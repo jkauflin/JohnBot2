@@ -57,3 +57,42 @@ dataFunctions.getZip('90210', function(results) {
 */
 
 dataFunctions.loadData();
+
+
+/*
+
+// Place your settings in this file to overwrite the default settings
+{
+      "editor.fontSize": 12,
+      "git.confirmSync": false,
+      "extensions.ignoreRecommendations": false,
+      "git.enableSmartCommit": true,
+      "files.autoSave": "afterDelay",
+      "workbench.startupEditor": "newUntitledFile"
+}
+
+// Place your key bindings in this file to overwrite the defaults
+[
+    {
+        "key": "delete",
+        "command": "editor.action.clipboardCutAction",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+delete",
+        "command": "-editor.action.clipboardCutAction",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "insert",
+        "command": "editor.action.clipboardPasteAction",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+insert",
+        "command": "-editor.action.clipboardPasteAction",
+        "when": "editorTextFocus && !editorReadonly"
+    }
+]
+
+*/
