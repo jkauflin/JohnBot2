@@ -1,0 +1,26 @@
+{
+  "name": "johnbot2",
+  "version": "1.0.0",
+  "description": "2nd version of hobby robotics project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jkauflin/JohnBot2.git"
+  },
+  "author": "John J Kauflin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jkauflin/JohnBot2/issues"
+  },
+  "homepage": "https://github.com/jkauflin/JohnBot2#readme",
+  "dependencies": {
+    "elasticsearch": "^13.3.1",
+    "express": "^4.16.2",
+    "get-json": "^1.0.0",
+    "node-datetime": "^2.0.3",
+    "say": "^0.14.0"
+  }
+}
