@@ -15,18 +15,22 @@ function loadData() {
             //console.log("Error in loadData getJSON, err = "+error);
         }
         else {
-            //console.log("SUCCESSFUL call of getBotData.php");
-            //console.log(botResponses);
+            console.log("SUCCESSFUL call of getBotData.php");
+            console.log(botResponses);
 
             makebulk(botResponses,function(madebulk){
-                //console.log("Bulk content prepared");
-                indexall(madebulk,function(response){
-                    //console.log("indexall response:");
-                    //console.log(response);
-                    
-                    //Update last updated timestamp
-                    console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
-                })
+                console.log("Bulk content prepared");
+                console.log("madebulk = "+madebulk);
+                console.log("length = "+madebulk.length);
+                // Execute the bulk index load if there is anything to load
+                if (madebulk.length > 0) {
+                    indexall(madebulk,function(response){
+                        console.log("indexall response:");
+                        console.log(response);
+                        //Update last updated timestamp
+                        console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
+                    })
+                }
             });
 
         }
@@ -34,7 +38,7 @@ function loadData() {
 };
 
 function lastUpdate(table) {
-    var lastUpdateTs = '2017-11-11 10:14:55';
+    var lastUpdateTs = '2017-11-11 17:36:00';
     // TBD - get timestamp from system parameters index 
     // table,lastupdate
     return(lastUpdateTs);
