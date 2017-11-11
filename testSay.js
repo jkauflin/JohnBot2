@@ -11,7 +11,6 @@ say.speak('Hello! My name is John.');
 // Stop the text currently being spoken
 say.stop();
 */
-
 var say = require('say');
 
 say.speak('Hello, how are you today?', (err) => {

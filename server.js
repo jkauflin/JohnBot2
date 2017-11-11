@@ -49,12 +49,15 @@ app.listen(3000,function(){
   console.log("Live at Port 3000 - Let's rock!");
 });
 
+dataFunctions.loadData();
+
 var searchStr = 'do you love me';
 //var searchStr = 'zzz';
 dataFunctions.searchResponses(searchStr, function(results) {
     console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
     console.log(results);
 });
+
 
 console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.loadData();

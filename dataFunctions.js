@@ -34,7 +34,7 @@ function loadData() {
 };
 
 function lastUpdate(table) {
-    var lastUpdateTs = '2017-01-01';
+    var lastUpdateTs = '2017-11-11 10:14:55';
     // TBD - get timestamp from system parameters index 
     // table,lastupdate
     return(lastUpdateTs);
