@@ -1,12 +1,32 @@
+/*==============================================================================
+(C) Copyright 2017 John J Kauflin, All rights reserved. 
+-----------------------------------------------------------------------------
+DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
+             communications to the Arduino Mega robot
+-----------------------------------------------------------------------------
+Modification History
+2017-09-23 JJK  Initial version to test web app and connection to arduino
+2017-11-12 JJK  Got the Elasticsearch data source working for responses
+=============================================================================*/
+
 var express = require('express');
 var dateTime = require('node-datetime');
 var dataFunctions = require('./dataFunctions.js');
+//var botFunctions = require('./botFunctions.js');
 
 var app = express();
 var router = express.Router();
 //var path = __dirname + '/views/';
 var path = __dirname + '/';
- 
+
+// General handler for any uncaught exceptions
+process.on('uncaughtException', function (er) {
+	console.log("UncaughtException, error = "+er);
+	console.error(er.stack);
+	// Stop the process
+	process.exit(1);
+});
+
  
 app.use(express.static('public'))
  
