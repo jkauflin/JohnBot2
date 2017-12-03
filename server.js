@@ -6,13 +6,18 @@ DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
 -----------------------------------------------------------------------------
 Modification History
 2017-09-23 JJK  Initial version to test web app and connection to arduino
+2017-10-10 JJK  Got Johnny-Five working to control the arduino functions
 2017-11-12 JJK  Got the Elasticsearch data source working for responses
+2017-12-03 JJK  Got audio functions working for TTS and playing MP3's
+				Implementing tableinfo with update timestamp
 =============================================================================*/
 
 var express = require('express');
 var dateTime = require('node-datetime');
 var dataFunctions = require('./dataFunctions.js');
 //var botFunctions = require('./botFunctions.js');
+var audioFunctions = require('./audioFunctions.js');
+
 
 var app = express();
 var router = express.Router();
@@ -75,11 +80,11 @@ var searchStr = 'do you love me';
 //var searchStr = 'zzz';
 dataFunctions.searchResponses(searchStr, function(results) {
     console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-    console.log(results);
+	console.log(results);
+	audioFunctions.speakText(results);
 });
 
 
 console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
-//dataFunctions.loadData();
 //dataFunctions.esInfo();
 

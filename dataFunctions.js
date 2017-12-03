@@ -29,6 +29,7 @@ function loadData() {
                         console.log(response);
                         //Update last updated timestamp
                         console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
+                        saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
                     })
                 }
             });
@@ -40,9 +41,63 @@ function loadData() {
 function lastUpdate(table) {
     var lastUpdateTs = '2017-11-19 18:02:18';
     // TBD - get timestamp from system parameters index 
-    // table,lastupdate
+    // table,lastupdate    'lastupdated'
+
+    esClient.search({
+        index: 'bot',
+        type: 'responses',
+        body: {
+            query: {
+            match: { "keywords": searchStr }
+            // wildcard: { "constituencyname": "???wich" }
+            // wildcard: { "constituencyname": "*leet*" }
+            // regexp: { "constituencyname": ".+wich" }
+            },
+        }
+    },function (error,response,status) {
+        var responseStr = '';
+        if (error) {
+            //console.log("search error: "+error)
+        } else {
+            //console.log("response.hits.hits.length = "+response.hits.hits.length);
+            if (response.hits.hits.length > 0) {
+                responseStr = response.hits.hits[0]._source.verbalResponse;
+            }
+
+            /*
+            console.log("--- Response --- for: "+searchStr);
+            console.log("--- Hits ---");
+            response.hits.hits.forEach(function(hit,index){
+                console.log(hit._id+", Score ="+hit._score+" ===============================================");
+                console.log("requestKeywords = "+hit._source.keywords);
+                console.log(" responseSpeech = "+hit._source.verbalResponse);
+                console.log(hit);
+                if (index == 0) {
+                    responseStr = hit._source.verbalResponse;
+                }
+            });
+            */
+        }
+        callback(responseStr);
+    });
+
+
     return(lastUpdateTs);
 };
+
+function saveTableTimestamp(table,timestamp) {
+    esClient.index({
+        index: 'bot',
+        id: table,
+        type: 'tableInfo',
+        body: {
+        'updateTimestamp': timestamp
+        }
+        },function(err,resp,status) {
+        console.log(resp);
+    });
+
+}
 
 var makebulk = function(botResponsesList,callback){
     for (var current in botResponsesList){
