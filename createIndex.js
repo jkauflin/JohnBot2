@@ -22,4 +22,10 @@ esClient.indices.create({
         console.log("create",resp);
     }
 });
+
+esClient.indices.delete({index: 'lastupdated'},function(err,resp,status) {  
+    console.log("delete",resp);
+});
+
 */
+

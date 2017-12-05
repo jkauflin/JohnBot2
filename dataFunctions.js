@@ -39,48 +39,33 @@ function loadData() {
 };
 
 function lastUpdate(table) {
-    var lastUpdateTs = '2017-11-19 18:02:18';
+    var lastUpdateTs = '2017-11-20 18:02:18';
     // TBD - get timestamp from system parameters index 
     // table,lastupdate    'lastupdated'
 
-    esClient.search({
-        index: 'bot',
-        type: 'responses',
-        body: {
-            query: {
-            match: { "keywords": searchStr }
-            // wildcard: { "constituencyname": "???wich" }
-            // wildcard: { "constituencyname": "*leet*" }
-            // regexp: { "constituencyname": ".+wich" }
-            },
-        }
-    },function (error,response,status) {
-        var responseStr = '';
-        if (error) {
-            //console.log("search error: "+error)
-        } else {
-            //console.log("response.hits.hits.length = "+response.hits.hits.length);
-            if (response.hits.hits.length > 0) {
-                responseStr = response.hits.hits[0]._source.verbalResponse;
-            }
-
-            /*
-            console.log("--- Response --- for: "+searchStr);
-            console.log("--- Hits ---");
-            response.hits.hits.forEach(function(hit,index){
-                console.log(hit._id+", Score ="+hit._score+" ===============================================");
-                console.log("requestKeywords = "+hit._source.keywords);
-                console.log(" responseSpeech = "+hit._source.verbalResponse);
-                console.log(hit);
-                if (index == 0) {
-                    responseStr = hit._source.verbalResponse;
-                }
-            });
-            */
-        }
-        callback(responseStr);
-    });
-
+    esClient.get({
+        index: 'bot',
+        type: 'tableInfo',
+        id: table
+      }, function (error, response) {
+        console.log("tableInfo response = "+response);
+        // response.updateTimestamp
+        /*
+{
+    "_index" : "twitter",
+    "_type" : "tweet",
+    "_id" : "0",
+    "_version" : 1,
+    "found": true,
+    "_source" : {
+        "user" : "kimchy",
+        "date" : "2009-11-15T14:12:12",
+        "likes": 0,
+        "message" : "trying out Elasticsearch"
+    }
+}
+        */
+      });
 
     return(lastUpdateTs);
 };
