@@ -74,9 +74,10 @@ app.listen(3000,function(){
   console.log("Live at Port 3000 - Let's rock!");
 });
 
-dataFunctions.loadData();
+dataFunctions.loadData('responses');
 
-var searchStr = 'do you love me';
+//var searchStr = 'do you love me';
+var searchStr = 'loki';
 //var searchStr = 'zzz';
 dataFunctions.searchResponses(searchStr, function(results) {
     console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
@@ -85,6 +86,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 
 
-console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
+//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 

@@ -8,66 +8,52 @@ var bulk = [];
 var botDataUrl = "http://johnkauflin.com/getBotDataProxy.php";
 
 
-function loadData() {
-    var table = 'responses';
-    getJSON(botDataUrl+'?table='+table+'&lastupdate='+lastUpdate(table), function(error, botResponses){
-        if(error) {
-            //console.log("Error in loadData getJSON, err = "+error);
-        }
-        else {
-            console.log("SUCCESSFUL call of getBotData.php");
-            console.log(botResponses);
-
-            makebulk(botResponses,function(madebulk){
-                console.log("Bulk content prepared");
-                console.log("madebulk = "+madebulk);
-                console.log("length = "+madebulk.length);
-                // Execute the bulk index load if there is anything to load
-                if (madebulk.length > 0) {
-                    indexall(madebulk,function(response){
-                        console.log("indexall response:");
-                        console.log(response);
-                        //Update last updated timestamp
-                        console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
-                        saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
-                    })
-                }
-            });
-
-        }
-    });
-};
-
-function lastUpdate(table) {
-    var lastUpdateTs = '2017-11-20 18:02:18';
-    // TBD - get timestamp from system parameters index 
-    // table,lastupdate    'lastupdated'
-
+function loadData(table) {
     esClient.get({
         index: 'bot',
         type: 'tableInfo',
         id: table
-      }, function (error, response) {
-        console.log("tableInfo response = "+response);
-        // response.updateTimestamp
-        /*
-{
-    "_index" : "twitter",
-    "_type" : "tweet",
-    "_id" : "0",
-    "_version" : 1,
-    "found": true,
-    "_source" : {
-        "user" : "kimchy",
-        "date" : "2009-11-15T14:12:12",
-        "likes": 0,
-        "message" : "trying out Elasticsearch"
-    }
-}
-        */
-      });
+      }, function (error,response,status) {
+        if (error) {
+            console.log("search error: "+error)
+            // found = false
+        } else {
+            // if response.found = true
+            //console.log("id = "+response._id);
+            //console.log("updateTimestamp = "+response._source.updateTimestamp);
 
-    return(lastUpdateTs);
+            //console.log("url = "+botDataUrl+'?table='+table+'&lastupdate='+response._source.updateTimestamp);
+            getJSON(botDataUrl+'?table='+table+'&lastupdate='+response._source.updateTimestamp, function(error, botResponses){
+                if(error) {
+                    //console.log("Error in loadData getJSON, err = "+error);
+                }
+                else {
+                    //console.log("SUCCESSFUL call of getBotData.php");
+                    //console.log(botResponses);
+        
+                    makebulk(botResponses,function(madebulk){
+                        /*
+                        console.log("Bulk content prepared");
+                        console.log("madebulk = "+madebulk);
+                        console.log("length = "+madebulk.length);
+                        */
+                        // Execute the bulk index load if there is anything to load
+                        if (madebulk.length > 0) {
+                            indexall(madebulk,function(response){
+                                //console.log("indexall response:");
+                                //console.log(response);
+                                //Update last updated timestamp
+                                //console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
+                                saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
+                            })
+                        }
+                    });
+        
+                }
+            });
+        
+        }
+    });
 };
 
 function saveTableTimestamp(table,timestamp) {
@@ -79,9 +65,8 @@ function saveTableTimestamp(table,timestamp) {
         'updateTimestamp': timestamp
         }
         },function(err,resp,status) {
-        console.log(resp);
+        //console.log("saveTableTimestamp, timestamp = "+timestamp);
     });
-
 }
 
 var makebulk = function(botResponsesList,callback){
@@ -198,3 +183,9 @@ module.exports = {
     esInfo,
     searchResponses
 };
+
+
+
+    
+     
+    
