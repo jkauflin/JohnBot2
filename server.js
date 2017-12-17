@@ -10,6 +10,7 @@ Modification History
 2017-11-12 JJK  Got the Elasticsearch data source working for responses
 2017-12-03 JJK  Got audio functions working for TTS and playing MP3's
 				Implementing tableinfo with update timestamp
+2017-12-17 JJK  
 =============================================================================*/
 
 var express = require('express');
@@ -74,9 +75,10 @@ app.listen(3000,function(){
   console.log("Live at Port 3000 - Let's rock!");
 });
 
-dataFunctions.loadData('responses');
+dataFunctions.loadData('responsesBAD');
 
 //var searchStr = 'do you love me';
+/*
 var searchStr = 'loki';
 //var searchStr = 'zzz';
 dataFunctions.searchResponses(searchStr, function(results) {
@@ -84,7 +86,7 @@ dataFunctions.searchResponses(searchStr, function(results) {
 	console.log(results);
 	audioFunctions.speakText(results);
 });
-
+*/
 
 //console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();

@@ -7,6 +7,9 @@ var bulk = [];
 //var formatted = dt.format('Y-m-d H:M:S');
 var botDataUrl = "http://johnkauflin.com/getBotDataProxy.php";
 
+// maybe do loadData as a top level, with only an error or callback if there is a problem
+// top level should start load, load should load all tables and do a callback when all are completed
+// successfully or if there is any problem
 
 function loadData(table) {
     esClient.get({
@@ -15,10 +18,18 @@ function loadData(table) {
         id: table
       }, function (error,response,status) {
         if (error) {
-            console.log("search error: "+error)
+            console.log("Error getting tableInfo for table = "+table);
+            console.log("Error = "+error);
             // found = false
+            return;
+        }
+
+        var updTs = "2017-01-01";
+        if (response.found == true) {
+            updTs = response._source.updateTimestamp;
         } else {
-            // if response.found = true
+            console.log("No tableInfo for table = "+table);
+        }
             //console.log("id = "+response._id);
             //console.log("updateTimestamp = "+response._source.updateTimestamp);
 
@@ -52,7 +63,6 @@ function loadData(table) {
                 }
             });
         
-        }
     });
 };
 
