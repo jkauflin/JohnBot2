@@ -75,7 +75,10 @@ app.listen(3000,function(){
   console.log("Live at Port 3000 - Let's rock!");
 });
 
-dataFunctions.loadData('responsesBAD');
+//dataFunctions.loadData('responsesBAD');
+dataFunctions.loadData('', function(error,response,status) {
+	console.log("loadData response = "+response);
+});
 
 //var searchStr = 'do you love me';
 /*

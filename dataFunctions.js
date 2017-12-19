@@ -11,7 +11,16 @@ var botDataUrl = "http://johnkauflin.com/getBotDataProxy.php";
 // top level should start load, load should load all tables and do a callback when all are completed
 // successfully or if there is any problem
 
-function loadData(table) {
+function loadData(inStr,callback){
+    console.log("in loadData "+dateTime.create().format('Y-m-d H:M:S'));
+    var responseStr = "loadData response string";
+    var error = null;
+    var status = null;
+    callback(error,responseStr,status);
+    
+}; // function searchResponses(searchStr,callback){
+
+function loadData2(table) {
     esClient.get({
         index: 'bot',
         type: 'tableInfo',
@@ -193,9 +202,3 @@ module.exports = {
     esInfo,
     searchResponses
 };
-
-
-
-    
-     
-    
