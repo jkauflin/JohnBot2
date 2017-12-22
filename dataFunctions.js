@@ -16,64 +16,70 @@ function loadData(inStr,callback){
     var responseStr = "loadData response string";
     var error = null;
     var status = null;
-    callback(error,responseStr,status);
-    
-}; // function searchResponses(searchStr,callback){
 
-function loadData2(table) {
     esClient.get({
         index: 'bot',
         type: 'tableInfo',
-        id: table
-      }, function (error,response,status) {
-        if (error) {
-            console.log("Error getting tableInfo for table = "+table);
-            console.log("Error = "+error);
-            // found = false
-            return;
-        }
+        id: 'responses'
+    }, loadTable);
+    
+    esClient.get({
+        index: 'bot',
+        type: 'tableInfo',
+        id: 'jokes'
+    }, loadTable);
 
-        var updTs = "2017-01-01";
-        if (response.found == true) {
-            updTs = response._source.updateTimestamp;
-        } else {
-            console.log("No tableInfo for table = "+table);
-        }
-            //console.log("id = "+response._id);
-            //console.log("updateTimestamp = "+response._source.updateTimestamp);
+    callback(error,responseStr,status);
+    // Keep a global flag in the main that is set to true when it gets this callback when all tables are loaded successfully
+}; // function searchResponses(searchStr,callback){
+    
+function loadTable(error,response,status) {
+    var table = response._id;
+    console.log(" ");
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" In loadTable");
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" Callback from esClient.get, table = "+table);
+    console.log(dateTime.create().format('Y-m-d H:M:S')+"    error = "+error);
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" response = "+response);
+    console.log(dateTime.create().format('Y-m-d H:M:S')+"   status = "+status);
+    if (error != null) {
+        console.log("ERROR in callback");
+    }
 
-            //console.log("url = "+botDataUrl+'?table='+table+'&lastupdate='+response._source.updateTimestamp);
-            getJSON(botDataUrl+'?table='+table+'&lastupdate='+response._source.updateTimestamp, function(error, botResponses){
-                if(error) {
-                    //console.log("Error in loadData getJSON, err = "+error);
-                }
-                else {
-                    //console.log("SUCCESSFUL call of getBotData.php");
-                    //console.log(botResponses);
-        
-                    makebulk(botResponses,function(madebulk){
-                        /*
-                        console.log("Bulk content prepared");
-                        console.log("madebulk = "+madebulk);
-                        console.log("length = "+madebulk.length);
-                        */
-                        // Execute the bulk index load if there is anything to load
-                        if (madebulk.length > 0) {
-                            indexall(madebulk,function(response){
-                                //console.log("indexall response:");
-                                //console.log(response);
-                                //Update last updated timestamp
-                                //console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
-                                saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
-                            })
-                        }
-                    });
-        
+    var updTs = "2017-01-01";
+    if (response.found == true) {
+        //updTs = response._source.updateTimestamp;
+    } else {
+        console.log("No tableInfo for table = "+table);
+    }
+
+    var tempUrl = botDataUrl+'?table='+table+'&lastupdate='+updTs;
+    console.log("botData url = "+tempUrl);
+    getJSON(tempUrl, function(error, urlJsonResponse){
+        if (error != null) {
+            console.log("Error in getJSON, err = "+error);
+        }
+        else {
+            console.log("SUCCESSFUL call of getBotData.php");
+            console.log("urlJsonResponse.length = "+urlJsonResponse.length);
+            /*
+            makebulk(urlJsonResponse,function(madebulk){
+                // Execute the bulk index load if there is anything to load
+                if (madebulk.length > 0) {
+                    indexall(madebulk,function(response){
+                        //console.log("indexall response:");
+                        //console.log(response);
+                        //Update last updated timestamp
+                        //console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
+                        saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
+                    })
                 }
             });
-        
+            */
+        }
     });
-};
+    //2017-12-20 13:06:14   status = 200
+   
+}
 
 function saveTableTimestamp(table,timestamp) {
     esClient.index({

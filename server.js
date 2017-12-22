@@ -10,15 +10,15 @@ Modification History
 2017-11-12 JJK  Got the Elasticsearch data source working for responses
 2017-12-03 JJK  Got audio functions working for TTS and playing MP3's
 				Implementing tableinfo with update timestamp
-2017-12-17 JJK  
+2017-12-22 JJK  Finishing up data table load logic
 =============================================================================*/
 
 var express = require('express');
 var dateTime = require('node-datetime');
-var dataFunctions = require('./dataFunctions.js');
 //var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
-
+var dataFunctions = require('./dataFunctions.js');
+var dataLoaded = false;
 
 var app = express();
 var router = express.Router();
@@ -77,7 +77,17 @@ app.listen(3000,function(){
 
 //dataFunctions.loadData('responsesBAD');
 dataFunctions.loadData('', function(error,response,status) {
-	console.log("loadData response = "+response);
+    console.log(" ");
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" Callback in server from loadData");
+    console.log(dateTime.create().format('Y-m-d H:M:S')+"    error = "+error);
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" response = "+response);
+    console.log(dateTime.create().format('Y-m-d H:M:S')+"   status = "+status);
+    if (error != null) {
+        console.log("ERROR in callback");
+    }
+	if (error == null) {
+		dataLoaded = true;
+	}
 });
 
 //var searchStr = 'do you love me';
