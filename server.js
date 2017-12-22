@@ -77,6 +77,7 @@ app.listen(3000,function(){
 
 //dataFunctions.loadData('responsesBAD');
 dataFunctions.loadData('', function(error,response,status) {
+    /*
     console.log(" ");
     console.log(dateTime.create().format('Y-m-d H:M:S')+" Callback in server from loadData");
     console.log(dateTime.create().format('Y-m-d H:M:S')+"    error = "+error);
@@ -85,6 +86,7 @@ dataFunctions.loadData('', function(error,response,status) {
     if (error != null) {
         console.log("ERROR in callback");
     }
+    */
 	if (error == null) {
 		dataLoaded = true;
 	}
@@ -101,6 +103,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
-//dataFunctions.esInfo();
+console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
+dataFunctions.esInfo();
 

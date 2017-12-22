@@ -28,7 +28,7 @@ function loadData(inStr,callback){
         type: 'tableInfo',
         id: 'jokes'
     }, loadTable);
-
+    
     callback(error,responseStr,status);
     // Keep a global flag in the main that is set to true when it gets this callback when all tables are loaded successfully
 }; // function searchResponses(searchStr,callback){
@@ -47,7 +47,7 @@ function loadTable(error,response,status) {
 
     var updTs = "2017-01-01";
     if (response.found == true) {
-        //updTs = response._source.updateTimestamp;
+        updTs = response._source.updateTimestamp;
     } else {
         console.log("No tableInfo for table = "+table);
     }
@@ -60,26 +60,38 @@ function loadTable(error,response,status) {
         }
         else {
             console.log("SUCCESSFUL call of getBotData.php");
-            console.log("urlJsonResponse.length = "+urlJsonResponse.length);
-            /*
-            makebulk(urlJsonResponse,function(madebulk){
+            // Don't really need to check this here because makebulk loops through array (0 no loops)
+            //if (urlJsonResponse.length > 0) {
+            //console.log(urlJsonResponse);
+                
+            makebulk(table,urlJsonResponse,function(madebulk){
                 // Execute the bulk index load if there is anything to load
                 if (madebulk.length > 0) {
-                    indexall(madebulk,function(response){
-                        //console.log("indexall response:");
-                        //console.log(response);
-                        //Update last updated timestamp
-                        //console.log("lastUpdate = "+dateTime.create().format('Y-m-d H:M:S'));
+                    /*
+                    indexall(table,madebulk,function(response){
                         saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
                     })
+                    */
+                    esClient.bulk({
+                        maxRetries: 5,
+                        index: 'bot',
+                        type: table,
+                        body: madebulk
+                    },function(error,response,status) {
+                        if (error != null) {
+                            console.log("Error in bulk index, err = "+error);
+                        } else {
+                            saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
+                        }
+                    })
+                                    
                 }
-            });
-            */
-        }
-    });
-    //2017-12-20 13:06:14   status = 200
-   
-}
+            }); // makebulk
+            
+        } // Successful getJSON call
+    }); // GetJSON
+} // function loadTable(error,response,status) {
+
 
 function saveTableTimestamp(table,timestamp) {
     esClient.index({
@@ -90,73 +102,65 @@ function saveTableTimestamp(table,timestamp) {
         'updateTimestamp': timestamp
         }
         },function(err,resp,status) {
-        //console.log("saveTableTimestamp, timestamp = "+timestamp);
+        console.log("*** saveTableTimestamp, timestamp = "+timestamp);
     });
 }
 
-var makebulk = function(botResponsesList,callback){
-    for (var current in botResponsesList){
+var makebulk = function(table,urlJsonResponse,callback){
+    for (var current in urlJsonResponse){
         // how do I know when the update is done - do I care?
         // log how many records were in the service call JSON response
         //console.log("id = "+botResponsesList[current].id);
-        if (botResponsesList[current].deleted == "Y") {
+        if (urlJsonResponse[current].deleted == "Y") {
             esClient.delete({
                 index: 'bot',
-                type: 'responses',
-                id: botResponsesList[current].id
+                type: table,
+                id: urlJsonResponse[current].id
             },function(err,resp,status) {
                 //console.log(resp);
             });
         } else {
-            /*
-            esClient.index({
-            index: 'bot',
-            id: botResponsesList[current].id,
-            type: 'responses',
-            body: {
-            'keywords': botResponsesList[current].keywords,
-            'verbalResponse': botResponsesList[current].verbalResponse,
-            'updateTimestamp': botResponsesList[current].verbalResponse
-            }
-            },function(err,resp,status) {
-            console.log(resp);
-            });
-            */
-            bulk.push(
-                { index: {_index: 'bot', _type: 'responses', _id: botResponsesList[current].id } },
-                {
-                    'keywords': botResponsesList[current].keywords,
-                    'verbalResponse': botResponsesList[current].verbalResponse,
-                    'lastChangedTs': botResponsesList[current].lastChangedTs
-                }
-            );
-        }
-    }
+            if (table == 'responses') {
+                bulk.push(
+                    { index: {_index: 'bot', _type: table, _id: urlJsonResponse[current].id } },
+                    {
+                        'keywords': urlJsonResponse[current].keywords,
+                        'verbalResponse': urlJsonResponse[current].verbalResponse,
+                        'lastChangedTs': urlJsonResponse[current].lastChangedTs
+                    }
+                );
+            } else if (table == 'jokes') {
+                bulk.push(
+                    { index: {_index: 'bot', _type: table, _id: urlJsonResponse[current].id } },
+                    {
+                        'question': urlJsonResponse[current].question,
+                        'answer': urlJsonResponse[current].answer,
+                        'lastChangedTs': urlJsonResponse[current].lastChangedTs
+                    }
+                );
+            } // table
+        } // bulk push
+    } // loop through JSON list
     callback(bulk);
 }
 
-var indexall = function(madebulk,callback) {
-    esClient.bulk({
-        maxRetries: 5,
-        index: 'bot',
-        type: 'responses',
-        body: madebulk
-    },function(err,resp,status) {
-        if (err) {
-            console.log("Error in indexall, err = "+err);
-        } else {
-            callback(resp);
-        }
-    })
-}
 
 function esInfo() {
+    /*
     esClient.cluster.health({},function(err,resp,status) {
         console.log("-- Client Health --",resp);
     });
-    
+    */
     esClient.count({index: 'bot',type: 'responses'},function(err,resp,status) {
         console.log("Bot Responses: ",resp);
+    });
+
+    esClient.count({index: 'bot',type: 'jokes'},function(err,resp,status) {
+        console.log("Bot Jokes: ",resp);
+    });
+
+    esClient.count({index: 'bot',type: 'tableInfo'},function(err,resp,status) {
+        console.log("Bot TableInfo: ",resp);
     });
 };
 
@@ -208,3 +212,18 @@ module.exports = {
     esInfo,
     searchResponses
 };
+
+            /*
+            esClient.index({
+            index: 'bot',
+            id: botResponsesList[current].id,
+            type: 'responses',
+            body: {
+            'keywords': botResponsesList[current].keywords,
+            'verbalResponse': botResponsesList[current].verbalResponse,
+            'updateTimestamp': botResponsesList[current].verbalResponse
+            }
+            },function(err,resp,status) {
+            console.log(resp);
+            });
+            */
