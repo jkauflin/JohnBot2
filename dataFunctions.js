@@ -1,18 +1,13 @@
 var getJSON = require('get-json');
 var dateTime = require('node-datetime');
 var esClient = require('./dataConnection.js');
-//var inputfile = require('./bot_responses.json');
-var bulk = [];
-//var dt = dateTime.create();
-//var formatted = dt.format('Y-m-d H:M:S');
-var botDataUrl = "http://johnkauflin.com/getBotDataProxy.php";
 
 // maybe do loadData as a top level, with only an error or callback if there is a problem
 // top level should start load, load should load all tables and do a callback when all are completed
 // successfully or if there is any problem
 
 function loadData(inStr,callback){
-    console.log("in loadData "+dateTime.create().format('Y-m-d H:M:S'));
+    console.log("in loadData "+dateTime.create().format('H:M:S.N'));
     var responseStr = "loadData response string";
     var error = null;
     var status = null;
@@ -35,12 +30,14 @@ function loadData(inStr,callback){
     
 function loadTable(error,response,status) {
     var table = response._id;
+    /*
     console.log(" ");
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" In loadTable");
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" Callback from esClient.get, table = "+table);
-    console.log(dateTime.create().format('Y-m-d H:M:S')+"    error = "+error);
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" response = "+response);
-    console.log(dateTime.create().format('Y-m-d H:M:S')+"   status = "+status);
+    console.log(dateTime.create().format('H:M:S.N')+" In loadTable");
+    console.log(dateTime.create().format('H:M:S.N')+" Callback from esClient.get, table = "+table);
+    console.log(dateTime.create().format('H:M:S.N')+"    error = "+error);
+    console.log(dateTime.create().format('H:M:S.N')+" response = "+response);
+    console.log(dateTime.create().format('H:M:S.N')+"   status = "+status);
+    */
     if (error != null) {
         console.log("ERROR in callback");
     }
@@ -49,29 +46,27 @@ function loadTable(error,response,status) {
     if (response.found == true) {
         updTs = response._source.updateTimestamp;
     } else {
-        console.log("No tableInfo for table = "+table);
+        //console.log("No tableInfo for table = "+table);
     }
 
-    var tempUrl = botDataUrl+'?table='+table+'&lastupdate='+updTs;
-    console.log("botData url = "+tempUrl);
+    var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs;
+    //console.log("botData url = "+tempUrl);
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
             console.log("Error in getJSON, err = "+error);
         }
         else {
-            console.log("SUCCESSFUL call of getBotData.php");
+            //console.log(dateTime.create().format('H:M:S.N')+" SUCCESSFUL call of BOT_DATA_URL ");
             // Don't really need to check this here because makebulk loops through array (0 no loops)
             //if (urlJsonResponse.length > 0) {
+            //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+urlJsonResponse.length);
             //console.log(urlJsonResponse);
-                
             makebulk(table,urlJsonResponse,function(madebulk){
                 // Execute the bulk index load if there is anything to load
+                //console.log(" ");
+                //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", madebulk.length = "+madebulk.length);
+                //console.log(madebulk);
                 if (madebulk.length > 0) {
-                    /*
-                    indexall(table,madebulk,function(response){
-                        saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
-                    })
-                    */
                     esClient.bulk({
                         maxRetries: 5,
                         index: 'bot',
@@ -81,6 +76,7 @@ function loadTable(error,response,status) {
                         if (error != null) {
                             console.log("Error in bulk index, err = "+error);
                         } else {
+                            //console.log(dateTime.create().format('H:M:S.N')+" $$$ After callback from makebulk, table = "+table);
                             saveTableTimestamp(table,dateTime.create().format('Y-m-d H:M:S'));
                         }
                     })
@@ -102,11 +98,14 @@ function saveTableTimestamp(table,timestamp) {
         'updateTimestamp': timestamp
         }
         },function(err,resp,status) {
-        console.log("*** saveTableTimestamp, timestamp = "+timestamp);
+        //console.log("*** saveTableTimestamp, timestamp = "+timestamp);
     });
 }
 
 var makebulk = function(table,urlJsonResponse,callback){
+    // Create an empty array object
+    var bulk = [];
+    // Loop through the responses
     for (var current in urlJsonResponse){
         // how do I know when the update is done - do I care?
         // log how many records were in the service call JSON response
@@ -165,7 +164,7 @@ function esInfo() {
 };
 
 function searchResponses(searchStr,callback){
-    //console.log("in searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
+    //console.log("in searchResponses "+dateTime.create().format('H:M:S.N'));
     esClient.search({
         index: 'bot',
         type: 'responses',
@@ -179,14 +178,12 @@ function searchResponses(searchStr,callback){
         }
     },function (error,response,status) {
         var responseStr = '';
-        if (error) {
-            //console.log("search error: "+error)
+        if (error != null) {
+            console.log("search error: "+error)
         } else {
-            //console.log("response.hits.hits.length = "+response.hits.hits.length);
             if (response.hits.hits.length > 0) {
                 responseStr = response.hits.hits[0]._source.verbalResponse;
             }
-
             /*
             console.log("--- Response --- for: "+searchStr);
             console.log("--- Hits ---");

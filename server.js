@@ -11,6 +11,7 @@ Modification History
 2017-12-03 JJK  Got audio functions working for TTS and playing MP3's
 				Implementing tableinfo with update timestamp
 2017-12-22 JJK  Finishing up data table load logic
+2017-12-26 JJK  Finally got the two table loads working
 =============================================================================*/
 
 var express = require('express');
@@ -20,6 +21,7 @@ var audioFunctions = require('./audioFunctions.js');
 var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
 
+const WEB_PORT = 3000;
 var app = express();
 var router = express.Router();
 //var path = __dirname + '/views/';
@@ -71,7 +73,7 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Something broke!')
 })
  
-app.listen(3000,function(){
+app.listen(WEB_PORT,function(){
   console.log("Live at Port 3000 - Let's rock!");
 });
 
@@ -104,5 +106,5 @@ dataFunctions.searchResponses(searchStr, function(results) {
 */
 
 console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
-dataFunctions.esInfo();
+//dataFunctions.esInfo();
 
