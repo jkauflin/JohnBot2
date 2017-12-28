@@ -12,9 +12,14 @@ Modification History
 				Implementing tableinfo with update timestamp
 2017-12-22 JJK  Finishing up data table load logic
 2017-12-26 JJK  Finally got the two table loads working
+2017-12-27 JJK  Starting to test WebSocket
 =============================================================================*/
 
-var express = require('express');
+const express = require('express');
+const http = require('http');
+const url = require('url');
+const WebSocket = require('ws');
+
 var dateTime = require('node-datetime');
 //var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
@@ -78,21 +83,13 @@ app.listen(WEB_PORT,function(){
 });
 
 //dataFunctions.loadData('responsesBAD');
+/*
 dataFunctions.loadData('', function(error,response,status) {
-    /*
-    console.log(" ");
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" Callback in server from loadData");
-    console.log(dateTime.create().format('Y-m-d H:M:S')+"    error = "+error);
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" response = "+response);
-    console.log(dateTime.create().format('Y-m-d H:M:S')+"   status = "+status);
-    if (error != null) {
-        console.log("ERROR in callback");
-    }
-    */
 	if (error == null) {
 		dataLoaded = true;
 	}
 });
+*/
 
 //var searchStr = 'do you love me';
 /*
