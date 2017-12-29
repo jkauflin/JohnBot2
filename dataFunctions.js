@@ -46,11 +46,11 @@ function loadTable(error,response,status) {
     if (response.found == true) {
         updTs = response._source.updateTimestamp;
     } else {
-        //console.log("No tableInfo for table = "+table);
+        console.log("No tableInfo for table = "+table);
     }
 
     var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs;
-    //console.log("botData url = "+tempUrl);
+    console.log("botData url = "+tempUrl);
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
             console.log("Error in getJSON, err = "+error);

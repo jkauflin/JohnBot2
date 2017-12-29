@@ -29,5 +29,8 @@ esClient.indices.delete({index: 'lastupdated'},function(err,resp,status) {
 esClient.indices.delete({index: 'bot'},function(err,resp,status) {  
     console.log("delete",resp);
 });
+esClient.indices.delete({index: 'bot_responses'},function(err,resp,status) {  
+    console.log("delete",resp);
+});
 
 */
