@@ -14,13 +14,15 @@ Modification History
 2017-12-26 JJK  Finally got the two table loads working
 2017-12-27 JJK  Starting to test WebSocket
 2017-12-29 JJK  Got WebSocket, and slider working
+2017-12-31 JJK  Loaded StandardFirmataPlus on the Arduino Mega and am
+                testing functions
 =============================================================================*/
 
 const express = require('express');
 const http = require('http');
 const url = require('url');
 var dateTime = require('node-datetime');
-//var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
 var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
@@ -80,7 +82,6 @@ function sendDate(ws) {
   }
 
 }
-
 
 app.get('/start', function (req, res, next) {
   //console.log("app.get /testcall, searchStr = "+req.query.searchStr);
