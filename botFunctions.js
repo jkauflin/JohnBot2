@@ -39,9 +39,7 @@ board.on("ready", function() {
   });
   
   thermometer.on("change", function() {
-    //console.log(this.celsius + "°C");
-    console.log(this.fahrenheit + "°F");
-    // console.log("0x" + this.address.toString(16));
+    //console.log(dateTime.create().format('H:M:S.N')+"  Tempature = "+this.fahrenheit + "°F");
   });
   
   
@@ -50,7 +48,7 @@ board.on("ready", function() {
   var led2 = new five.Led(45);
 
   // Strobe the pin on/off, defaults to 100ms phases
-  console.log("Starting LED test");
+  //console.log("Starting LED test");
   //led.strobe();
 /*  
   led.fade({
