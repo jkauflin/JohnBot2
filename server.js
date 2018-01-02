@@ -36,7 +36,8 @@ var path = __dirname + '/';
 const ws = require('ws');
 const wss = new ws.Server({ port: 3035, perMessageDeflate: false });
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "ws://localhost:3035";
+//const wsUrl = "ws://localhost:3035";
+const wsUrl = "ws://192.168.1.68:3035";
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -47,17 +48,24 @@ process.on('uncaughtException', function (e) {
 	//process.exit(1);
 });
 
-  wss.on('connection', function (ws) {
+wss.on('connection', function (ws) {
+  ws.on('message', function (message) {
+    console.log('received from client: %s', message)
+  })
 
-    ws.on('message', function (message) {
-      console.log('received from client: %s', message)
-    })
+  // register event listener
+  botFunctions.thermometerEvent.on("tempatureChange", function(fahrenheit) {
+    // process data when someEvent occurs
+    //console.log(dateTime.create().format('H:M:S.N')+" in Server, Tempature = "+fahrenheit + "°F");
+    ws.send(fahrenheit);
+  });
+
     /*
     setInterval(
       sendDate,
       1000,ws)
     */
-  })
+})
   
 function sendDate(ws) {
   try { 

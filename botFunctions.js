@@ -10,6 +10,7 @@ Modification History
 =============================================================================*/
 var five = require("johnny-five");
 var dateTime = require('node-datetime');
+const EventEmitter = require('events');
 var board = new five.Board();
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
@@ -29,6 +30,8 @@ var hygrometer = new five.Multi({
     freq: 1000
 });
 */
+// create EventEmitter object
+var thermometerEvent = new EventEmitter();
 
 board.on("ready", function() {
 
@@ -40,6 +43,7 @@ board.on("ready", function() {
   
   thermometer.on("change", function() {
     //console.log(dateTime.create().format('H:M:S.N')+"  Tempature = "+this.fahrenheit + "°F");
+    thermometerEvent.emit("tempatureChange", this.fahrenheit);
   });
   
   
@@ -138,5 +142,6 @@ function testBot(testStr,callback){
 
 
 module.exports = {
-    testBot
+    testBot,
+    thermometerEvent
 };

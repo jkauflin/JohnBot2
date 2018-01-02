@@ -53,6 +53,8 @@ $(document).ready(function(){
 			// event emmited when receiving message 
 			ws.onmessage = function (messageEvent) {
 				//var msg = JSON.parse(messageEvent.data);
+				
+				$("#TempatureDisplay").html(messageEvent.data);
 			}
 		});
 	});
