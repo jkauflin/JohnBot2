@@ -82,12 +82,13 @@ $(document).ready(function(){
 			console.log("Mouse DOWN");
 	  	});
 	
-		  $("#ex6").slider();
-		  $("#ex6").on("slide", function(slideEvt) {
+			$("#ex6").slider({
+				reversed : true
+			});
+			$("#ex6").on("slide", function(slideEvt) {
 			  $("#ex6SliderVal").text(slideEvt.value);
 			  //console.log("slider value = "+slideEvt.value);
 		  });
-
 
 
 }); // $(document).ready(function(){

@@ -18,6 +18,7 @@ Modification History
                 testing functions
 =============================================================================*/
 
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const url = require('url');
@@ -165,3 +166,4 @@ dataFunctions.searchResponses(searchStr, function(results) {
 console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 
+console.log("process.env.DB_HOST = ",process.env.DB_HOST);

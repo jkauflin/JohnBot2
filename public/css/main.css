@@ -143,8 +143,12 @@ li {
 	list-style-type: none;
 }
 
+.slider-track-high {
+	background: red;
+}
+
 .slider-selection {
-    background: rgb(206, 19, 19);
+    background: green;
 }
 
 /*
