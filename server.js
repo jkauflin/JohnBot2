@@ -16,29 +16,18 @@ Modification History
 2017-12-29 JJK  Got WebSocket, and slider working
 2017-12-31 JJK  Loaded StandardFirmataPlus on the Arduino Mega and am
                 testing functions
+                Loaded ConfigurableFirmata (needed for tempature sensor
+                using OneWire communication)
+2018-01-04 JJK  Added dotenv to set environment variables and abstract
+                literals
+.env
+HOST=localhost
+WEB_PORT=3000
+WS_PORT=3035
 =============================================================================*/
 
+// Read environment variables from the .env file
 require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const url = require('url');
-var dateTime = require('node-datetime');
-var botFunctions = require('./botFunctions.js');
-var audioFunctions = require('./audioFunctions.js');
-var dataFunctions = require('./dataFunctions.js');
-var dataLoaded = false;
-
-const WEB_PORT = 3000;
-var app = express();
-var router = express.Router();
-//var path = __dirname + '/views/';
-var path = __dirname + '/';
-
-const ws = require('ws');
-const wss = new ws.Server({ port: 3035, perMessageDeflate: false });
-// WebSocket URL to give to the client browser to establish ws connection
-//const wsUrl = "ws://localhost:3035";
-const wsUrl = "ws://192.168.1.68:3035";
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -49,7 +38,55 @@ process.on('uncaughtException', function (e) {
 	//process.exit(1);
 });
 
+const express = require('express');
+const http = require('http');
+const url = require('url');
+var dateTime = require('node-datetime');
+var botFunctions = require('./botFunctions.js');
+var audioFunctions = require('./audioFunctions.js');
+var dataFunctions = require('./dataFunctions.js');
+var dataLoaded = false;
+
+var app = express();
+var router = express.Router();
+//var path = __dirname + '/views/';
+var path = __dirname + '/';
+
+
+//=================================================================================================
+// D
+//=================================================================================================
+const ws = require('ws');
+const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false });
+// WebSocket URL to give to the client browser to establish ws connection
+const wsUrl = "ws://"+process.env.HOST+":"+process.env.WS_PORT;
+
+function heartbeat() {
+  this.isAlive = true;
+}
+
+const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) {
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping('', false, true);
+  });
+}, 30000);
+
 wss.on('connection', function (ws) {
+  ws.isAlive = true;
+  // If you get a pong response from a client call the heartbeat function to set a variable
+  // showing the connection is still alive
+  ws.on('pong', heartbeat);
+
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(data);
+    }
+  });
+
   ws.on('message', function (message) {
     console.log('received from client: %s', message)
   })
@@ -140,8 +177,8 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Something broke!')
 })
  
-app.listen(WEB_PORT,function(){
-  console.log("Live at Port 3000 - Let's rock!");
+app.listen(process.env.WEB_PORT,function(){
+  console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
 });
 
 /*
@@ -166,4 +203,3 @@ dataFunctions.searchResponses(searchStr, function(results) {
 console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 
-console.log("process.env.DB_HOST = ",process.env.DB_HOST);
