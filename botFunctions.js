@@ -36,6 +36,7 @@ var thermometerEvent = new EventEmitter();
 board.on("ready", function() {
 
   // This requires OneWire support using the ConfigurableFirmata
+  /*
   var thermometer = new five.Thermometer({
     controller: "DS18B20",
     pin: 2
@@ -45,7 +46,7 @@ board.on("ready", function() {
     //console.log(dateTime.create().format('H:M:S.N')+"  Tempature = "+this.fahrenheit + "°F");
     thermometerEvent.emit("tempatureChange", this.fahrenheit);
   });
-  
+  */
   
   // Create an Led on pin 13
   var led = new five.Led(44);

@@ -20,10 +20,7 @@ Modification History
                 using OneWire communication)
 2018-01-04 JJK  Added dotenv to set environment variables and abstract
                 literals
-.env
-HOST=localhost
-WEB_PORT=3000
-WS_PORT=3035
+                Added heartbeat check for websocket connections
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -67,9 +64,11 @@ function heartbeat() {
 
 const interval = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
+    console.log(dateTime.create().format('Y-m-d H:M:S')+" In the ping, ws.readyState = "+ws.readyState);
     if (ws.isAlive === false) {
       return ws.terminate();
     }
+    // Reset to false and request a ping (the pong response will set isAlive to true again)
     ws.isAlive = false;
     ws.ping('', false, true);
   });
@@ -81,22 +80,27 @@ wss.on('connection', function (ws) {
   // showing the connection is still alive
   ws.on('pong', heartbeat);
 
+  // Broadcast?
+  /*
   wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
+    if (client.readyState === ws.OPEN) {
       client.send(data);
     }
   });
+  */
 
   ws.on('message', function (message) {
     console.log('received from client: %s', message)
   })
 
   // register event listener
+  /*
   botFunctions.thermometerEvent.on("tempatureChange", function(fahrenheit) {
     // process data when someEvent occurs
     //console.log(dateTime.create().format('H:M:S.N')+" in Server, Tempature = "+fahrenheit + "°F");
     ws.send(fahrenheit);
   });
+  */
 
     /*
     setInterval(
