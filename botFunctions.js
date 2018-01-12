@@ -53,7 +53,7 @@ board.on("ready", function() {
   var led2 = new five.Led(45);
 
   // Strobe the pin on/off, defaults to 100ms phases
-  //console.log("Starting LED test");
+  console.log("Starting LED test");
   //led.strobe();
 /*  
   led.fade({
@@ -67,51 +67,50 @@ board.on("ready", function() {
 */
   // "blink" the led in 500ms
   // on-off phase periods
-  //led.blink(100);  
-  //led2.blink(700);
+  led.blink(700);  
+  led2.blink(700);
 
 //  #define LEFT_EYE 44
 // #define RIGHT_EYE 45
 //#define SERVO_1_PIN 10  ARM
 //#define SERVO_2_PIN 9   HEAD
 
-  //console.log("Starting Servo test");
+  console.log("Starting Servo test");
   
  // Initialize a Servo collection
  /*
   var servos = new five.Servos([9, 10]);
   servos.center();  
-  
-    // Inject the `servo` hardware into
-  // the Repl instance's context;
-  // allows direct command line access
-  this.repl.inject({
-    servos: servos
-  });
-  
   servos.stop();
 */
-/*
- var servo = new five.Servo(9);
- this.repl.inject({
-    servo: servo
+
+ //var servo = new five.Servo(9);
+var servo = new five.Servo({
+    id: "MyServo",     // User defined id
+    pin: 9,           // Which pin is it attached to?
+    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
+    range: [0,180],    // Default: 0-180
+    fps: 100,          // Used to calculate rate of movement between positions
+    invert: false,     // Invert all specified positions
+    startAt: 90,       // Immediately move to a degree
+    center: true,      // overrides startAt if true and moves the servo to the center of the range
   });
-*/
+
   //servo.to(120);
 
   // Sweep from 0-180.
   //servo.sweep();
 
-/*
+
   var configs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
 
 var motor1 = new five.Motor(configs.M1);
 var motor2 = new five.Motor(configs.M2);
-*/
+
 //var motor3 = new five.Motor(configs.M3);
 //var motor4 = new five.Motor(configs.M4);
 
-//  console.log("Starting Motor test");
+console.log("Starting Motor test");
 /*
 var motor = new five.Motor({
     controller: "PCA9685",
@@ -125,8 +124,8 @@ var motor = new five.Motor({
 */
 
   // Start the motor at maximum speed
-  //motor2.forward(80);
-  //motor1.forward(80);
+  //motor2.forward(200);
+  //motor1.forward(200);
 
   
 //});
