@@ -7,6 +7,9 @@ DESCRIPTION: NodeJS module to handle robot functions.  Communicates with
 Modification History
 2017-12-31 JJK  Loaded ConfigurableFirmata on the Arduino Mega.
                 LED functions working ok
+2018-01-12 JJK  Tested LED, Servo, and Motor successfully.  Connecting 
+                servo back on motorshield and using 4 AA pack shared with
+                motors
 =============================================================================*/
 var five = require("johnny-five");
 var dateTime = require('node-datetime');
@@ -15,21 +18,11 @@ var board = new five.Board();
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
 
-/*
-var board = new five.Board({
-  samplingInterval: 100,
-});
+const LEFT_EYE = 44;
+const RIGHT_EYE = 45;
+const SERVO_1_ARM = 10;
+const SERVO_2_HEAD = 9;
 
-var thermometer = new five.Thermometer({
-      controller: "DS18B20",
-      pin: 4,
-      freq: 1000
-});
-var hygrometer = new five.Multi({
-    controller: "HTU21D",
-    freq: 1000
-});
-*/
 // create EventEmitter object
 var thermometerEvent = new EventEmitter();
 
@@ -49,8 +42,8 @@ board.on("ready", function() {
   */
   
   // Create an Led on pin 13
-  var led = new five.Led(44);
-  var led2 = new five.Led(45);
+  var led = new five.Led(LEFT_EYE);
+  var led2 = new five.Led(RIGHT_EYE);
 
   // Strobe the pin on/off, defaults to 100ms phases
   console.log("Starting LED test");
@@ -67,13 +60,9 @@ board.on("ready", function() {
 */
   // "blink" the led in 500ms
   // on-off phase periods
-  led.blink(700);  
-  led2.blink(700);
+  //led.blink(700);  
+  //led2.blink(700);
 
-//  #define LEFT_EYE 44
-// #define RIGHT_EYE 45
-//#define SERVO_1_PIN 10  ARM
-//#define SERVO_2_PIN 9   HEAD
 
   console.log("Starting Servo test");
   
@@ -84,10 +73,13 @@ board.on("ready", function() {
   servos.stop();
 */
 
+//const SERVO_1_ARM = 10;
+//const SERVO_2_HEAD = 9;
+
  //var servo = new five.Servo(9);
 var servo = new five.Servo({
-    id: "MyServo",     // User defined id
-    pin: 9,           // Which pin is it attached to?
+    id: "HeadServo",     // User defined id
+    pin: SERVO_2_HEAD, // Which pin is it attached to?
     type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
     range: [0,180],    // Default: 0-180
     fps: 100,          // Used to calculate rate of movement between positions
@@ -111,17 +103,6 @@ var motor2 = new five.Motor(configs.M2);
 //var motor4 = new five.Motor(configs.M4);
 
 console.log("Starting Motor test");
-/*
-var motor = new five.Motor({
-    controller: "PCA9685",
-    frequency: 200, // Hz
-    pins: {
-      pwm: 8,
-      dir: 9,
-      cdir: 10,
-    },
-  });
-*/
 
   // Start the motor at maximum speed
   //motor2.forward(200);
