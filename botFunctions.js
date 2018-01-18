@@ -10,6 +10,7 @@ Modification History
 2018-01-12 JJK  Tested LED, Servo, and Motor successfully.  Connecting 
                 servo back on motorshield and using 4 AA pack shared with
                 motors
+2018-01-15 JJK  Creating functions to be called from the controller
 =============================================================================*/
 var five = require("johnny-five");
 var dateTime = require('node-datetime');
@@ -26,6 +27,12 @@ const SERVO_2_HEAD = 9;
 // create EventEmitter object
 var thermometerEvent = new EventEmitter();
 
+// Event Namespace
+//var RoboEvents = {};
+  var leftEyeLed;
+  var rightEyeLed;
+
+
 board.on("ready", function() {
 
   // This requires OneWire support using the ConfigurableFirmata
@@ -41,9 +48,10 @@ board.on("ready", function() {
   });
   */
   
+
   // Create an Led on pin 13
-  var led = new five.Led(LEFT_EYE);
-  var led2 = new five.Led(RIGHT_EYE);
+  leftEyeLed = new five.Led(LEFT_EYE);
+  rightEyeLed = new five.Led(RIGHT_EYE);
 
   // Strobe the pin on/off, defaults to 100ms phases
   console.log("Starting LED test");
@@ -107,12 +115,17 @@ console.log("Starting Motor test");
   // Start the motor at maximum speed
   //motor2.forward(200);
   //motor1.forward(200);
-
+//.reverse
+//.stop
+// parameter speed - 255 max
   
 //});
 
 }); // board.on("ready", function() {
 
+function testLed() {
+  leftEyeLed.on();
+}
 
 
 function testBot(testStr,callback){
@@ -124,5 +137,17 @@ function testBot(testStr,callback){
 
 module.exports = {
     testBot,
+    testLed,
     thermometerEvent
 };
+
+// make the motor objects global in this module, then expose functions that use them
+/*
+exports.forward = function(){
+  console.log('moving forward');
+
+  //hack for the direction issue
+  leftFront.reverse(255);
+  rightFront.reverse(255);
+}
+*/

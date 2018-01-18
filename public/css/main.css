@@ -154,7 +154,18 @@ li {
 /*
 css from webspeechdemo.html
 font-family: Verdana, Arial, sans-serif;
+background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;    
  */
+ /*
  .button {
     background: -webkit-linear-gradient(top,#008dfd 0,#0370ea 100%);
     border: 1px solid #076bd2;
@@ -169,6 +180,12 @@ font-family: Verdana, Arial, sans-serif;
     text-shadow: 1px 1px 1px #076bd2;
     letter-spacing: normal;
   }
+*/
+
+  .btn-lg.round {
+	border-radius: 50%;
+    }
+
   .center {
     padding: 10px;
     text-align: center;

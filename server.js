@@ -64,7 +64,7 @@ function heartbeat() {
 
 const interval = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
-    console.log(dateTime.create().format('Y-m-d H:M:S')+" In the ping, ws.readyState = "+ws.readyState);
+    //console.log(dateTime.create().format('Y-m-d H:M:S')+" In the ping, ws.readyState = "+ws.readyState);
     if (ws.isAlive === false) {
       return ws.terminate();
     }
@@ -74,6 +74,7 @@ const interval = setInterval(function ping() {
   });
 }, 30000);
 
+// Successful connection from a web client
 wss.on('connection', function (ws) {
   ws.isAlive = true;
   // If you get a pong response from a client call the heartbeat function to set a variable
@@ -88,6 +89,8 @@ wss.on('connection', function (ws) {
     }
   });
   */
+
+  botFunctions.testLed();
 
   ws.on('message', function (message) {
     console.log('received from client: %s', message)
@@ -109,6 +112,7 @@ wss.on('connection', function (ws) {
     */
 })
   
+// test send data to client
 function sendDate(ws) {
   try { 
 
