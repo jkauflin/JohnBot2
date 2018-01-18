@@ -21,6 +21,7 @@ Modification History
 2018-01-04 JJK  Added dotenv to set environment variables and abstract
                 literals
                 Added heartbeat check for websocket connections
+                NODE_ENV=development
 =============================================================================*/
 
 // Read environment variables from the .env file
