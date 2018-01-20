@@ -16,7 +16,6 @@ var nonPrintableCharsStr = "[\x01-\x1F\x7F]";
 //"g" global so it does more than 1 substitution
 var regexNonPrintableChars = new RegExp(nonPrintableCharsStr,"g");
 
-
 function cleanStr(inStr) {
 	return inStr.replace(regexNonPrintableChars,'');
 }
@@ -48,23 +47,23 @@ $(document).ready(function(){
 
 	$("#StartButton").click(function() {
 		$.getJSON("start","",function(response){
-			console.log("response.wsUrl = "+response.wsUrl);
+			//console.log("response.wsUrl = "+response.wsUrl);
 			ws = new WebSocket(response.wsUrl);
 			// event emmited when connected
 			ws.onopen = function () {
-				console.log('websocket is connected ...')
+				//console.log('websocket is connected ...')
 				// sending a send event to websocket server
-				ws.send('This is the message being sent from the client browser')
+				//ws.send('This is the message being sent from the client browser')
 				$("#StatusDisplay").html("Connected");
-			}
-			// event emmited when receiving message 
-			ws.onmessage = function (messageEvent) {
-				//var msg = JSON.parse(messageEvent.data);
-				
-				$("#TempatureDisplay").html(messageEvent.data);
 			}
 		});
 	});
+
+	// event emmited when receiving message 
+	ws.onmessage = function (messageEvent) {
+		//var msg = JSON.parse(messageEvent.data);
+		//$("#TempatureDisplay").html(messageEvent.data);
+	}
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
@@ -77,25 +76,86 @@ $(document).ready(function(){
     		//displayPropertyList(hoaPropertyRecList);
 		});
 		*/
-		ws.send($("#searchStr").val());
-        event.stopPropagation();
-    });
-
-	$("#ForwardButton")
-		.mouseup(function() {
-			console.log("Mouse UP");
-	  	})
-	  	.mousedown(function() {
-			console.log("Mouse DOWN");
-	  	});
+		//ws.send($("#searchStr").val());
+    event.stopPropagation();
+	});
 	
-			$("#ex6").slider({
-				reversed : true
-			});
-			$("#ex6").on("slide", function(slideEvt) {
-			  $("#ex6SliderVal").text(slideEvt.value);
-			  //console.log("slider value = "+slideEvt.value);
-		  });
+	$("#ForwardButton")
+	.mousedown(function() {
+		//console.log("Mouse DOWN");
+
+var botMessage = {
+	"moveDirection" : "F",
+	"move" : 1,
+	"rotateDirection" : "R",
+	"rotate" : 0,
+	"eyes" : 0,
+	"motorSpeed" : 100,
+	"armPosition" : 90,
+	"headPosition" : 90
+};
+
+
+		JSON.stringify(object);
+		ws.send();
+	})
+	.mouseup(function() {
+		//console.log("Mouse UP");
+	});
+
+	$("#BackwardButton")
+	.mousedown(function() {
+		//console.log("Mouse DOWN");
+	})
+	.mouseup(function() {
+		//console.log("Mouse UP");
+	});
+
+	$("#RotateLeftButton")
+	.mousedown(function() {
+		//console.log("Mouse DOWN");
+	})
+	.mouseup(function() {
+		//console.log("Mouse UP");
+	});
+
+	$("#RotateRightButton")
+	.mousedown(function() {
+		//console.log("Mouse DOWN");
+	})
+	.mouseup(function() {
+		//console.log("Mouse UP");
+	});
+
+	$("#EyeButton")
+	.mousedown(function() {
+		//console.log("Mouse DOWN");
+	})
+	.mouseup(function() {
+		//console.log("Mouse UP");
+	});
+
+	$("#MotorSpeed").slider({
+		reversed : true
+	})
+	.on("slide", function(slideEvt) {
+		//$("#ex6SliderVal").text(slideEvt.value);
+		//console.log("slider value = "+slideEvt.value);
+	});
+
+	$("#ArmPosition").slider({
+		reversed : true
+	})
+	.on("slide", function(slideEvt) {
+		//$("#ex6SliderVal").text(slideEvt.value);
+		//console.log("slider value = "+slideEvt.value);
+	});
+
+	$("#HeadPosition").slider({
+	})
+	.on("slide", function(slideEvt) {
+		//console.log("slider value = "+slideEvt.value);
+	});
 
 
 }); // $(document).ready(function(){

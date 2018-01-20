@@ -19,6 +19,7 @@ var board = new five.Board();
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
 
+// Constants for pin numbers
 const LEFT_EYE = 44;
 const RIGHT_EYE = 45;
 const SERVO_1_ARM = 10;
@@ -29,32 +30,37 @@ var thermometerEvent = new EventEmitter();
 
 // Event Namespace
 //var RoboEvents = {};
-  var leftEyeLed;
-  var rightEyeLed;
+var leftEyeLed;
+var rightEyeLed;
+var motorConfig = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
+var motor1;
+var motor2;
+var motorSpeed = 100;
+var headServo;
+var armServo;
 
+var moving = false;
+var rotating = false;
 
+// When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
-
   // This requires OneWire support using the ConfigurableFirmata
   /*
   var thermometer = new five.Thermometer({
     controller: "DS18B20",
     pin: 2
   });
-  
   thermometer.on("change", function() {
     //console.log(dateTime.create().format('H:M:S.N')+"  Tempature = "+this.fahrenheit + "°F");
     thermometerEvent.emit("tempatureChange", this.fahrenheit);
   });
   */
-  
 
   // Create an Led on pin 13
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
 
   // Strobe the pin on/off, defaults to 100ms phases
-  console.log("Starting LED test");
   //led.strobe();
 /*  
   led.fade({
@@ -70,9 +76,6 @@ board.on("ready", function() {
   // on-off phase periods
   //led.blink(700);  
   //led2.blink(700);
-
-
-  console.log("Starting Servo test");
   
  // Initialize a Servo collection
  /*
@@ -81,36 +84,23 @@ board.on("ready", function() {
   servos.stop();
 */
 
-//const SERVO_1_ARM = 10;
-//const SERVO_2_HEAD = 9;
+headServo = new five.Servo({
+  id: "HeadServo",     // User defined id
+  pin: SERVO_2_HEAD, // Which pin is it attached to?
+  type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
+  range: [0,180],    // Default: 0-180
+  fps: 100,          // Used to calculate rate of movement between positions
+  invert: false,     // Invert all specified positions
+  //startAt: 90,       // Immediately move to a degree
+  center: true,      // overrides startAt if true and moves the servo to the center of the range
+});
 
- //var servo = new five.Servo(9);
-var servo = new five.Servo({
-    id: "HeadServo",     // User defined id
-    pin: SERVO_2_HEAD, // Which pin is it attached to?
-    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-    range: [0,180],    // Default: 0-180
-    fps: 100,          // Used to calculate rate of movement between positions
-    invert: false,     // Invert all specified positions
-    startAt: 90,       // Immediately move to a degree
-    center: true,      // overrides startAt if true and moves the servo to the center of the range
-  });
-
-  //servo.to(120);
-
+  //headServo.to(120);
   // Sweep from 0-180.
-  //servo.sweep();
+  //headServo.sweep();
 
-
-  var configs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
-
-var motor1 = new five.Motor(configs.M1);
-var motor2 = new five.Motor(configs.M2);
-
-//var motor3 = new five.Motor(configs.M3);
-//var motor4 = new five.Motor(configs.M4);
-
-console.log("Starting Motor test");
+  motor1 = new five.Motor(motorConfig.M1);
+  motor2 = new five.Motor(motorConfig.M2);
 
   // Start the motor at maximum speed
   //motor2.forward(200);
@@ -123,8 +113,25 @@ console.log("Starting Motor test");
 
 }); // board.on("ready", function() {
 
-function testLed() {
-  leftEyeLed.on();
+function manualControl(botMessage) {
+  //leftEyeLed.on();
+  /*
+  botMessage.moveDirection" : "F",
+  botMessage.move" : 1,
+  botMessage.rotateDirection" : "R",
+  botMessage.rotate" : 0,
+  botMessage.eyes" : 0,
+  botMessage.motorSpeed" : 100,
+  botMessage.armPosition" : 90,
+  botMessage.headPosition" : 90
+  */
+
+  if (botMessage.eyes) {
+    leftEyeLed.on();
+  } else {
+    leftEyeLed.off();
+  }
+
 }
 
 
@@ -134,10 +141,9 @@ function testBot(testStr,callback){
     
 }; // 
 
-
 module.exports = {
     testBot,
-    testLed,
+    manualControl,
     thermometerEvent
 };
 

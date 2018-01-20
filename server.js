@@ -22,6 +22,8 @@ Modification History
                 literals
                 Added heartbeat check for websocket connections
                 NODE_ENV=development
+2018-01-20 JJK  Implemented handling for manual control WebSocket 
+                messages from the client
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -52,7 +54,7 @@ var path = __dirname + '/';
 
 
 //=================================================================================================
-// D
+// Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
 const ws = require('ws');
 const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false });
@@ -75,15 +77,16 @@ const interval = setInterval(function ping() {
   });
 }, 30000);
 
+//=================================================================================================
 // Successful connection from a web client
+//=================================================================================================
 wss.on('connection', function (ws) {
   ws.isAlive = true;
   // If you get a pong response from a client call the heartbeat function to set a variable
   // showing the connection is still alive
   ws.on('pong', heartbeat);
 
-  // Broadcast?
-  /*
+  /* Broadcast example
   wss.clients.forEach(function each(client) {
     if (client.readyState === ws.OPEN) {
       client.send(data);
@@ -91,10 +94,31 @@ wss.on('connection', function (ws) {
   });
   */
 
-  botFunctions.testLed();
+  // Handle messages from the client browser
+  ws.on('message', function (botMessage) {
+    // console.log('received from client: %s', message)
+    // check for manual controls and call function
+    //botMessage.
+    /*
+    "moveDirection" : "F",
+    "move" : 1,
+    "rotateDirection" : "R",
+    "rotate" : 0,
+    "eyes" : 0,
+    "motorSpeed" : 100,
+    "armPosition" : 90,
+    "headPosition" : 90
 
-  ws.on('message', function (message) {
-    console.log('received from client: %s', message)
+  botMessage.moveDirection" : "F",
+  botMessage.move" : 1,
+  botMessage.rotateDirection" : "R",
+  botMessage.rotate" : 0,
+  botMessage.eyes" : 0,
+  botMessage.motorSpeed" : 100,
+  botMessage.armPosition" : 90,
+  botMessage.headPosition" : 90
+    */
+    botFunctions.manualControl(botMessage);
   })
 
   // register event listener
@@ -106,13 +130,15 @@ wss.on('connection', function (ws) {
   });
   */
 
-    /*
-    setInterval(
-      sendDate,
-      1000,ws)
-    */
-})
-  
+  /*
+  setInterval(
+    sendDate,
+    1000,ws)
+  */
+});
+
+  //botFunctions.testLed();
+
 // test send data to client
 function sendDate(ws) {
   try { 
@@ -156,23 +182,18 @@ router.use(function (req,res,next) {
   console.log("/" + req.method);
   next();
 });
- 
 router.get("/",function(req,res){
   //res.sendFile(path + "index.html");
   res.sendFile('index.html', { root: __dirname });
 });
- 
 router.get("/about",function(req,res){
   res.sendFile(path + "about.html");
 });
- 
 router.get("/contact",function(req,res){
   res.sendFile(path + "contact.html");
 });
- 
 app.use("/",router);
 */
- 
 
 app.use("*",function(req,res){
   console.log("Not in Public, URL = "+req.url);
