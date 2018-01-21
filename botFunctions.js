@@ -125,12 +125,23 @@ function manualControl(botMessage) {
   botMessage.armPosition" : 90,
   botMessage.headPosition" : 90
   */
-
-  if (botMessage.eyes) {
-    leftEyeLed.on();
-  } else {
-    leftEyeLed.off();
+  if (botMessage.eyes != 'undefined') {
+    //console.log("botMessage.eyes = "+botMessage.eyes);
+    if (botMessage.eyes) {
+      leftEyeLed.on();
+      rightEyeLed.on();
+    } else {
+      leftEyeLed.off();
+      rightEyeLed.off();
+    }
+    
   }
+
+    /*
+  if (botMessage.eyes) {
+  } else {
+  }
+  */
 
 }
 

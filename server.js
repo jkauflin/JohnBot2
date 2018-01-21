@@ -118,7 +118,7 @@ wss.on('connection', function (ws) {
   botMessage.armPosition" : 90,
   botMessage.headPosition" : 90
     */
-    botFunctions.manualControl(botMessage);
+    botFunctions.manualControl(JSON.parse(botMessage));
   })
 
   // register event listener

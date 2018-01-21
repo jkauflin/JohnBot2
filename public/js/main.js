@@ -10,6 +10,8 @@
 
 // Global variables
 var ws = null;
+var wsConnected = false;
+var isTouchDevice = false;
 
 //Non-Printable characters - Hex 01 to 1F, and 7F
 var nonPrintableCharsStr = "[\x01-\x1F\x7F]";
@@ -35,6 +37,9 @@ $(document).ajaxError(function(e, xhr, settings, exception) {
 
 
 $(document).ready(function(){
+	isTouchDevice = 'ontouchstart' in document.documentElement;
+	//$("#logMessage").html("isTouchDevice = "+isTouchDevice);
+
 	// Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
 	$(document).on('click','.navbar-collapse.in',function(e) {
 		if( $(e.target).is('a') && $(e.target).attr('class') != 'dropdown-toggle' ) {
@@ -51,19 +56,24 @@ $(document).ready(function(){
 			ws = new WebSocket(response.wsUrl);
 			// event emmited when connected
 			ws.onopen = function () {
+				//**************************************** set a "connected" status variable
+				// and only try to do a ws.send if connected?????????????????????????????????
+				wsConnected = true;
 				//console.log('websocket is connected ...')
 				// sending a send event to websocket server
 				//ws.send('This is the message being sent from the client browser')
 				$("#StatusDisplay").html("Connected");
+
+				// event emmited when receiving message 
+				ws.onmessage = function (messageEvent) {
+					//var msg = JSON.parse(messageEvent.data);
+					//$("#TempatureDisplay").html(messageEvent.data);
+				}
+
 			}
 		});
 	});
 
-	// event emmited when receiving message 
-	ws.onmessage = function (messageEvent) {
-		//var msg = JSON.parse(messageEvent.data);
-		//$("#TempatureDisplay").html(messageEvent.data);
-	}
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
@@ -80,10 +90,7 @@ $(document).ready(function(){
     event.stopPropagation();
 	});
 	
-	$("#ForwardButton")
-	.mousedown(function() {
-		//console.log("Mouse DOWN");
-
+		/*
 var botMessage = {
 	"moveDirection" : "F",
 	"move" : 1,
@@ -94,47 +101,91 @@ var botMessage = {
 	"armPosition" : 90,
 	"headPosition" : 90
 };
-
-
-		JSON.stringify(object);
-		ws.send();
-	})
-	.mouseup(function() {
-		//console.log("Mouse UP");
-	});
+		*/
+	$("#ForwardButton")
+		.mousedown(function() {
+			if (!isTouchDevice) { forwardPushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { forwardReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { forwardPushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { forwardReleased(); }
+		});
 
 	$("#BackwardButton")
-	.mousedown(function() {
-		//console.log("Mouse DOWN");
-	})
-	.mouseup(function() {
-		//console.log("Mouse UP");
-	});
+		.mousedown(function() {
+			if (!isTouchDevice) { backwardPushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { backwardReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { backwardPushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { backwardReleased(); }
+		});
 
 	$("#RotateLeftButton")
-	.mousedown(function() {
-		//console.log("Mouse DOWN");
-	})
-	.mouseup(function() {
-		//console.log("Mouse UP");
-	});
+		.mousedown(function() {
+			if (!isTouchDevice) { rotateLeftPushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { rotateLeftReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { rotateLeftPushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { rotateLeftReleased(); }
+		});
 
 	$("#RotateRightButton")
-	.mousedown(function() {
-		//console.log("Mouse DOWN");
-	})
-	.mouseup(function() {
-		//console.log("Mouse UP");
-	});
+		.mousedown(function() {
+			if (!isTouchDevice) { rotateRightPushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { rotateRightReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { rotateRightPushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { rotateRightReleased(); }
+		});
 
 	$("#EyeButton")
-	.mousedown(function() {
-		//console.log("Mouse DOWN");
-	})
-	.mouseup(function() {
-		//console.log("Mouse UP");
-	});
+		.mousedown(function() {
+			if (!isTouchDevice) { eyePushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { eyeReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { eyePushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { eyeReleased(); }
+		});
 
+	$("#VoiceButton")
+		.mousedown(function() {
+			if (!isTouchDevice) { voicePushed(); }
+		})
+		.mouseup(function() {
+			if (!isTouchDevice) { voiceReleased(); }
+		})
+		.on('touchstart', function(){
+			if (isTouchDevice) { voicePushed(); }
+		})
+		.on('touchend', function(){
+			if (isTouchDevice)  { voiceReleased(); }
+		});
+		
 	$("#MotorSpeed").slider({
 		reversed : true
 	})
@@ -160,8 +211,64 @@ var botMessage = {
 
 }); // $(document).ready(function(){
 
+function forwardPushed() {
+	//console.log("EYES - Pushed");
+	//$("#logMessage").html("EYES - Pushed");
+	wsSend('{"eyes" : 1}');
+}
+function forwardReleased() {
+	//console.log("EYES - Released");
+	//$("#logMessage").html("EYES - Released");
+	wsSend('{"eyes" : 0}');
+}
 
-	
+function backwardPushed() {
+	//console.log("EYES - Pushed");
+	//$("#logMessage").html("EYES - Pushed");
+	wsSend('{"eyes" : 1}');
+}
+function backwardReleased() {
+	//console.log("EYES - Released");
+	//$("#logMessage").html("EYES - Released");
+	wsSend('{"eyes" : 0}');
+}
+
+function rotateLeftPushed() {
+	wsSend('{"eyes" : 1}');
+}
+function rotateLeftReleased() {
+	wsSend('{"eyes" : 0}');
+}
+
+function rotateRightPushed() {
+	wsSend('{"eyes" : 1}');
+}
+function rotateRightReleased() {
+	wsSend('{"eyes" : 0}');
+}
+
+function eyePushed() {
+	wsSend('{"eyes" : 1}');
+}
+function eyeReleased() {
+	wsSend('{"eyes" : 0}');
+}
+
+function voicePushed() {
+	wsSend('{"eyes" : 1}');
+}
+function voiceReleased() {
+	wsSend('{"eyes" : 0}');
+}
+
+function wsSend(botMessage) {
+	if (wsConnected) {
+		ws.send(botMessage);
+	}
+}
+
+
+	/*
 	var create_email = false;
 	var final_transcript = '';
 	var recognizing = false;
@@ -335,4 +442,4 @@ var botMessage = {
 	  copy_info.style.display = 'none';
 	  email_info.style.display = 'none';
 	}
-	
+	*/
