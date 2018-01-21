@@ -4,8 +4,9 @@
  * DESCRIPTION: Client-side JS functions and logic for JohnBot2
  *----------------------------------------------------------------------------
  * Modification History
- * 2017-09-08 JJK 	Initial version 
+ * 2017-09-08 JJK Initial version 
  * 2017-12-29 JJK	Initial controls and WebSocket communication
+ * 2017-01-21 JJK	Implementing response to buttons for manual controls
  *============================================================================*/
 
 // Global variables
@@ -56,8 +57,6 @@ $(document).ready(function(){
 			ws = new WebSocket(response.wsUrl);
 			// event emmited when connected
 			ws.onopen = function () {
-				//**************************************** set a "connected" status variable
-				// and only try to do a ws.send if connected?????????????????????????????????
 				wsConnected = true;
 				//console.log('websocket is connected ...')
 				// sending a send event to websocket server
@@ -73,7 +72,6 @@ $(document).ready(function(){
 			}
 		});
 	});
-
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
@@ -192,6 +190,7 @@ var botMessage = {
 	.on("slide", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
+		wsSend('{"motorSpeed" : '+slideEvt.value+'}');
 	});
 
 	$("#ArmPosition").slider({
@@ -200,51 +199,53 @@ var botMessage = {
 	.on("slide", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
+		wsSend('{"armPosition" : '+slideEvt.value+'}');
 	});
 
 	$("#HeadPosition").slider({
 	})
 	.on("slide", function(slideEvt) {
 		//console.log("slider value = "+slideEvt.value);
+		wsSend('{"headPosition" : '+slideEvt.value+'}');
 	});
 
-
 }); // $(document).ready(function(){
+
 
 function forwardPushed() {
 	//console.log("EYES - Pushed");
 	//$("#logMessage").html("EYES - Pushed");
-	wsSend('{"eyes" : 1}');
+	wsSend('{"moveDirection" : "F","move" : 1}');
 }
 function forwardReleased() {
 	//console.log("EYES - Released");
 	//$("#logMessage").html("EYES - Released");
-	wsSend('{"eyes" : 0}');
+	wsSend('{move" : 0}');
 }
 
 function backwardPushed() {
 	//console.log("EYES - Pushed");
 	//$("#logMessage").html("EYES - Pushed");
-	wsSend('{"eyes" : 1}');
+	wsSend('{"moveDirection" : "R","move" : 1}');
 }
 function backwardReleased() {
 	//console.log("EYES - Released");
 	//$("#logMessage").html("EYES - Released");
-	wsSend('{"eyes" : 0}');
+	wsSend('{"move" : 0}');
 }
 
 function rotateLeftPushed() {
-	wsSend('{"eyes" : 1}');
+	wsSend('{"rotateDirection" : "L","rotate" : 1}');
 }
 function rotateLeftReleased() {
-	wsSend('{"eyes" : 0}');
+	wsSend('{"rotate" : 0}');
 }
 
 function rotateRightPushed() {
-	wsSend('{"eyes" : 1}');
+	wsSend('{"rotateDirection" : "R","rotate" : 1}');
 }
 function rotateRightReleased() {
-	wsSend('{"eyes" : 0}');
+	wsSend('{"rotate" : 0}');
 }
 
 function eyePushed() {
@@ -255,10 +256,10 @@ function eyeReleased() {
 }
 
 function voicePushed() {
-	wsSend('{"eyes" : 1}');
+	wsSend('{"voice" : 1}');
 }
 function voiceReleased() {
-	wsSend('{"eyes" : 0}');
+	wsSend('{"voice" : 0}');
 }
 
 function wsSend(botMessage) {

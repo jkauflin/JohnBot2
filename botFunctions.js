@@ -39,8 +39,16 @@ var motorSpeed = 100;
 var headServo;
 var armServo;
 
+const FORWARD_DIRECTION = 'F';
+const BACKWARD_DIRECTION = 'B';
+const RIGHT_DIRECTION = 'R';
+const LEFT_DIRECTION = 'L';
+
+var moveDirection = FORWARD_DIRECTION;
 var moving = false;
+var rotateDirection = RIGHT_DIRECTION;
 var rotating = false;
+var eyesOn = false;
 
 // When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
@@ -84,16 +92,16 @@ board.on("ready", function() {
   servos.stop();
 */
 
-headServo = new five.Servo({
-  id: "HeadServo",     // User defined id
-  pin: SERVO_2_HEAD, // Which pin is it attached to?
-  type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-  range: [0,180],    // Default: 0-180
-  fps: 100,          // Used to calculate rate of movement between positions
-  invert: false,     // Invert all specified positions
-  //startAt: 90,       // Immediately move to a degree
-  center: true,      // overrides startAt if true and moves the servo to the center of the range
-});
+  headServo = new five.Servo({
+    id: "HeadServo",     // User defined id
+    pin: SERVO_2_HEAD, // Which pin is it attached to?
+    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
+    range: [0,180],    // Default: 0-180
+    fps: 100,          // Used to calculate rate of movement between positions
+    invert: false,     // Invert all specified positions
+    //startAt: 90,       // Immediately move to a degree
+    center: true,      // overrides startAt if true and moves the servo to the center of the range
+  });
 
   //headServo.to(120);
   // Sweep from 0-180.
@@ -114,36 +122,80 @@ headServo = new five.Servo({
 }); // board.on("ready", function() {
 
 function manualControl(botMessage) {
-  //leftEyeLed.on();
-  /*
-  botMessage.moveDirection" : "F",
-  botMessage.move" : 1,
-  botMessage.rotateDirection" : "R",
-  botMessage.rotate" : 0,
-  botMessage.eyes" : 0,
-  botMessage.motorSpeed" : 100,
-  botMessage.armPosition" : 90,
-  botMessage.headPosition" : 90
-  */
+  if (botMessage.motorSpeed != 'undefined') {
+    motorSpeed = botMessage.motorSpeed;
+  }
+  if (botMessage.armPosition != 'undefined') {
+    //armServo.to(botMessage.armPosition);
+  }
+  if (botMessage.headPosition != 'undefined') {
+    headServo.to(botMessage.headPosition);
+  }
+
+  if (botMessage.move != 'undefined') {
+    if (botMessage.moveDirection != 'undefined') {
+      moveDirection = botMessage.moveDirection;
+    }
+    if (botMessage.move) {
+      if (moveDirection == BACKWARD_DIRECTION) {
+        motor1.reverse(motorSpeed);
+        motor2.reverse(motorSpeed);
+      } else {
+        motor1.forward(motorSpeed);
+        motor2.forward(motorSpeed);
+      }
+      moving = true;
+    } else {
+      motor1.stop();
+      motor2.stop();
+      moving = false;
+    }
+  }
+
+  if (botMessage.rotate != 'undefined') {
+    if (botMessage.rotateDirection != 'undefined') {
+      rotateDirection = botMessage.rotateDirection;
+    }
+    if (botMessage.rotate) {
+      if (rotateDirection == LEFT_DIRECTION) {
+        motor2.forward(motorSpeed);
+        motor1.reverse(motorSpeed);
+      } else {
+        motor1.forward(motorSpeed);
+        motor2.reverse(motorSpeed);
+      }
+      rotating = true;
+    } else {
+      motor1.stop();
+      motor2.stop();
+      rotating = false;
+    }
+  }
+
   if (botMessage.eyes != 'undefined') {
     //console.log("botMessage.eyes = "+botMessage.eyes);
     if (botMessage.eyes) {
       leftEyeLed.on();
       rightEyeLed.on();
+      eyesOn = true;
     } else {
       leftEyeLed.off();
       rightEyeLed.off();
+      eyesOn = false;
     }
     
   }
 
-    /*
-  if (botMessage.eyes) {
-  } else {
+  if (botMessage.voice != 'undefined') {
+    //console.log("botMessage.eyes = "+botMessage.eyes);
+    if (botMessage.voice) {
+      // turn on voice (or start playing a random sound clip)
+    } else {
+      // turn off voice (stop playing sound clip)
+    }
   }
-  */
 
-}
+} // function manualControl(botMessage) {
 
 
 function testBot(testStr,callback){
