@@ -269,7 +269,6 @@ function wsSend(botMessage) {
 }
 
 
-	/*
 	var create_email = false;
 	var final_transcript = '';
 	var recognizing = false;
@@ -443,4 +442,4 @@ function wsSend(botMessage) {
 	  copy_info.style.display = 'none';
 	  email_info.style.display = 'none';
 	}
-	*/
+	
