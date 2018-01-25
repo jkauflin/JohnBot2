@@ -11,6 +11,7 @@ Modification History
                 servo back on motorshield and using 4 AA pack shared with
                 motors
 2018-01-15 JJK  Creating functions to be called from the controller
+2018-01-24 JJK  Corrections after testing manual controls
 =============================================================================*/
 var five = require("johnny-five");
 var dateTime = require('node-datetime');
@@ -40,7 +41,7 @@ var headServo;
 var armServo;
 
 const FORWARD_DIRECTION = 'F';
-const BACKWARD_DIRECTION = 'B';
+const BACKWARD_DIRECTION = 'R';
 const RIGHT_DIRECTION = 'R';
 const LEFT_DIRECTION = 'L';
 
@@ -122,18 +123,18 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function manualControl(botMessage) {
-  if (botMessage.motorSpeed != 'undefined') {
+  if (botMessage.motorSpeed != null) {
     motorSpeed = botMessage.motorSpeed;
   }
-  if (botMessage.armPosition != 'undefined') {
+  if (botMessage.armPosition != null) {
     //armServo.to(botMessage.armPosition);
   }
-  if (botMessage.headPosition != 'undefined') {
+  if (botMessage.headPosition != null) {
     headServo.to(botMessage.headPosition);
   }
 
-  if (botMessage.move != 'undefined') {
-    if (botMessage.moveDirection != 'undefined') {
+  if (botMessage.move != null) {
+    if (botMessage.moveDirection != null) {
       moveDirection = botMessage.moveDirection;
     }
     if (botMessage.move) {
@@ -152,8 +153,8 @@ function manualControl(botMessage) {
     }
   }
 
-  if (botMessage.rotate != 'undefined') {
-    if (botMessage.rotateDirection != 'undefined') {
+  if (botMessage.rotate != null) {
+    if (botMessage.rotateDirection != null) {
       rotateDirection = botMessage.rotateDirection;
     }
     if (botMessage.rotate) {
@@ -172,7 +173,7 @@ function manualControl(botMessage) {
     }
   }
 
-  if (botMessage.eyes != 'undefined') {
+  if (botMessage.eyes != null) {
     //console.log("botMessage.eyes = "+botMessage.eyes);
     if (botMessage.eyes) {
       leftEyeLed.on();
@@ -186,15 +187,15 @@ function manualControl(botMessage) {
     
   }
 
-  if (botMessage.voice != 'undefined') {
-    //console.log("botMessage.eyes = "+botMessage.eyes);
+  if (botMessage.voice != null) {
+    //console.log("botMessage.voice = "+botMessage.voice);
     if (botMessage.voice) {
       // turn on voice (or start playing a random sound clip)
     } else {
       // turn off voice (stop playing sound clip)
     }
   }
-
+  
 } // function manualControl(botMessage) {
 
 

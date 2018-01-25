@@ -191,12 +191,22 @@ var botMessage = {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
 		wsSend('{"motorSpeed" : '+slideEvt.value+'}');
+	})
+	.on("slideStop", function(slideEvt) {
+		//$("#ex6SliderVal").text(slideEvt.value);
+		//console.log("slider value = "+slideEvt.value);
+		wsSend('{"motorSpeed" : '+slideEvt.value+'}');
 	});
 
 	$("#ArmPosition").slider({
 		reversed : true
 	})
 	.on("slide", function(slideEvt) {
+		//$("#ex6SliderVal").text(slideEvt.value);
+		//console.log("slider value = "+slideEvt.value);
+		wsSend('{"armPosition" : '+slideEvt.value+'}');
+	})
+	.on("slideStop", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
 		wsSend('{"armPosition" : '+slideEvt.value+'}');
@@ -207,7 +217,12 @@ var botMessage = {
 	.on("slide", function(slideEvt) {
 		//console.log("slider value = "+slideEvt.value);
 		wsSend('{"headPosition" : '+slideEvt.value+'}');
+	})
+	.on("slideStop", function(slideEvt) {
+		//console.log("sliderStop value = "+slideEvt.value);
+		wsSend('{"headPosition" : '+slideEvt.value+'}');
 	});
+
 
 }); // $(document).ready(function(){
 
@@ -220,7 +235,7 @@ function forwardPushed() {
 function forwardReleased() {
 	//console.log("EYES - Released");
 	//$("#logMessage").html("EYES - Released");
-	wsSend('{move" : 0}');
+	wsSend('{"move" : 0}');
 }
 
 function backwardPushed() {

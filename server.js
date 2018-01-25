@@ -118,6 +118,7 @@ wss.on('connection', function (ws) {
   botMessage.armPosition" : 90,
   botMessage.headPosition" : 90
     */
+    //console.log("botMessage = "+botMessage);
     botFunctions.manualControl(JSON.parse(botMessage));
   })
 
