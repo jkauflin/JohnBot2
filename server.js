@@ -42,7 +42,7 @@ const express = require('express');
 const http = require('http');
 const url = require('url');
 var dateTime = require('node-datetime');
-//var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
 var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
@@ -118,8 +118,9 @@ wss.on('connection', function (ws) {
   botMessage.armPosition" : 90,
   botMessage.headPosition" : 90
     */
+    
     //console.log("botMessage = "+botMessage);
-    //botFunctions.manualControl(JSON.parse(botMessage));
+    botFunctions.manualControl(JSON.parse(botMessage));
   })
 
   // register event listener
@@ -231,6 +232,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
+//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 

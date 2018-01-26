@@ -12,11 +12,17 @@ Modification History
                 motors
 2018-01-15 JJK  Creating functions to be called from the controller
 2018-01-24 JJK  Corrections after testing manual controls
+2018-01-26 JJK  Modified board initialization for running as a service
 =============================================================================*/
-var five = require("johnny-five");
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
-var board = new five.Board();
+// When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
+// be sure to shut the REPL off!
+var five = require("johnny-five");
+var board = new five.Board({
+  repl: false,
+  debug: false,
+});
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
 
