@@ -23,8 +23,9 @@ var board = new five.Board();
 // Constants for pin numbers
 const LEFT_EYE = 44;
 const RIGHT_EYE = 45;
-const SERVO_1_ARM = 10;
-const SERVO_2_HEAD = 9;
+const ARM_SERVO = 10;
+const HEAD_SERVO = 9;
+//const PROXIMITY_PIN = 7;
 
 // create EventEmitter object
 var thermometerEvent = new EventEmitter();
@@ -39,6 +40,7 @@ var motor2;
 var motorSpeed = 100;
 var headServo;
 var armServo;
+//var proximity;
 
 const FORWARD_DIRECTION = 'F';
 const BACKWARD_DIRECTION = 'R';
@@ -65,6 +67,24 @@ board.on("ready", function() {
   });
   */
 
+  /*
+  proximity = new five.Proximity({
+    controller: "HCSR04",
+    pin: PROXIMITY_PIN
+  });
+
+  proximity.on("data", function() {
+    console.log("Proximity: ");
+    console.log("  cm  : ", this.cm);
+    console.log("  in  : ", this.in);
+    console.log("-----------------");
+  });
+
+  proximity.on("change", function() {
+    console.log("The obstruction has moved.");
+  });
+  */
+  
   // Create an Led on pin 13
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
@@ -95,7 +115,18 @@ board.on("ready", function() {
 
   headServo = new five.Servo({
     id: "HeadServo",     // User defined id
-    pin: SERVO_2_HEAD, // Which pin is it attached to?
+    pin: HEAD_SERVO, // Which pin is it attached to?
+    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
+    range: [0,180],    // Default: 0-180
+    fps: 100,          // Used to calculate rate of movement between positions
+    invert: false,     // Invert all specified positions
+    //startAt: 90,       // Immediately move to a degree
+    center: true,      // overrides startAt if true and moves the servo to the center of the range
+  });
+
+  armServo = new five.Servo({
+    id: "ArmServo",     // User defined id
+    pin: ARM_SERVO, // Which pin is it attached to?
     type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
     range: [0,180],    // Default: 0-180
     fps: 100,          // Used to calculate rate of movement between positions
@@ -127,7 +158,7 @@ function manualControl(botMessage) {
     motorSpeed = botMessage.motorSpeed;
   }
   if (botMessage.armPosition != null) {
-    //armServo.to(botMessage.armPosition);
+    armServo.to(botMessage.armPosition);
   }
   if (botMessage.headPosition != null) {
     headServo.to(botMessage.headPosition);
@@ -198,6 +229,37 @@ function manualControl(botMessage) {
   
 } // function manualControl(botMessage) {
 
+/*
+End of server 2018-01-25 20:15:26
+UncaughtException, error = Error: listen EADDRINUSE :::3000
+Error: listen EADDRINUSE :::3000
+    at Object.exports._errnoException (util.js:1020:11)
+    at exports._exceptionWithHostPort (util.js:1043:20)
+    at Server._listen2 (net.js:1262:14)
+    at listen (net.js:1298:10)
+    at Server.listen (net.js:1394:5)
+    at EventEmitter.listen (/home/pi/c9sdk/workspace/JohnBot2/node_modules/express/lib/application.js:618:24)
+    at Object.<anonymous> (/home/pi/c9sdk/workspace/JohnBot2/server.js:211:5)
+    at Module._compile (module.js:570:32)
+    at Object.Module._extensions..js (module.js:579:10)
+    at Module.load (module.js:487:32)
+UncaughtException, error = Error: listen EADDRINUSE :::3035
+Error: listen EADDRINUSE :::3035
+    at Object.exports._errnoException (util.js:1020:11)
+    at exports._exceptionWithHostPort (util.js:1043:20)
+    at Server._listen2 (net.js:1262:14)
+    at listen (net.js:1298:10)
+    at net.js:1408:9
+    at _combinedTickCallback (internal/process/next_tick.js:83:11)
+    at process._tickDomainCallback (internal/process/next_tick.js:128:9)
+    at Module.runMain (module.js:606:11)
+    at run (bootstrap_node.js:383:7)
+    at startup (bootstrap_node.js:149:9)
+1516929326521 Available /dev/ttyACM0
+1516929326573 Connected /dev/ttyACM0
+1516929331146 Repl Initialized
+
+*/
 
 function testBot(testStr,callback){
     console.log("in testBot "+dateTime.create().format('Y-m-d H:M:S'));
