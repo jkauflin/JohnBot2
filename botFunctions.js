@@ -47,6 +47,7 @@ var motorSpeed = 100;
 var headServo;
 var armServo;
 //var proximity;
+var armAnimation;
 
 const FORWARD_DIRECTION = 'F';
 const BACKWARD_DIRECTION = 'R';
@@ -141,6 +142,9 @@ board.on("ready", function() {
     center: true,      // overrides startAt if true and moves the servo to the center of the range
   });
 
+  armAnimation = new five.Animation(armServo);
+
+
   //headServo.to(120);
   // Sweep from 0-180.
   //headServo.sweep();
@@ -168,6 +172,7 @@ function manualControl(botMessage) {
   }
   if (botMessage.headPosition != null) {
     headServo.to(botMessage.headPosition);
+
   }
 
   if (botMessage.move != null) {
@@ -216,6 +221,14 @@ function manualControl(botMessage) {
       leftEyeLed.on();
       rightEyeLed.on();
       eyesOn = true;
+
+      armAnimation.enqueue({
+        duration: 2000,
+        cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
+        keyFrames: [ {degrees: 90}, {degrees: 130}, {degrees: 45}, {degrees: 120}, {degrees: 90}]
+      });
+  
+
     } else {
       leftEyeLed.off();
       rightEyeLed.off();

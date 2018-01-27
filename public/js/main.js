@@ -14,6 +14,8 @@ var ws = null;
 var wsConnected = false;
 var isTouchDevice = false;
 
+var headPos = 0;
+
 //Non-Printable characters - Hex 01 to 1F, and 7F
 var nonPrintableCharsStr = "[\x01-\x1F\x7F]";
 //"g" global so it does more than 1 substitution
@@ -215,8 +217,11 @@ var botMessage = {
 	$("#HeadPosition").slider({
 	})
 	.on("slide", function(slideEvt) {
-		//console.log("slider value = "+slideEvt.value);
-		wsSend('{"headPosition" : '+slideEvt.value+'}');
+		if (slideEvt.value != headPos) {
+			headPos = slideEvt.value;
+			//console.log("Head slider value = "+slideEvt.value);
+			wsSend('{"headPosition" : '+slideEvt.value+'}');
+		}
 	})
 	.on("slideStop", function(slideEvt) {
 		//console.log("sliderStop value = "+slideEvt.value);
