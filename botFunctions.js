@@ -13,6 +13,8 @@ Modification History
 2018-01-15 JJK  Creating functions to be called from the controller
 2018-01-24 JJK  Corrections after testing manual controls
 2018-01-26 JJK  Modified board initialization for running as a service
+2018-01-27 JJK  Modified to use PingFirmata to get the HC-SR04 ultrasonic
+                proximity sensor working
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -31,7 +33,7 @@ const LEFT_EYE = 44;
 const RIGHT_EYE = 45;
 const ARM_SERVO = 10;
 const HEAD_SERVO = 9;
-//const PROXIMITY_PIN = 7;
+const PROXIMITY_PIN = 7;
 
 // create EventEmitter object
 var thermometerEvent = new EventEmitter();
@@ -46,7 +48,7 @@ var motor2;
 var motorSpeed = 100;
 var headServo;
 var armServo;
-//var proximity;
+var proximity;
 var armAnimation;
 var currArmPos = 90;
 
@@ -75,19 +77,18 @@ board.on("ready", function() {
   });
   */
 
-  /*
   proximity = new five.Proximity({
     controller: "HCSR04",
     pin: PROXIMITY_PIN
   });
 
   proximity.on("data", function() {
-    console.log("Proximity: ");
-    console.log("  cm  : ", this.cm);
-    console.log("  in  : ", this.in);
-    console.log("-----------------");
+    if (this.in < 4.0) {
+      //console.log("Proximity: "+this.in);
+    }
   });
 
+  /*
   proximity.on("change", function() {
     console.log("The obstruction has moved.");
   });
