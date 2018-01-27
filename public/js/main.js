@@ -13,8 +13,14 @@
 var ws = null;
 var wsConnected = false;
 var isTouchDevice = false;
+var date;
 
 var headPos = 0;
+var armPos = 0;
+var motorPos = 0;
+
+var currMs = 0;
+var prevArmMs = 0;
 
 //Non-Printable characters - Hex 01 to 1F, and 7F
 var nonPrintableCharsStr = "[\x01-\x1F\x7F]";
@@ -53,7 +59,7 @@ $(document).ready(function(){
 	// Using addClear plug-in function to add a clear button on input text fields
 	$(".resetval").addClear();
 
-	$("#StartButton").click(function() {
+//	$("#StartButton").click(function() {
 		$.getJSON("start","",function(response){
 			//console.log("response.wsUrl = "+response.wsUrl);
 			ws = new WebSocket(response.wsUrl);
@@ -73,7 +79,7 @@ $(document).ready(function(){
 
 			}
 		});
-	});
+//	});
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
@@ -192,7 +198,10 @@ var botMessage = {
 	.on("slide", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
-		wsSend('{"motorSpeed" : '+slideEvt.value+'}');
+		if (slideEvt.value != motorPos) {
+			wsSend('{"motorSpeed" : '+slideEvt.value+'}');
+			motorPos = slideEvt.value;
+		}
 	})
 	.on("slideStop", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
@@ -206,7 +215,16 @@ var botMessage = {
 	.on("slide", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
 		//console.log("slider value = "+slideEvt.value);
-		wsSend('{"armPosition" : '+slideEvt.value+'}');
+		if (slideEvt.value != armPos) {
+			//date = new Date();
+			//currMs = date.getTime();
+			//if ((currMs - prevArmMs) > 500) {
+				//console.log("Arm slider value = "+slideEvt.value+", date = "+date.getTime());
+				wsSend('{"armPosition" : '+slideEvt.value+'}');
+				armPos = slideEvt.value;
+				//prevArmMs = currMs;
+			//}
+		}
 	})
 	.on("slideStop", function(slideEvt) {
 		//$("#ex6SliderVal").text(slideEvt.value);
@@ -218,9 +236,9 @@ var botMessage = {
 	})
 	.on("slide", function(slideEvt) {
 		if (slideEvt.value != headPos) {
-			headPos = slideEvt.value;
 			//console.log("Head slider value = "+slideEvt.value);
 			wsSend('{"headPosition" : '+slideEvt.value+'}');
+			headPos = slideEvt.value;
 		}
 	})
 	.on("slideStop", function(slideEvt) {
