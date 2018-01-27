@@ -52,8 +52,10 @@ var proximity;
 var armAnimation;
 var currArmPos = 90;
 
-const FORWARD_DIRECTION = 'F';
-const BACKWARD_DIRECTION = 'R';
+//const FORWARD_DIRECTION = 'F';
+//const BACKWARD_DIRECTION = 'R';
+const FORWARD_DIRECTION = 'R';
+const BACKWARD_DIRECTION = 'F';
 const RIGHT_DIRECTION = 'R';
 const LEFT_DIRECTION = 'L';
 
@@ -84,7 +86,7 @@ board.on("ready", function() {
 
   proximity.on("data", function() {
     if (this.in < 4.0) {
-      //console.log("Proximity: "+this.in);
+      console.log("Proximity: "+this.in);
     }
   });
 
