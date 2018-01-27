@@ -48,6 +48,7 @@ var headServo;
 var armServo;
 //var proximity;
 var armAnimation;
+var currArmPos = 90;
 
 const FORWARD_DIRECTION = 'F';
 const BACKWARD_DIRECTION = 'R';
@@ -169,6 +170,15 @@ function manualControl(botMessage) {
   }
   if (botMessage.armPosition != null) {
     armServo.to(botMessage.armPosition);
+    /*
+    armAnimation.enqueue({
+      duration: 500,
+      cuePoints: [0, 1.0],
+      keyFrames: [ {degrees: currArmPos}, {degrees: botMessage.armPosition}]
+    });
+    */
+    currArmPos = botMessage.armPosition;
+
   }
   if (botMessage.headPosition != null) {
     headServo.to(botMessage.headPosition);
@@ -222,12 +232,13 @@ function manualControl(botMessage) {
       rightEyeLed.on();
       eyesOn = true;
 
+      /*
       armAnimation.enqueue({
         duration: 2000,
         cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
         keyFrames: [ {degrees: 90}, {degrees: 130}, {degrees: 45}, {degrees: 120}, {degrees: 90}]
       });
-  
+      */
 
     } else {
       leftEyeLed.off();
