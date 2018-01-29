@@ -47,7 +47,7 @@ $(document).ajaxError(function(e, xhr, settings, exception) {
 
 $(document).ready(function(){
 	isTouchDevice = 'ontouchstart' in document.documentElement;
-	//$("#logMessage").html("isTouchDevice = "+isTouchDevice);
+	$("#logMessage").html("isTouchDevice = "+isTouchDevice);
 
 	// Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
 	$(document).on('click','.navbar-collapse.in',function(e) {

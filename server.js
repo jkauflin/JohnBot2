@@ -232,6 +232,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
+console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 

@@ -86,7 +86,7 @@ board.on("ready", function() {
 
   proximity.on("data", function() {
     if (this.in < 4.0) {
-      console.log("Proximity: "+this.in);
+      //console.log("Proximity: "+this.in);
     }
   });
 
