@@ -79,6 +79,7 @@ board.on("ready", function() {
   });
   */
 
+  /*
   proximity = new five.Proximity({
     controller: "HCSR04",
     pin: PROXIMITY_PIN
@@ -89,6 +90,7 @@ board.on("ready", function() {
       //console.log("Proximity: "+this.in);
     }
   });
+  */
 
   /*
   proximity.on("change", function() {
@@ -124,6 +126,7 @@ board.on("ready", function() {
   servos.stop();
 */
 
+/*
   headServo = new five.Servo({
     id: "HeadServo",     // User defined id
     pin: HEAD_SERVO, // Which pin is it attached to?
@@ -134,6 +137,7 @@ board.on("ready", function() {
     //startAt: 90,       // Immediately move to a degree
     center: true,      // overrides startAt if true and moves the servo to the center of the range
   });
+*/
 
   armServo = new five.Servo({
     id: "ArmServo",     // User defined id
@@ -153,8 +157,8 @@ board.on("ready", function() {
   // Sweep from 0-180.
   //headServo.sweep();
 
-  motor1 = new five.Motor(motorConfig.M1);
-  motor2 = new five.Motor(motorConfig.M2);
+  //motor1 = new five.Motor(motorConfig.M1);
+  //motor2 = new five.Motor(motorConfig.M2);
 
   // Start the motor at maximum speed
   //motor2.forward(200);
