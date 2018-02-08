@@ -24,6 +24,7 @@ Modification History
                 NODE_ENV=development
 2018-01-20 JJK  Implemented handling for manual control WebSocket 
                 messages from the client
+2018-02-07 JJK  Got working on Pi zero w
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -44,7 +45,7 @@ const url = require('url');
 var dateTime = require('node-datetime');
 var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
-var dataFunctions = require('./dataFunctions.js');
+//var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
 
 var app = express();
