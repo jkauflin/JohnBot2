@@ -31,8 +31,8 @@ var board = new five.Board({
 // Constants for pin numbers
 const LEFT_EYE = 44;
 const RIGHT_EYE = 45;
-const ARM_SERVO = 10;
-const HEAD_SERVO = 9;
+const ARM_SERVO = 9;
+const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
 
 // create EventEmitter object
@@ -126,7 +126,6 @@ board.on("ready", function() {
   servos.stop();
 */
 
-/*
   headServo = new five.Servo({
     id: "HeadServo",     // User defined id
     pin: HEAD_SERVO, // Which pin is it attached to?
@@ -137,7 +136,6 @@ board.on("ready", function() {
     //startAt: 90,       // Immediately move to a degree
     center: true,      // overrides startAt if true and moves the servo to the center of the range
   });
-*/
 
   armServo = new five.Servo({
     id: "ArmServo",     // User defined id
@@ -157,8 +155,8 @@ board.on("ready", function() {
   // Sweep from 0-180.
   //headServo.sweep();
 
-  //motor1 = new five.Motor(motorConfig.M1);
-  //motor2 = new five.Motor(motorConfig.M2);
+  motor1 = new five.Motor(motorConfig.M1);
+  motor2 = new five.Motor(motorConfig.M2);
 
   // Start the motor at maximum speed
   //motor2.forward(200);
