@@ -25,6 +25,9 @@ Modification History
 2018-01-20 JJK  Implemented handling for manual control WebSocket 
                 messages from the client
 2018-02-07 JJK  Got working on Pi zero w
+2018-02-10 JJK  Adding display of proximity values
+
+working on JSON message to web clients (include one for uncaught errors)
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -33,11 +36,27 @@ require('dotenv').config();
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
 	console.log("UncaughtException, error = "+e);
-	console.error(e.stack);
+  console.error(e.stack);
+  if (ws.isAlive) {
+    //var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
+    //ws.send(serverMessage);
+  }
   // Stop the process
   // 2017-12-29 JJK - Don't stop for now, just log the error
 	//process.exit(1);
 });
+
+/*
+UncaughtException, error = Error: Uncaught, unspecified "error" event. ([object Object])
+Error: Uncaught, unspecified "error" event. ([object Object])
+    at Board.emit (events.js:163:17)
+    at Board.log (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:630:8)
+    at Board.(anonymous function) [as error] (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:641:14)
+    at Board.<anonymous> (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:385:14)
+    at ontimeout (timers.js:386:14)
+    at tryOnTimeout (timers.js:250:5)
+    at Timer.listOnTimeout (timers.js:214:5)
+*/
 
 const express = require('express');
 const http = require('http');
@@ -62,7 +81,10 @@ const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false 
 // WebSocket URL to give to the client browser to establish ws connection
 const wsUrl = "ws://"+process.env.HOST+":"+process.env.WS_PORT;
 
+// Initialize to false at the start
+ws.isAlive = false;
 function heartbeat() {
+  // If successful heartbeat call, set to true
   this.isAlive = true;
 }
 
@@ -82,6 +104,7 @@ const interval = setInterval(function ping() {
 // Successful connection from a web client
 //=================================================================================================
 wss.on('connection', function (ws) {
+  // Set to true after getting a successfuly connection from a web client
   ws.isAlive = true;
   // If you get a pong response from a client call the heartbeat function to set a variable
   // showing the connection is still alive
@@ -94,6 +117,8 @@ wss.on('connection', function (ws) {
     }
   });
   */
+
+
 
   // Handle messages from the client browser
   ws.on('message', function (botMessage) {
@@ -124,14 +149,30 @@ wss.on('connection', function (ws) {
     botFunctions.manualControl(JSON.parse(botMessage));
   })
 
-  // register event listener
+
+  // Register event listeners for the bot events
   /*
-  botFunctions.thermometerEvent.on("tempatureChange", function(fahrenheit) {
+  botFunctions.botEvent.on("tempatureChange", function(fahrenheit) {
     // process data when someEvent occurs
     //console.log(dateTime.create().format('H:M:S.N')+" in Server, Tempature = "+fahrenheit + "°F");
     ws.send(fahrenheit);
   });
   */
+ 
+  botFunctions.botEvent.on("error", function(errorMessage) {
+    // JJK - you can either construct it as a string and send with no JSON.stringify
+    //       or construct a JSON object, with easier syntax, and then you have to stringify it
+    var serverMessage = {"errorMessage" : errorMessage};
+    ws.send(JSON.stringify(serverMessage));
+  });
+
+  botFunctions.botEvent.on("proxIn", function(proxIn) {
+    // JJK - you can either construct it as a string and send with no JSON.stringify
+    //       or construct a JSON object, with easier syntax, and then you have to stringify it
+    var serverMessage = {"proxIn" : proxIn};
+    ws.send(JSON.stringify(serverMessage));
+  });
+
 
   /*
   setInterval(
@@ -167,6 +208,9 @@ function sendDate(ws) {
 
 }
 
+// When the web browser client requests a "/start" URL, send back the url to use to establish
+// the Websocket connection
+// Use /start as a trigger to start any robot functions, like a hello sequence
 app.get('/start', function (req, res, next) {
   //console.log("app.get /testcall, searchStr = "+req.query.searchStr);
   var startData = {
@@ -233,6 +277,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
+//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
 //dataFunctions.esInfo();
 

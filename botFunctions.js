@@ -15,6 +15,13 @@ Modification History
 2018-01-26 JJK  Modified board initialization for running as a service
 2018-01-27 JJK  Modified to use PingFirmata to get the HC-SR04 ultrasonic
                 proximity sensor working
+2018-02-10 JJK  Implemented the general botEvent, checking for Board errors,
+                and sending an error event.
+
+Working with proximity sensors
+display of the proximity values for the web page
+action to take for close proximity
+
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -36,7 +43,7 @@ const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
 
 // create EventEmitter object
-var thermometerEvent = new EventEmitter();
+var botEvent = new EventEmitter();
 
 // Event Namespace
 //var RoboEvents = {};
@@ -65,32 +72,30 @@ var rotateDirection = RIGHT_DIRECTION;
 var rotating = false;
 var eyesOn = false;
 
+board.on("error", function() {
+  //console.log("*** Error in Board ***");
+  botEvent.emit("error", "*** Error in Board ***");
+}); // board.on("error", function() {
+  
+
 // When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
-  // This requires OneWire support using the ConfigurableFirmata
-  /*
-  var thermometer = new five.Thermometer({
-    controller: "DS18B20",
-    pin: 2
-  });
-  thermometer.on("change", function() {
-    //console.log(dateTime.create().format('H:M:S.N')+"  Tempature = "+this.fahrenheit + "°F");
-    thermometerEvent.emit("tempatureChange", this.fahrenheit);
-  });
-  */
 
-  /*
   proximity = new five.Proximity({
     controller: "HCSR04",
     pin: PROXIMITY_PIN
   });
 
   proximity.on("data", function() {
-    if (this.in < 4.0) {
-      //console.log("Proximity: "+this.in);
+    if (this.in < 12.0) {
+      // Send event message for change in proximity inches
+      botEvent.emit("proxIn", this.in);
+      if (this.in < 4.0) {
+        //console.log("Proximity: "+this.in);
+        // stop and turn around
+      }
     }
   });
-  */
 
   /*
   proximity.on("change", function() {
@@ -304,8 +309,8 @@ function testBot(testStr,callback){
 
 module.exports = {
     testBot,
-    manualControl,
-    thermometerEvent
+    botEvent,
+    manualControl
 };
 
 // make the motor objects global in this module, then expose functions that use them

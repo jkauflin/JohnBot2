@@ -44,10 +44,14 @@ $(document).ajaxError(function(e, xhr, settings, exception) {
 	$("#StatusDisplay").html("An Error has occurred (see console log)");
 });
 
+function logMessage(message) {
+	console.log(message);
+	$("#logMessage").html(message);
+}
 
 $(document).ready(function(){
 	isTouchDevice = 'ontouchstart' in document.documentElement;
-	$("#logMessage").html("isTouchDevice = "+isTouchDevice);
+	logMessage("isTouchDevice = "+isTouchDevice);
 
 	// Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
 	$(document).on('click','.navbar-collapse.in',function(e) {
@@ -59,27 +63,32 @@ $(document).ready(function(){
 	// Using addClear plug-in function to add a clear button on input text fields
 	$(".resetval").addClear();
 
-//	$("#StartButton").click(function() {
-		$.getJSON("start","",function(response){
-			//console.log("response.wsUrl = "+response.wsUrl);
-			ws = new WebSocket(response.wsUrl);
-			// event emmited when connected
-			ws.onopen = function () {
+	$.getJSON("start","",function(response){
+		//console.log("response.wsUrl = "+response.wsUrl);
+		ws = new WebSocket(response.wsUrl);
+		// event emmited when connected
+		ws.onopen = function () {
 				wsConnected = true;
 				//console.log('websocket is connected ...')
 				// sending a send event to websocket server
 				//ws.send('This is the message being sent from the client browser')
 				$("#StatusDisplay").html("Connected");
 
-				// event emmited when receiving message 
+				// event emmited when receiving message from the server
 				ws.onmessage = function (messageEvent) {
-					//var msg = JSON.parse(messageEvent.data);
-					//$("#TempatureDisplay").html(messageEvent.data);
-				}
+					var serverMessage = JSON.parse(messageEvent.data);
+					if (serverMessage.errorMessage != null) {
+						logMessage(serverMessage.errorMessage);
+					}
 
-			}
-		});
-//	});
+					// add other bot event handling here
+					if (serverMessage.proxIn != null) {
+						$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
+					}
+				} // on message (from server)
+
+		} // Websocket open
+	}); // start
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
@@ -249,7 +258,13 @@ var botMessage = {
 
 }); // $(document).ready(function(){
 
-
+// General function to send the botMessage to the server if Websocket is connected
+function wsSend(botMessage) {
+	if (wsConnected) {
+		ws.send(botMessage);
+	}
+}
+	
 function forwardPushed() {
 	//console.log("EYES - Pushed");
 	//$("#logMessage").html("EYES - Pushed");
@@ -300,12 +315,6 @@ function voiceReleased() {
 	wsSend('{"voice" : 0}');
 }
 
-function wsSend(botMessage) {
-	if (wsConnected) {
-		ws.send(botMessage);
-	}
-}
-
 
 	var create_email = false;
 	var final_transcript = '';
@@ -321,71 +330,76 @@ function wsSend(botMessage) {
 	  recognition.interimResults = true;
 	
 	  recognition.onstart = function() {
-		recognizing = true;
-		showInfo('info_speak_now');
-		start_img.src = './img/mic-animate.gif';
+			recognizing = true;
+			showInfo('info_speak_now');
+			start_img.src = './img/mic-animate.gif';
 	  };
 	
 	  recognition.onerror = function(event) {
-		if (event.error == 'no-speech') {
-		  start_img.src = './img/mic.gif';
-		  showInfo('info_no_speech');
-		  ignore_onend = true;
-		}
-		if (event.error == 'audio-capture') {
-		  start_img.src = './img/mic.gif';
-		  showInfo('info_no_microphone');
-		  ignore_onend = true;
-		}
-		if (event.error == 'not-allowed') {
-		  if (event.timeStamp - start_timestamp < 100) {
-			showInfo('info_blocked');
-		  } else {
-			showInfo('info_denied');
-		  }
-		  ignore_onend = true;
-		}
+			console.log("recognition error = "+event.error);
+			/*
+			if (event.error == 'no-speech') {
+				start_img.src = './img/mic.gif';
+				showInfo('info_no_speech');
+				ignore_onend = true;
+			}
+			if (event.error == 'audio-capture') {
+				start_img.src = './img/mic.gif';
+				showInfo('info_no_microphone');
+				ignore_onend = true;
+			}
+			if (event.error == 'not-allowed') {
+				if (event.timeStamp - start_timestamp < 100) {
+				showInfo('info_blocked');
+				} else {
+				showInfo('info_denied');
+				}
+				ignore_onend = true;
+			}
+			*/
 	  };
 	
 	  recognition.onend = function() {
-		recognizing = false;
-		if (ignore_onend) {
-		  return;
-		}
-		start_img.src = './img/mic.gif';
-		if (!final_transcript) {
-		  showInfo('info_start');
-		  return;
-		}
-		showInfo('');
-		if (window.getSelection) {
-		  window.getSelection().removeAllRanges();
-		  var range = document.createRange();
-		  range.selectNode(document.getElementById('final_span'));
-		  window.getSelection().addRange(range);
-		}
-		if (create_email) {
-		  create_email = false;
-		  createEmail();
-		}
+			recognizing = false;
+			if (ignore_onend) {
+				return;
+			}
+			start_img.src = './img/mic.gif';
+			if (!final_transcript) {
+				showInfo('info_start');
+				return;
+			}
+			showInfo('');
+			if (window.getSelection) {
+				window.getSelection().removeAllRanges();
+				var range = document.createRange();
+				range.selectNode(document.getElementById('final_span'));
+				window.getSelection().addRange(range);
+			}
+			/*
+			if (create_email) {
+				create_email = false;
+				createEmail();
+			}
+			*/
 	  };
 	
 	  recognition.onresult = function(event) {
-		var interim_transcript = '';
-		for (var i = event.resultIndex; i < event.results.length; ++i) {
-		  if (event.results[i].isFinal) {
-			final_transcript += event.results[i][0].transcript;
-		  } else {
-			interim_transcript += event.results[i][0].transcript;
-		  }
-		}
-		final_transcript = capitalize(final_transcript);
-		final_span.innerHTML = linebreak(final_transcript);
-		interim_span.innerHTML = linebreak(interim_transcript);
-		if (final_transcript || interim_transcript) {
-		  showButtons('inline-block');
-		}
-	  };
+			var interim_transcript = '';
+			for (var i = event.resultIndex; i < event.results.length; ++i) {
+				if (event.results[i].isFinal) {
+				final_transcript += event.results[i][0].transcript;
+				} else {
+				interim_transcript += event.results[i][0].transcript;
+				}
+			}
+			final_transcript = capitalize(final_transcript);
+			final_span.innerHTML = linebreak(final_transcript);
+			interim_span.innerHTML = linebreak(interim_transcript);
+			if (final_transcript || interim_transcript) {
+				showButtons('inline-block');
+			}
+		};
 	}
 	
 	function upgrade() {
@@ -404,6 +418,17 @@ function wsSend(botMessage) {
 	  return s.replace(first_char, function(m) { return m.toUpperCase(); });
 	}
 	
+	function copyButton() {
+	  if (recognizing) {
+			recognizing = false;
+			recognition.stop();
+	  }
+	  copy_button.style.display = 'none';
+	  copy_info.style.display = 'inline-block';
+	  showInfo('');
+	}
+	
+	/*
 	function createEmail() {
 	  var n = final_transcript.indexOf('\n');
 	  if (n < 0 || n >= 80) {
@@ -413,17 +438,7 @@ function wsSend(botMessage) {
 	  var body = encodeURI(final_transcript.substring(n + 1));
 	  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
 	}
-	
-	function copyButton() {
-	  if (recognizing) {
-		recognizing = false;
-		recognition.stop();
-	  }
-	  copy_button.style.display = 'none';
-	  copy_info.style.display = 'inline-block';
-	  showInfo('');
-	}
-	
+
 	function emailButton() {
 	  if (recognizing) {
 		create_email = true;
@@ -436,12 +451,13 @@ function wsSend(botMessage) {
 	  email_info.style.display = 'inline-block';
 	  showInfo('');
 	}
-	
+	*/
+
 	function startButton(event) {
 		console.log("mic start");
 	  if (recognizing) {
-		recognition.stop();
-		return;
+			recognition.stop();
+			return;
 	  }
 	  final_transcript = '';
 	  //recognition.lang = select_dialect.value;
@@ -457,6 +473,8 @@ function wsSend(botMessage) {
 	}
 	
 	function showInfo(s) {
+		console.log("showInfo = "+s);
+		/*
 	  if (s) {
 		for (var child = info.firstChild; child; child = child.nextSibling) {
 		  if (child.style) {
@@ -466,7 +484,8 @@ function wsSend(botMessage) {
 		info.style.visibility = 'visible';
 	  } else {
 		info.style.visibility = 'hidden';
-	  }
+		}
+		*/
 	}
 	
 	var current_style;
@@ -476,8 +495,9 @@ function wsSend(botMessage) {
 	  }
 	  current_style = style;
 	  copy_button.style.display = style;
-	  email_button.style.display = style;
+	  //email_button.style.display = style;
 	  copy_info.style.display = 'none';
-	  email_info.style.display = 'none';
+	  //email_info.style.display = 'none';
 	}
+	
 	
