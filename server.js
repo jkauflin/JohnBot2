@@ -28,6 +28,13 @@ Modification History
 2018-02-10 JJK  Adding display of proximity values
 
 working on JSON message to web clients (include one for uncaught errors)
+
+UncaughtException, error = Error: read ECONNRESET
+Error: read ECONNRESET
+    at _errnoException (util.js:1024:11)
+    at TCP.onread (net.js:615:25)
+
+recognition error = not-allowed
 =============================================================================*/
 
 // Read environment variables from the .env file

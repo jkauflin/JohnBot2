@@ -337,7 +337,10 @@ function voiceReleased() {
 	
 	  recognition.onerror = function(event) {
 			console.log("recognition error = "+event.error);
-			/*
+/*
+webkitSpeechRecognition not-allowed
+recognition error = not-allowed
+
 			if (event.error == 'no-speech') {
 				start_img.src = './img/mic.gif';
 				showInfo('info_no_speech');
