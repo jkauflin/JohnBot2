@@ -35,6 +35,8 @@ Error: read ECONNRESET
     at TCP.onread (net.js:615:25)
 
 recognition error = not-allowed
+2018-02-11 JJK  Getting web server to use HTTPS to get speech recognition
+                  working
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -68,6 +70,8 @@ Error: Uncaught, unspecified "error" event. ([object Object])
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
+const https = require('https');
+
 const url = require('url');
 var dateTime = require('node-datetime');
 var botFunctions = require('./botFunctions.js');
@@ -76,9 +80,16 @@ var audioFunctions = require('./audioFunctions.js');
 var dataLoaded = false;
 
 var app = express();
-var router = express.Router();
+//var router = express.Router();
 //var path = __dirname + '/views/';
 var path = __dirname + '/';
+
+var privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
+var certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+var credentials = {key: privateKey, cert: certificate};
+
+var httpServer = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
 
 
 //=================================================================================================
@@ -261,9 +272,13 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
- 
-app.listen(process.env.WEB_PORT,function(){
+
+httpServer.listen(process.env.WEB_PORT,function() {
   console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
+});
+
+httpsServer.listen(3443,function() {
+    console.log("Secure Live at Port 3443 - come on man!");
 });
 
 /*
