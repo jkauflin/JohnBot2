@@ -37,6 +37,11 @@ Error: read ECONNRESET
 recognition error = not-allowed
 2018-02-11 JJK  Getting web server to use HTTPS to get speech recognition
                   working
+
+HOST=
+WEB_PORT=3000
+WS_PORT=3035
+
 =============================================================================*/
 
 // Read environment variables from the .env file
