@@ -1,64 +1,10 @@
 var getJSON = require('get-json');
 var dateTime = require('node-datetime');
-var fullTextSearch = require('full-text-search');
-var search = new fullTextSearch({
-  minimum_chars: 2      // default = 1, The less minimum chars you want to use for your search, the slower the 'add' method gets 
-});
-//ignore_case: false,   // default = true, Ignore case during all search queries 
-//index_amount: 8,      // default = 12, The more indexes you have, the faster can be your search but the slower the 'add' method  gets 
+var esClient = require('./dataConnection.js');
 
 // maybe do loadData as a top level, with only an error or callback if there is a problem
 // top level should start load, load should load all tables and do a callback when all are completed
 // successfully or if there is any problem
-
-// Add objects 
-var obj = {
-    name: 'Alexandra',
-    age: 27,
-    student: true,
-    hobbies: ['Tennis', 'Football', 'Party'];
-    car: {
-        make: 'Volvo',
-        year: 2012,
-        topspeed: 280
-    }
-};
- 
-search.add(obj);
-
-
-var results = search.search('p');
-// results = ['Peter', 'Paul'] 
-
-// Add returns an id 
-var f = search.add("Frank");
- 
-// With that id you can remove the value from the search 
-search.remove(f);
- 
-// Returns an array with all result objects 
-var result = search.search('pau');
-// result: ['Paul'] 
-
-
-var fullTextSearch = require('full-text-search');
-var search = new fullTextSearch();
- 
-// Add 
-search.add('Hello World');
- 
-// Save current db 
-search.saveSync('search.json');
- 
-// Load db 
-var search_loaded = db.loadSync('search.json');
-search_loaded.search('World');
-
-
-search.drop()
-search.saveSync('path/to/file.json')
-db.loadSync('path/to/file.json')
-
 
 function loadData(inStr,callback){
     console.log("in loadData "+dateTime.create().format('H:M:S.N'));
@@ -264,3 +210,17 @@ module.exports = {
     searchResponses
 };
 
+            /*
+            esClient.index({
+            index: 'bot',
+            id: botResponsesList[current].id,
+            type: 'responses',
+            body: {
+            'keywords': botResponsesList[current].keywords,
+            'verbalResponse': botResponsesList[current].verbalResponse,
+            'updateTimestamp': botResponsesList[current].verbalResponse
+            }
+            },function(err,resp,status) {
+            console.log(resp);
+            });
+            */

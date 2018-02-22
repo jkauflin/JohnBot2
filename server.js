@@ -27,17 +27,6 @@ Modification History
 2018-02-07 JJK  Got working on Pi zero w
 2018-02-10 JJK  Adding display of proximity values
 
-working on JSON message to web clients (include one for uncaught errors)
-
-UncaughtException, error = Error: read ECONNRESET
-Error: read ECONNRESET
-    at _errnoException (util.js:1024:11)
-    at TCP.onread (net.js:615:25)
-
-recognition error = not-allowed
-2018-02-11 JJK  Getting web server to use HTTPS to get speech recognition
-                  working
-
 HOST=
 WEB_PORT=3000
 WS_PORT=3035
@@ -73,9 +62,7 @@ Error: Uncaught, unspecified "error" event. ([object Object])
 */
 
 const express = require('express');
-const fs = require('fs');
 const http = require('http');
-const https = require('https');
 
 const url = require('url');
 var dateTime = require('node-datetime');
@@ -89,12 +76,7 @@ var app = express();
 //var path = __dirname + '/views/';
 var path = __dirname + '/';
 
-var privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
-var certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
-var credentials = {key: privateKey, cert: certificate};
-
 var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
 
 
 //=================================================================================================
@@ -243,8 +225,8 @@ app.get('/start', function (req, res, next) {
   res.send(JSON.stringify(startData));
 })
    
-app.use(express.static('public'))
- 
+app.use('/',express.static('public'));
+
 // searchStr to search responses for
 // return response
 
@@ -280,10 +262,6 @@ app.use(function (err, req, res, next) {
 
 httpServer.listen(process.env.WEB_PORT,function() {
   console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
-});
-
-httpsServer.listen(3443,function() {
-    console.log("Secure Live at Port 3443 - come on man!");
 });
 
 /*
