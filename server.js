@@ -26,11 +26,10 @@ Modification History
                 messages from the client
 2018-02-07 JJK  Got working on Pi zero w
 2018-02-10 JJK  Adding display of proximity values
-
+2018-02-22 JJK  Redoing dataFunctions using full-text-search
 HOST=
 WEB_PORT=3000
 WS_PORT=3035
-
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -68,7 +67,7 @@ const url = require('url');
 var dateTime = require('node-datetime');
 var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
-//var dataFunctions = require('./dataFunctions.js');
+var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
 
 var app = express();
@@ -264,25 +263,20 @@ httpServer.listen(process.env.WEB_PORT,function() {
   console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
 });
 
-/*
+
 dataFunctions.loadData('', function(error,response,status) {
 	if (error == null) {
 		dataLoaded = true;
 	}
 });
-*/
+
 
 //var searchStr = 'do you love me';
-/*
 var searchStr = 'loki';
 //var searchStr = 'zzz';
 dataFunctions.searchResponses(searchStr, function(results) {
     console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-	console.log(results);
-	audioFunctions.speakText(results);
+	  console.log(results);
+	  //audioFunctions.speakText(results);
 });
-*/
-
-//console.log("End of server "+dateTime.create().format('Y-m-d H:M:S'));
-//dataFunctions.esInfo();
 
