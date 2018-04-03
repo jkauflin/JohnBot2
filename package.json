@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
+    "bluetoothctl": "^1.1.0",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "full-text-search": "0.0.16",

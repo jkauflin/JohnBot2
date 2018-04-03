@@ -27,6 +27,7 @@ Modification History
 2018-02-07 JJK  Got working on Pi zero w
 2018-02-10 JJK  Adding display of proximity values
 2018-02-22 JJK  Redoing dataFunctions using full-text-search
+2018-04-03 JJK  Working on audio functions (bluetooth speaker)
 HOST=
 WEB_PORT=3000
 WS_PORT=3035
