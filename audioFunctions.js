@@ -19,10 +19,10 @@ var picoConfig = {
   picoSpeaker.init(picoConfig);
 
 
-const player = require('rpi3-audio-player');
 console.log("in testmp3");
 player.play("./Hoedown.mp3");  
 */
+const player = require('rpi3-audio-player');
 
 
 var blue = require("bluetoothctl");
@@ -50,6 +50,9 @@ var blue = require("bluetoothctl");
  console.log('system has bluetooth controller:' + hasBluetooth)
  
  if(hasBluetooth) {
+    blue.connect("32:69:4D:B9:A6:9F");
+
+    /*
      console.log('isBluetooth Ready:' + blue.isBluetoothReady)
      blue.scan(true)
      setTimeout(function(){
@@ -57,9 +60,16 @@ var blue = require("bluetoothctl");
          blue.scan(false)
          blue.info('00:0C:8A:8C:D3:71')
      },20000)
+     */
+     //speakText("Hello, John, how are you?");
+
+     console.log("playing MP3 file");
+    player.play("./hoedown.mp3");  
+
  }
 
 
+ 
 function speakText(textStr){
     console.log("in speakText "+dateTime.create().format('Y-m-d H:M:S'));
     picoSpeaker.speak(textStr).then(function() {

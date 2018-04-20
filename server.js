@@ -66,9 +66,9 @@ const http = require('http');
 
 const url = require('url');
 var dateTime = require('node-datetime');
-var botFunctions = require('./botFunctions.js');
+//var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
-var dataFunctions = require('./dataFunctions.js');
+//var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
 
 var app = express();
@@ -265,12 +265,12 @@ httpServer.listen(process.env.WEB_PORT,function() {
 });
 
 
+/*
 dataFunctions.loadData('', function(error,response,status) {
 	if (error == null) {
 		dataLoaded = true;
 	}
 });
-
 
 //var searchStr = 'do you love me';
 var searchStr = 'loki';
@@ -280,4 +280,6 @@ dataFunctions.searchResponses(searchStr, function(results) {
 	  console.log(results);
 	  //audioFunctions.speakText(results);
 });
+*/
 
+//audioFunctions.speakText("Hello, John, how are you?");
