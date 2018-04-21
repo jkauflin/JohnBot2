@@ -24,6 +24,7 @@ player.play("./Hoedown.mp3");
 */
 const player = require('rpi3-audio-player');
 
+console.log("helolo john");
 
 var blue = require("bluetoothctl");
  blue.Bluetooth()

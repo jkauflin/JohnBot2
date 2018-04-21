@@ -23,7 +23,7 @@
     "express": "^4.16.2",
     "full-text-search": "0.0.16",
     "get-json": "^1.0.0",
-    "johnny-five": "^0.12.0",
+    "johnny-five": "^0.14.3",
     "node-datetime": "^2.0.3",
     "pico-speaker": "0.0.7",
     "rpi3-audio-player": "^1.2.31",
