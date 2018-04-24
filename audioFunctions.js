@@ -18,14 +18,14 @@ var picoConfig = {
   // Initialize with config
   picoSpeaker.init(picoConfig);
 
-
 console.log("in testmp3");
 player.play("./Hoedown.mp3");  
 */
 const player = require('rpi3-audio-player');
 
-console.log("helolo john");
+console.log("in the audioFunctions");
 
+/*
 var blue = require("bluetoothctl");
  blue.Bluetooth()
  
@@ -40,6 +40,11 @@ var blue = require("bluetoothctl");
  
  blue.on(blue.bluetoothEvents.Device, function (devices) {
      console.log('devices:' + JSON.stringify(devices,null,2))
+     //speakText("Hello, John, how are you?");
+
+    //console.log("playing MP3 file");
+    //player.play("/home/pi/projects/hoedown.mp3");  
+
  })
  
  blue.on(blue.bluetoothEvents.PassKey, function (passkey) {
@@ -51,9 +56,8 @@ var blue = require("bluetoothctl");
  console.log('system has bluetooth controller:' + hasBluetooth)
  
  if(hasBluetooth) {
-    blue.connect("32:69:4D:B9:A6:9F");
+    //blue.connect("32:69:4D:B9:A6:9F");
 
-    /*
      console.log('isBluetooth Ready:' + blue.isBluetoothReady)
      blue.scan(true)
      setTimeout(function(){
@@ -61,16 +65,13 @@ var blue = require("bluetoothctl");
          blue.scan(false)
          blue.info('00:0C:8A:8C:D3:71')
      },20000)
-     */
-     //speakText("Hello, John, how are you?");
 
-     console.log("playing MP3 file");
-    player.play("./hoedown.mp3");  
+     //console.log("playing MP3 file");
+    //player.play("/home/pi/projects/hoedown.mp3");  
 
  }
+*/
 
-
- 
 function speakText(textStr){
     console.log("in speakText "+dateTime.create().format('Y-m-d H:M:S'));
     picoSpeaker.speak(textStr).then(function() {

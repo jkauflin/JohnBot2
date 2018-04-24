@@ -282,4 +282,5 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-//audioFunctions.speakText("Hello, John, how are you?");
+//setTimeout(audioFunctions.speakText("test.  Hello, John, how are you today?  Are you feeling well?"),10000);
+audioFunctions.speakText("  this is an example of the pico speaker saying some text.  I hope it works.");

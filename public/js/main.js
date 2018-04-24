@@ -101,8 +101,8 @@ $(document).ready(function(){
     		//displayPropertyList(hoaPropertyRecList);
 		});
 		*/
-		//ws.send($("#searchStr").val());
-    event.stopPropagation();
+		ws.send($("#searchStr").val());
+    	event.stopPropagation();
 	});
 	
 		/*
