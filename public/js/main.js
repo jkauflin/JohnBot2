@@ -92,16 +92,8 @@ $(document).ready(function(){
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
-        //$("#PropertyListDisplay tbody").html("");
-		console.log("searchStr = "+$("#searchStr").val());
-    	//$.getJSON("testcall","searchStr="+cleanStr($("#searchStr").val()),function(response){
-		/*
-		$.get("testcall","searchStr="+cleanStr($("#searchStr").val()),function(response){
-				console.log("response from SERVER in client = "+response);
-    		//displayPropertyList(hoaPropertyRecList);
-		});
-		*/
-		ws.send($("#searchStr").val());
+		//console.log("searchStr = "+$("#searchStr").val());
+		wsSend('{"searchStr" : "'+$("#searchStr").val()+'"}');
     	event.stopPropagation();
 	});
 	
@@ -258,10 +250,10 @@ var botMessage = {
 
 }); // $(document).ready(function(){
 
-// General function to send the botMessage to the server if Websocket is connected
-function wsSend(botMessage) {
+// General function to send the botMessageStr to the server if Websocket is connected
+function wsSend(botMessageStr) {
 	if (wsConnected) {
-		ws.send(botMessage);
+		ws.send(botMessageStr);
 	}
 }
 	
@@ -314,6 +306,8 @@ function voicePushed() {
 function voiceReleased() {
 	wsSend('{"voice" : 0}');
 }
+
+
 
 
 	var create_email = false;

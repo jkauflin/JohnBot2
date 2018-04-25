@@ -28,13 +28,16 @@ Modification History
 2018-02-10 JJK  Adding display of proximity values
 2018-02-22 JJK  Redoing dataFunctions using full-text-search
 2018-04-03 JJK  Working on audio functions (bluetooth speaker)
-HOST=
-WEB_PORT=3000
-WS_PORT=3035
+2018-04-23 JJK  Got bluetooth and pico-speaker working
+2018-04-25 JJK  Working on web inputs
 =============================================================================*/
 
 // Read environment variables from the .env file
 require('dotenv').config();
+//HOST=
+//WEB_PORT=
+//WS_PORT=
+//BOT_DATA_URL=
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -127,7 +130,7 @@ wss.on('connection', function (ws) {
 
 
   // Handle messages from the client browser
-  ws.on('message', function (botMessage) {
+  ws.on('message', function (botMessageStr) {
     // console.log('received from client: %s', message)
     // check for manual controls and call function
     //botMessage.
@@ -151,8 +154,14 @@ wss.on('connection', function (ws) {
   botMessage.headPosition" : 90
     */
     
-    //console.log("botMessage = "+botMessage);
-    botFunctions.manualControl(JSON.parse(botMessage));
+    console.log("botMessageStr = "+botMessageStr);
+    // Use JSON.parse to turn the string into a JSON object
+    var botMessage = JSON.parse(botMessageStr);
+    if (botMessage.searchStr != null) {
+      audioFunctions.speakText(botMessage.searchStr);
+    } else {
+      //botFunctions.manualControl(botMessage);
+    }
   })
 
 
@@ -282,5 +291,3 @@ dataFunctions.searchResponses(searchStr, function(results) {
 });
 */
 
-//setTimeout(audioFunctions.speakText("test.  Hello, John, how are you today?  Are you feeling well?"),10000);
-audioFunctions.speakText("  this is an example of the pico speaker saying some text.  I hope it works.");

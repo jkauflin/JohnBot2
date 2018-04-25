@@ -80,6 +80,8 @@ function speakText(textStr){
             
 }; // 
 
+// picoSpeaker.shutUp() => interrupt all sentences being spoken at the moment
+
 module.exports = {
     speakText
 };
