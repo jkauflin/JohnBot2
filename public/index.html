@@ -57,22 +57,6 @@
     <div class="tab-pane active" id="HomePage">
       <h3>Home</h3>
 
-      <!--
-      <div class="row">
-        <div class="col-xs-4 col-sm-3">
-          <a id="StartButton" href="#" class="btn btn-success btn-lg" role="button">Start</a>
-        </div>
-
-        <div class="col-xs-8 col-sm-9">
-            <div id="SearchInput" >
-                <div class="form-group">
-                  <input type="text" class="form-control resetval" name="searchStr"  	id="searchStr" 	placeholder="Enter value to search">
-                </div>
-                <button id="SearchButton" type="button" class="btn btn-primary">Search</button>
-              </div>
-        </div>
-      </div>
-    -->
 
       <div class="row">
         <div class="col-xs-4 col-sm-3">
@@ -88,47 +72,27 @@
             <button id="SearchButton" type="button" class="btn btn-primary">Search</button>
           </div>
 
-        <!--
-          <div id="info" style="background: lightblue;">
-              <p id="info_start">Click on the microphone icon and begin speaking.</p>
-              <p id="info_speak_now">Speak now.</p>
-              <p id="info_no_speech">No speech was detected. You may need to adjust your
-                <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
-                  microphone settings</a>.</p>
-              <p id="info_no_microphone" style="display:none">
-                No microphone was found. Ensure that a microphone is installed and that
-                <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">
-                microphone settings</a> are configured correctly.</p>
-              <p id="info_allow">Click the "Allow" button above to enable your microphone.</p>
-              <p id="info_denied">Permission to use microphone was denied.</p>
-              <p id="info_blocked">Permission to use microphone is blocked. To change,
-                go to chrome://settings/contentExceptions#media-stream</p>
-              <p id="info_upgrade">Web Speech API is not supported by this browser.
-                 Upgrade to <a href="//www.google.com/chrome">Chrome</a>
-                 version 25 or later.</p>
-            </div>
-          -->
-
-            <div class="right">
-              <button id="start_button" onclick="startButton(event)">
-                <img id="start_img" src="./img/mic.gif" alt="Start"></button>
-            </div>
-            <div id="results" style="background: lightgreen;">
-              <span id="final_span" class="final"></span>
-              <span id="interim_span" class="interim"></span>
-              <p>
-            </div>
-            <div class="center">
-              <div class="sidebyside" style="text-align:right">
-                <button id="copy_button" class="button" onclick="copyButton()">
-                  Copy and Paste</button>
-                <div id="copy_info" class="info">
-                  Press Control-C to copy text.<br>(Command-C on Mac.)
-                </div>
-              </div>
-            </div>
-
-          </div>
+            <form id="form">
+                    <input type="text" placeholder="Enter message" name="message">
+                    <input type="submit" value="Click to send">
+                  </form>
+               
+                  <iframe src="http://192.168.1.64:3000/frame.html" name="iframeId" id="iframeId" style="display:block;height:100px"></iframe>
+               
+                  <script>
+                    form.onsubmit = function() {
+                      iframeId.contentWindow.postMessage(this.message.value, '*');
+                      return false;
+                    };
+             
+                    //listen to holla back
+                    window.addEventListener('message',function(event) {
+                      //if(event.origin !== 'http://scriptandstyle.com') return;
+                      console.log('received response:  ',event.data);
+                    },false);
+             
+                  </script>
+            
 
       </div><!-- row -->
     
@@ -233,7 +197,7 @@
 	<script src="js/vendor/bootstrap-add-clear.min.js"></script>
 	<script src="js/vendor/bootstrap-slider.min.js"></script>
   <script src="js/plugins.js"></script>
-  <script src="js/main.js?ver=1.014"></script>
+  <script src="js/main.js?ver=1.015"></script>
 
 </body>
 </html>

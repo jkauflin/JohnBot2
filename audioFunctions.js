@@ -3,81 +3,63 @@ var dateTime = require('node-datetime');
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
 
-// Define configuration
-//AUDIO_DEVICE: 'default:CARD=0',
-//AUDIO_DEVICE: 'default:CARD=PCH',
 /*
 var picoConfig = {
   AUDIO_DEVICE: null,
   LANGUAGE: 'en-US'
+  LANGUAGE: 'en-GB'
 };
-var picoConfig = {
-    AUDIO_DEVICE: null,
-    LANGUAGE: 'fr-FR'
-  };
+
+ en-US   English
+    en-GB   Great Britain
+    de-DE   German
+    es-ES   Spanish
+    fr-FR   French
+    it-IT   Italian
+
   // Initialize with config
   picoSpeaker.init(picoConfig);
-
-console.log("in testmp3");
-player.play("./Hoedown.mp3");  
 */
-const player = require('rpi3-audio-player');
 
 console.log("in the audioFunctions");
 
-/*
-var blue = require("bluetoothctl");
- blue.Bluetooth()
- 
- blue.on(blue.bluetoothEvents.Controller, function(controllers){
- console.log('Controllers:' + JSON.stringify(controllers,null,2))
- });
- 
- blue.on(blue.bluetoothEvents.DeviceSignalLevel, function(devices,mac,signal){
-     console.log('signal level of:' + mac + ' - ' + signal)
- 
- });
- 
- blue.on(blue.bluetoothEvents.Device, function (devices) {
-     console.log('devices:' + JSON.stringify(devices,null,2))
-     //speakText("Hello, John, how are you?");
 
-    //console.log("playing MP3 file");
-    //player.play("/home/pi/projects/hoedown.mp3");  
-
- })
+// With full options
+var SoundPlayer = require("sound-player");
+var options = {
+    filename: "../dreams.mp3",
+    gain: 10,
+    debug: true,
+    player: "mpg321", // "afplay" "aplay" "mpg123" "mpg321"
+    device: "default"   //
+}
  
- blue.on(blue.bluetoothEvents.PassKey, function (passkey) {
-     console.log('Confirm passkey:' + passkey)
-     blue.confirmPassKey(true);
- })
+var player = new SoundPlayer(options)
+player.play();
  
- var hasBluetooth=blue.checkBluetoothController();
- console.log('system has bluetooth controller:' + hasBluetooth)
+//player.stop
+//player.pause
+//player.resume
+
+player.on('complete', function() {
+    console.log('Done with playback!');
+});
  
- if(hasBluetooth) {
-    //blue.connect("32:69:4D:B9:A6:9F");
+player.on('error', function(err) {
+    console.log('Error occurred:', err);
+});
 
-     console.log('isBluetooth Ready:' + blue.isBluetoothReady)
-     blue.scan(true)
-     setTimeout(function(){
-         console.log('stopping scan')
-         blue.scan(false)
-         blue.info('00:0C:8A:8C:D3:71')
-     },20000)
 
-     //console.log("playing MP3 file");
-    //player.play("/home/pi/projects/hoedown.mp3");  
-
- }
-*/
 
 function speakText(textStr){
-    console.log("in speakText "+dateTime.create().format('Y-m-d H:M:S'));
-    picoSpeaker.speak(textStr).then(function() {
-        console.log("done speaking");
+    console.log("in speakText "+dateTime.create().format('Y-m-d H:M:S')+", text = "+textStr);
+    player.stop();
+    //player.pause();
+    //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
+    picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
+        //console.log("done speaking");
+        //player.resume();
     }.bind(this));
-            
 }; // 
 
 // picoSpeaker.shutUp() => interrupt all sentences being spoken at the moment

@@ -18,15 +18,14 @@
   },
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
-    "bluetoothctl": "^1.1.0",
     "dotenv": "^4.0.0",
-    "express": "^4.16.2",
+    "express": "^4.16.3",
     "full-text-search": "0.0.16",
     "get-json": "^1.0.0",
     "johnny-five": "^0.14.3",
-    "node-datetime": "^2.0.3",
+    "node-datetime": "^2.0.6",
     "pico-speaker": "0.0.7",
-    "rpi3-audio-player": "^1.2.31",
+    "sound-player": "^1.0.13",
     "ws": "^3.3.3"
   }
 }

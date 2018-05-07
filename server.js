@@ -69,7 +69,7 @@ const http = require('http');
 
 const url = require('url');
 var dateTime = require('node-datetime');
-//var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
 //var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
