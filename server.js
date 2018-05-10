@@ -30,6 +30,7 @@ Modification History
 2018-04-03 JJK  Working on audio functions (bluetooth speaker)
 2018-04-23 JJK  Got bluetooth and pico-speaker working
 2018-04-25 JJK  Working on web inputs
+2018-05-09 JJK  Accept speech text
 =============================================================================*/
 
 // Read environment variables from the .env file
