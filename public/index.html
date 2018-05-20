@@ -72,28 +72,6 @@
             <button id="SearchButton" type="button" class="btn btn-primary">Search</button>
           </div>
 
-            <form id="form">
-                    <input type="text" placeholder="Enter message" name="message">
-                    <input type="submit" value="Click to send">
-                  </form>
-               
-                  <iframe src="http://192.168.1.64:3000/frame.html" name="iframeId" id="iframeId" style="display:block;height:100px"></iframe>
-               
-                  <script>
-                    form.onsubmit = function() {
-                      iframeId.contentWindow.postMessage(this.message.value, '*');
-                      return false;
-                    };
-             
-                    //listen to holla back
-                    window.addEventListener('message',function(event) {
-                      //if(event.origin !== 'http://scriptandstyle.com') return;
-                      console.log('received response:  ',event.data);
-                    },false);
-             
-                  </script>
-            
-
       </div><!-- row -->
     
     </div><!-- end of tab HomePage -->

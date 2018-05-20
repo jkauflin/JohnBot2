@@ -31,6 +31,7 @@ Modification History
 2018-04-23 JJK  Got bluetooth and pico-speaker working
 2018-04-25 JJK  Working on web inputs
 2018-05-09 JJK  Accept speech text
+2018-05-20 JJK  Finally got speech recognition text send working
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -53,18 +54,6 @@ process.on('uncaughtException', function (e) {
 	//process.exit(1);
 });
 
-/*
-UncaughtException, error = Error: Uncaught, unspecified "error" event. ([object Object])
-Error: Uncaught, unspecified "error" event. ([object Object])
-    at Board.emit (events.js:163:17)
-    at Board.log (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:630:8)
-    at Board.(anonymous function) [as error] (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:641:14)
-    at Board.<anonymous> (C:\Users\jjkaufl\Downloads\Projects\JohnBot2\node_modules\johnny-five\lib\board.js:385:14)
-    at ontimeout (timers.js:386:14)
-    at tryOnTimeout (timers.js:250:5)
-    at Timer.listOnTimeout (timers.js:214:5)
-*/
-
 const express = require('express');
 const http = require('http');
 
@@ -76,10 +65,6 @@ var audioFunctions = require('./audioFunctions.js');
 var dataLoaded = false;
 
 var app = express();
-//var router = express.Router();
-//var path = __dirname + '/views/';
-var path = __dirname + '/';
-
 var httpServer = http.createServer(app);
 
 
@@ -128,8 +113,6 @@ wss.on('connection', function (ws) {
   });
   */
 
-
-
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
     // console.log('received from client: %s', message)
@@ -156,10 +139,11 @@ wss.on('connection', function (ws) {
     */
     
     console.log("botMessageStr = "+botMessageStr);
+
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
-    if (botMessage.searchStr != null) {
-      audioFunctions.speakText(botMessage.searchStr);
+    if (botMessage.commandText != null) {
+      audioFunctions.speakText(botMessage.commandText);
     } else {
       //botFunctions.manualControl(botMessage);
     }
@@ -189,40 +173,15 @@ wss.on('connection', function (ws) {
     ws.send(JSON.stringify(serverMessage));
   });
 
-
-  /*
-  setInterval(
-    sendDate,
-    1000,ws)
-  */
 });
 
-  //botFunctions.testLed();
 
-// test send data to client
-function sendDate(ws) {
-  try { 
-
-    ws.send(dateTime.create().format('Y-m-d H:M:S'),
-    
-      function ack(error) {
-        // If error is not defined, the send has been completed, otherwise the error
-        // object will indicate what failed.
-        if (error == null) {
-          // send successful
-          //console.log("Successful send in sendDate ");
-        } else {
-          console.log("error object indicates ERROR in ws.send  - sendDate");
-        }
-      }
-
-    );
-
-  } catch (e) {
-    console.log("ERROR in try/catch for WebSocket - sendDate, e = "+e);
-  }
-
-}
+app.use(function(req, res, next) {
+    // allow any cross origin access - check on how to limit this
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection
@@ -240,29 +199,11 @@ app.use('/',express.static('public'));
 // searchStr to search responses for
 // return response
 
-/*
-router.use(function (req,res,next) {
-  console.log("/" + req.method);
-  next();
-});
-router.get("/",function(req,res){
-  //res.sendFile(path + "index.html");
-  res.sendFile('index.html', { root: __dirname });
-});
-router.get("/about",function(req,res){
-  res.sendFile(path + "about.html");
-});
-router.get("/contact",function(req,res){
-  res.sendFile(path + "contact.html");
-});
-app.use("/",router);
-*/
 
 app.use("*",function(req,res){
   console.log("Not in Public, URL = "+req.url);
   res.sendFile(path + "404.html");
 });
-
  
 // jjk new
 app.use(function (err, req, res, next) {

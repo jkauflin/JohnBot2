@@ -64,7 +64,7 @@ $(document).ready(function(){
 	$(".resetval").addClear();
 
 	$.getJSON("start","",function(response){
-		//console.log("response.wsUrl = "+response.wsUrl);
+		console.log("response.wsUrl = "+response.wsUrl);
 		ws = new WebSocket(response.wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
@@ -92,9 +92,8 @@ $(document).ready(function(){
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
-		//console.log("searchStr = "+$("#searchStr").val());
+		console.log("searchStr = "+$("#searchStr").val());
 		wsSend('{"searchStr" : "'+$("#searchStr").val()+'"}');
-    	event.stopPropagation();
 	});
 	
 		/*
@@ -252,7 +251,9 @@ var botMessage = {
 
 // General function to send the botMessageStr to the server if Websocket is connected
 function wsSend(botMessageStr) {
+	//console.log("in wsSend, wsConnected = "+wsConnected);
 	if (wsConnected) {
+		//console.log("in wsSend, botMessageStr = "+botMessageStr);
 		ws.send(botMessageStr);
 	}
 }

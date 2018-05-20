@@ -21,9 +21,6 @@ var picoConfig = {
   picoSpeaker.init(picoConfig);
 */
 
-console.log("in the audioFunctions");
-
-
 // With full options
 var SoundPlayer = require("sound-player");
 var options = {
@@ -34,8 +31,9 @@ var options = {
     device: "default"   //
 }
  
+// 5/20/2018 - this works
 var player = new SoundPlayer(options)
-player.play();
+//player.play();
  
 //player.stop
 //player.pause
@@ -50,10 +48,9 @@ player.on('error', function(err) {
 });
 
 
-
 function speakText(textStr){
     console.log("in speakText "+dateTime.create().format('Y-m-d H:M:S')+", text = "+textStr);
-    player.stop();
+    //player.stop();
     //player.pause();
     //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
     picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
