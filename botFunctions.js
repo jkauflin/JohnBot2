@@ -269,38 +269,6 @@ function manualControl(botMessage) {
   
 } // function manualControl(botMessage) {
 
-/*
-End of server 2018-01-25 20:15:26
-UncaughtException, error = Error: listen EADDRINUSE :::3000
-Error: listen EADDRINUSE :::3000
-    at Object.exports._errnoException (util.js:1020:11)
-    at exports._exceptionWithHostPort (util.js:1043:20)
-    at Server._listen2 (net.js:1262:14)
-    at listen (net.js:1298:10)
-    at Server.listen (net.js:1394:5)
-    at EventEmitter.listen (/home/pi/c9sdk/workspace/JohnBot2/node_modules/express/lib/application.js:618:24)
-    at Object.<anonymous> (/home/pi/c9sdk/workspace/JohnBot2/server.js:211:5)
-    at Module._compile (module.js:570:32)
-    at Object.Module._extensions..js (module.js:579:10)
-    at Module.load (module.js:487:32)
-UncaughtException, error = Error: listen EADDRINUSE :::3035
-Error: listen EADDRINUSE :::3035
-    at Object.exports._errnoException (util.js:1020:11)
-    at exports._exceptionWithHostPort (util.js:1043:20)
-    at Server._listen2 (net.js:1262:14)
-    at listen (net.js:1298:10)
-    at net.js:1408:9
-    at _combinedTickCallback (internal/process/next_tick.js:83:11)
-    at process._tickDomainCallback (internal/process/next_tick.js:128:9)
-    at Module.runMain (module.js:606:11)
-    at run (bootstrap_node.js:383:7)
-    at startup (bootstrap_node.js:149:9)
-1516929326521 Available /dev/ttyACM0
-1516929326573 Connected /dev/ttyACM0
-1516929331146 Repl Initialized
-
-*/
-
 function testBot(testStr,callback){
     console.log("in testBot "+dateTime.create().format('Y-m-d H:M:S'));
         callback("back");

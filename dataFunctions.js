@@ -1,11 +1,13 @@
 var getJSON = require('get-json');
 var dateTime = require('node-datetime');
+var audioFunctions = require('./audioFunctions.js');
 var fullTextSearch = require('full-text-search');
 var search = new fullTextSearch({
   minimum_chars: 2      // default = 1, The less minimum chars you want to use for your search, the slower the 'add' method gets 
 });
 //ignore_case: false,   // default = true, Ignore case during all search queries 
 //index_amount: 8,      // default = 12, The more indexes you have, the faster can be your search but the slower the 'add' method  gets 
+
 
 // maybe do loadData as a top level, with only an error or callback if there is a problem
 // top level should start load, load should load all tables and do a callback when all are completed
@@ -86,6 +88,7 @@ function loadData(inStr,callback){
     // Keep a global flag in the main that is set to true when it gets this callback when all tables are loaded successfully
 
     loadTable('responses');
+    //loadTable('jokes');
 }; // function searchResponses(searchStr,callback){
     
 function loadTable(table) {
@@ -111,7 +114,8 @@ function loadTable(table) {
     }
     */
 
-    var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs;
+
+    var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs+'&uid='+process.env.UID;
     console.log("botData url = "+tempUrl);
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
@@ -149,6 +153,7 @@ function loadTable(table) {
                                 }
                             );
                             */
+                           console.log("JSON.stringify(urlJsonResponse[current]) = "+JSON.stringify(urlJsonResponse[current]));
                            search.add(urlJsonResponse[current]);
 
                         } else if (table == 'jokes') {
@@ -171,7 +176,7 @@ function loadTable(table) {
                 searchResponses(searchStr, function(results) {
                     console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
                       console.log(results);
-                      //audioFunctions.speakText(results);
+                      audioFunctions.speakText(results);
                 });
                 
 
@@ -276,11 +281,23 @@ function searchResponses(searchStr,callback){
     console.log("result.length = "+result.length);    
     console.log("result = "+JSON.stringify(result));
     if (result.length > 0) {
+        console.log("result[0].id = "+result[0].id);
+        /*
         for (var current in result) {
             console.log("current = "+JSON.stringify(current));
         }
+        */
+        callback(result[0].verbalResponse);
     }
-    
+
+/*    
+    result = [{"id":"15",
+               "deleted":"N",
+               "keywords":"snake snakes loki thor kill me",
+               "verbalResponse":"Loki was always trying to kill me.  Once when we were children he turned into a snake, and I love snakes and I went to hug it, then he turned back into Loki and said Aaahhh, and stabbed me.",
+               "lastChangedTs":"2017-12-26 16:32:37"}]
+*/
+
     /*
     esClient.search({
         index: 'bot',

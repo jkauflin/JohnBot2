@@ -32,6 +32,7 @@ Modification History
 2018-04-25 JJK  Working on web inputs
 2018-05-09 JJK  Accept speech text
 2018-05-20 JJK  Finally got speech recognition text send working
+2018-05-27 JJK  Working on data load and full-text-search
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -59,9 +60,9 @@ const http = require('http');
 
 const url = require('url');
 var dateTime = require('node-datetime');
+var dataFunctions = require('./dataFunctions.js');
+//var audioFunctions = require('./audioFunctions.js');
 var botFunctions = require('./botFunctions.js');
-var audioFunctions = require('./audioFunctions.js');
-//var dataFunctions = require('./dataFunctions.js');
 var dataLoaded = false;
 
 var app = express();
@@ -138,12 +139,13 @@ wss.on('connection', function (ws) {
   botMessage.headPosition" : 90
     */
     
-    console.log("botMessageStr = "+botMessageStr);
+    //console.log("botMessageStr = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.commandText != null) {
-      audioFunctions.speakText(botMessage.commandText);
+      // TEST audio functions
+      //audioFunctions.speakText(botMessage.commandText);
     } else {
       //botFunctions.manualControl(botMessage);
     }
@@ -187,18 +189,10 @@ app.use(function(req, res, next) {
 // the Websocket connection
 // Use /start as a trigger to start any robot functions, like a hello sequence
 app.get('/start', function (req, res, next) {
-  //console.log("app.get /testcall, searchStr = "+req.query.searchStr);
-  var startData = {
-    "wsUrl": wsUrl
-  };
-  res.send(JSON.stringify(startData));
+  res.send(wsUrl);
 })
    
 app.use('/',express.static('public'));
-
-// searchStr to search responses for
-// return response
-
 
 app.use("*",function(req,res){
   console.log("Not in Public, URL = "+req.url);
@@ -216,13 +210,13 @@ httpServer.listen(process.env.WEB_PORT,function() {
 });
 
 
-/*
 dataFunctions.loadData('', function(error,response,status) {
 	if (error == null) {
 		dataLoaded = true;
 	}
 });
 
+/*
 //var searchStr = 'do you love me';
 var searchStr = 'loki';
 //var searchStr = 'zzz';

@@ -63,9 +63,9 @@ $(document).ready(function(){
 	// Using addClear plug-in function to add a clear button on input text fields
 	$(".resetval").addClear();
 
-	$.getJSON("start","",function(response){
-		console.log("response.wsUrl = "+response.wsUrl);
-		ws = new WebSocket(response.wsUrl);
+	$.get("start","",function(wsUrl){
+		console.log("wsUrl = "+wsUrl);
+		ws = new WebSocket(wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
 				wsConnected = true;
