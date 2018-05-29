@@ -92,7 +92,7 @@ $(document).ready(function(){
 
 	// Respond to the Search button click (because I can't figure out how to combine it with input change)
 	$(document).on("click","#SearchButton",function(){
-		console.log("searchStr = "+$("#searchStr").val());
+		//console.log("searchStr = "+$("#searchStr").val());
 		wsSend('{"searchStr" : "'+$("#searchStr").val()+'"}');
 	});
 	

@@ -61,7 +61,7 @@ const http = require('http');
 const url = require('url');
 var dateTime = require('node-datetime');
 var dataFunctions = require('./dataFunctions.js');
-//var audioFunctions = require('./audioFunctions.js');
+var audioFunctions = require('./audioFunctions.js');
 var botFunctions = require('./botFunctions.js');
 var dataLoaded = false;
 
@@ -146,6 +146,21 @@ wss.on('connection', function (ws) {
     if (botMessage.commandText != null) {
       // TEST audio functions
       //audioFunctions.speakText(botMessage.commandText);
+
+
+                searchResponses(searchStr, function(results) {
+                    console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
+                      console.log(results);
+                      audioFunctions.speakText(results);
+                });
+
+    } else if (botMessage.searchStr != null) {
+        dataFunctions.searchResponses(botMessage.searchStr, function(results) {
+        console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
+        console.log(results);
+        audioFunctions.speakText(results);
+      });
+
     } else {
       //botFunctions.manualControl(botMessage);
     }
