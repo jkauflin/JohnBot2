@@ -82,9 +82,11 @@ $(document).ready(function(){
 					}
 
 					// add other bot event handling here
+					/*
 					if (serverMessage.proxIn != null) {
 						$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
 					}
+					*/
 				} // on message (from server)
 
 		} // Websocket open
@@ -95,7 +97,14 @@ $(document).ready(function(){
 		//console.log("searchStr = "+$("#searchStr").val());
 		wsSend('{"searchStr" : "'+$("#searchStr").val()+'"}');
 	});
+
+	$(document).on("click","#LoadDataButton",function(){
+		wsSend('{"loadData" : "Y"}');
+	});
 	
+
+
+
 		/*
 var botMessage = {
 	"moveDirection" : "F",

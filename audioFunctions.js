@@ -57,6 +57,11 @@ function speakText(textStr){
         //console.log("done speaking");
         //player.resume();
     }.bind(this));
+/*
+error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav 
+" <volume level='15'><pitch level='60'>I am the John Bot. Pleased to meet you." && aplay /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav
+*/
+
 }; // 
 
 // picoSpeaker.shutUp() => interrupt all sentences being spoken at the moment

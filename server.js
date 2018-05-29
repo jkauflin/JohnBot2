@@ -41,6 +41,8 @@ require('dotenv').config();
 //WEB_PORT=
 //WS_PORT=
 //BOT_DATA_URL=
+//UID=
+//STORE_DIR=
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -146,14 +148,9 @@ wss.on('connection', function (ws) {
     if (botMessage.commandText != null) {
       // TEST audio functions
       //audioFunctions.speakText(botMessage.commandText);
-
-
-                searchResponses(searchStr, function(results) {
-                    console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-                      console.log(results);
-                      audioFunctions.speakText(results);
-                });
-
+    } else if (botMessage.loadData != null) {
+      dataFunctions.loadData('', function(error,response,status) {
+      });
     } else if (botMessage.searchStr != null) {
         dataFunctions.searchResponses(botMessage.searchStr, function(results) {
         console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
@@ -168,14 +165,6 @@ wss.on('connection', function (ws) {
 
 
   // Register event listeners for the bot events
-  /*
-  botFunctions.botEvent.on("tempatureChange", function(fahrenheit) {
-    // process data when someEvent occurs
-    //console.log(dateTime.create().format('H:M:S.N')+" in Server, Tempature = "+fahrenheit + "°F");
-    ws.send(fahrenheit);
-  });
-  */
- 
   botFunctions.botEvent.on("error", function(errorMessage) {
     // JJK - you can either construct it as a string and send with no JSON.stringify
     //       or construct a JSON object, with easier syntax, and then you have to stringify it
@@ -224,21 +213,4 @@ httpServer.listen(process.env.WEB_PORT,function() {
   console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
 });
 
-
-dataFunctions.loadData('', function(error,response,status) {
-	if (error == null) {
-		dataLoaded = true;
-	}
-});
-
-/*
-//var searchStr = 'do you love me';
-var searchStr = 'loki';
-//var searchStr = 'zzz';
-dataFunctions.searchResponses(searchStr, function(results) {
-    console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-	  console.log(results);
-	  //audioFunctions.speakText(results);
-});
-*/
 
