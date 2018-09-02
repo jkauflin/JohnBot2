@@ -53,7 +53,8 @@ function speakText(textStr){
     //player.stop();
     //player.pause();
     //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
-    picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
+    //picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
+    picoSpeaker.speak("<volume level='20'><pitch level='70'>"+textStr).then(function() {
         //console.log("done speaking");
         //player.resume();
     }.bind(this));

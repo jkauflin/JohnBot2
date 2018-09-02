@@ -33,6 +33,7 @@ Modification History
 2018-05-09 JJK  Accept speech text
 2018-05-20 JJK  Finally got speech recognition text send working
 2018-05-27 JJK  Working on data load and full-text-search
+2018-09-02 JJK  Checking capabilities
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -153,9 +154,10 @@ wss.on('connection', function (ws) {
       });
     } else if (botMessage.searchStr != null) {
         dataFunctions.searchResponses(botMessage.searchStr, function(results) {
-        console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-        console.log(results);
-        audioFunctions.speakText(results);
+        //console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
+        //console.log(results);
+        //audioFunctions.speakText(results);
+        audioFunctions.speakText(botMessage.searchStr);
       });
 
     } else {
