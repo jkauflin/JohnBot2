@@ -34,13 +34,13 @@ function loadResponses() {
     var updTs = "2017-01-01";
     var table = "responses";
     var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs+'&uid='+process.env.UID;
-    //console.log("botData url = "+tempUrl);
+    console.log("botData url = "+tempUrl);
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
             console.log("Error in getJSON, err = "+error);
         }
         else {
-            //console.log(dateTime.create().format('H:M:S.N')+" SUCCESSFUL call of BOT_DATA_URL ");
+            console.log(dateTime.create().format('H:M:S.N')+" SUCCESSFUL call of BOT_DATA_URL ");
             // Don't really need to check this here because makebulk loops through array (0 no loops)
             if (urlJsonResponse.length > 0) {
                 //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+urlJsonResponse.length);

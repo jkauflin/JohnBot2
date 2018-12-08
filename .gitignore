@@ -13,3 +13,6 @@ yarn-error.log*
 /.changelog
 .env
 *-search.json
+*.wav
+*.mp3
+ssl/

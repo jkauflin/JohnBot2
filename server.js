@@ -34,6 +34,7 @@ Modification History
 2018-05-20 JJK  Finally got speech recognition text send working
 2018-05-27 JJK  Working on data load and full-text-search
 2018-09-02 JJK  Checking capabilities
+2018-12-06 JJK  Implemented HTTPS and ws using the HTTPS server
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -44,6 +45,7 @@ require('dotenv').config();
 //BOT_DATA_URL=
 //UID=
 //STORE_DIR=
+
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -58,27 +60,49 @@ process.on('uncaughtException', function (e) {
 	//process.exit(1);
 });
 
-const express = require('express');
-const http = require('http');
+// Create an HTTPS web server
+var express = require('express')
+var fs = require('fs')
+//const http = require('http');
+var https = require('https')
+var app = express()
+
+const httpsServer = new https.createServer({
+  key: fs.readFileSync('ssl/ca-private.key'),
+  cert: fs.readFileSync('ssl/ca-public.crt')
+}, app)
+  .listen(process.env.WEB_PORT, function () {
+    console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
+})
 
 const url = require('url');
 var dateTime = require('node-datetime');
 var dataFunctions = require('./dataFunctions.js');
 var audioFunctions = require('./audioFunctions.js');
-var botFunctions = require('./botFunctions.js');
+//var botFunctions = require('./botFunctions.js');
 var dataLoaded = false;
-
-var app = express();
-var httpServer = http.createServer(app);
-
 
 //=================================================================================================
 // Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
 const ws = require('ws');
-const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false });
+//const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false });
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "ws://"+process.env.HOST+":"+process.env.WS_PORT;
+//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
+
+const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
+const wss = new ws.Server({ port: process.env.WS_PORT, httpsServer, perMessageDeflate: false });
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+  });
+
+  ws.send('something');
+});
+
+//server.listen(8080);
+
 
 // Initialize to false at the start
 ws.isAlive = false;
@@ -119,7 +143,7 @@ wss.on('connection', function (ws) {
 
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
-    // console.log('received from client: %s', message)
+    console.log('received from client: %s', message)
     // check for manual controls and call function
     //botMessage.
     /*
@@ -148,7 +172,7 @@ wss.on('connection', function (ws) {
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.commandText != null) {
       // TEST audio functions
-      //audioFunctions.speakText(botMessage.commandText);
+      audioFunctions.speakText(botMessage.commandText);
     } else if (botMessage.loadData != null) {
       dataFunctions.loadData('', function(error,response,status) {
       });
@@ -165,7 +189,7 @@ wss.on('connection', function (ws) {
     }
   })
 
-
+  /*
   // Register event listeners for the bot events
   botFunctions.botEvent.on("error", function(errorMessage) {
     // JJK - you can either construct it as a string and send with no JSON.stringify
@@ -180,16 +204,18 @@ wss.on('connection', function (ws) {
     var serverMessage = {"proxIn" : proxIn};
     ws.send(JSON.stringify(serverMessage));
   });
+  */
 
 });
 
-
+/*
 app.use(function(req, res, next) {
     // allow any cross origin access - check on how to limit this
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
+*/
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection
@@ -210,9 +236,5 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
-
-httpServer.listen(process.env.WEB_PORT,function() {
-  console.log("Live at Port "+process.env.WEB_PORT+" - Let's rock!");
-});
 
 

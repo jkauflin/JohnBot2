@@ -22,6 +22,8 @@ Working with proximity sensors
 display of the proximity values for the web page
 action to take for close proximity
 
+2018-12-01 JJK  Updated to johnny-five 1.0.0
+
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');

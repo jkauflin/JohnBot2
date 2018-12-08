@@ -1,6 +1,6 @@
 {
   "name": "johnbot2",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "2nd version of hobby robotics project",
   "main": "server.js",
   "scripts": {
@@ -18,15 +18,15 @@
   },
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
-    "dotenv": "^4.0.0",
-    "express": "^4.16.3",
-    "full-text-search": "0.0.16",
-    "get-json": "^1.0.0",
-    "johnny-five": "^0.15.1",
-    "lodash": "^4.15.5",
-    "node-datetime": "^2.1.0",
-    "pico-speaker": "0.0.7",
-    "sound-player": "^1.0.13",
-    "ws": "^3.3.3"
+    "lodash": "latest",
+    "merge": "latest",
+    "dotenv": "latest",
+    "node-datetime": "latest",
+    "express": "latest",
+    "full-text-search": "latest",
+    "get-json": "latest",
+    "johnny-five": "latest",
+    "sound-player": "latest",
+    "ws": "latest"
   }
 }
