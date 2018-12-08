@@ -11,10 +11,9 @@
     <!-- Place favicon.ico in the root directory -->
     <!--
     <link rel="icon" href="../../../../favicon.ico">
-    
     <link rel="apple-touch-icon" href="icon.png">
-    -->
     <link rel="manifest" href="./manifest.webapp">
+    -->
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -70,6 +69,17 @@
             </div>
             <button id="SearchButton" type="button" class="btn btn-primary">Search</button>
           </div>
+
+          <!-- Speech -->
+          <p>
+          <div class="right">
+            <button id="SpeechToTextButton">
+              <img id="STTButtonImage" src="./img/mic.gif" alt="Start or stop speech to text"></button>
+          </div>
+          <div id="results" style="background: lightblue;">
+            <span id="STTResultsSpan" class="final"></span>
+          </div>
+          </p>
 
         </div>
       </div><!-- row -->
@@ -174,8 +184,10 @@
   <script src="js/vendor/bootstrap.min.js"></script>
 	<script src="js/vendor/bootstrap-add-clear.min.js"></script>
 	<script src="js/vendor/bootstrap-slider.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/main.js?ver=1.016"></script>
+
+  <script src="js/util.js?ver=1.002"></script>
+  <script src="js/speech.js?ver=1.002"></script>
+  <script src="js/main.js?ver=1.020"></script>
 
 </body>
 </html>

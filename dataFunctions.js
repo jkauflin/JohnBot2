@@ -34,36 +34,45 @@ function loadResponses() {
     var updTs = "2017-01-01";
     var table = "responses";
     var tempUrl = process.env.BOT_DATA_URL+'?table='+table+'&lastupdate='+updTs+'&uid='+process.env.UID;
-    console.log("botData url = "+tempUrl);
+    //console.log("botData url = "+tempUrl);
+
+    getJSON(tempUrl).then(function (urlJsonResponse) {
+        //console.log(dateTime.create().format('H:M:S.N') + " SUCCESSFUL call of BOT_DATA_URL ");
+        // Don't really need to check this here because makebulk loops through array (0 no loops)
+        if (urlJsonResponse.length > 0) {
+            //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+urlJsonResponse.length);
+            for (var current in urlJsonResponse) {
+                // how do I know when the update is done - do I care?
+                // log how many records were in the service call JSON response
+                //console.log("id = "+botResponsesList[current].id);
+                if (urlJsonResponse[current].deleted == "Y") {
+                    // delete?
+                } else {
+                    //console.log("JSON.stringify(urlJsonResponse[current]) = "+JSON.stringify(urlJsonResponse[current]));
+                    responsesSearch.add(urlJsonResponse[current]);
+                } // bulk push
+            } // loop through JSON list
+
+            // Save data to a file
+            responsesSearch.saveSync(responsesFilename);
+
+        } // if (urlJsonResponse.length > 0) {
+
+    }).catch(function (error) {
+        console.log("Error in loadResponses getJSON, err = " + error);
+    });
+
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
             console.log("Error in getJSON, err = "+error);
         }
         else {
-            console.log(dateTime.create().format('H:M:S.N')+" SUCCESSFUL call of BOT_DATA_URL ");
-            // Don't really need to check this here because makebulk loops through array (0 no loops)
-            if (urlJsonResponse.length > 0) {
-                //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+urlJsonResponse.length);
-                for (var current in urlJsonResponse){
-                    // how do I know when the update is done - do I care?
-                    // log how many records were in the service call JSON response
-                    //console.log("id = "+botResponsesList[current].id);
-                    if (urlJsonResponse[current].deleted == "Y") {
-                        // delete?
-                    } else {
-                        //console.log("JSON.stringify(urlJsonResponse[current]) = "+JSON.stringify(urlJsonResponse[current]));
-                        responsesSearch.add(urlJsonResponse[current]);
-                    } // bulk push
-                } // loop through JSON list
-            
-                // Save data to a file
-                responsesSearch.saveSync(responsesFilename);
-
-            } // if (urlJsonResponse.length > 0) {
 
         } // Successful getJSON call
     }); // GetJSON
-} // 
+
+} // function loadResponses() {
+
 
                             /* jokes
                             bulk.push(

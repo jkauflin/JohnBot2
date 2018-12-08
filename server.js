@@ -35,6 +35,19 @@ Modification History
 2018-05-27 JJK  Working on data load and full-text-search
 2018-09-02 JJK  Checking capabilities
 2018-12-06 JJK  Implemented HTTPS and ws using the HTTPS server
+
+"johnny-five": "latest",
+"sound-player": "latest",
+
+#HOST=192.168.1.81
+HOST=johnbot-pizero1
+WEB_PORT=3000
+WS_PORT=3035
+BOT_DATA_URL=http://johnkauflin.com/getBotDataProxy.php
+UID=46655279-d0ef-4e61-941b-eb72d4db52c7
+STORE_DIR=/home/pi/projects/JohnBot2/
+
+2018-12-08 JJK  Working on implementing STT/TTS with google web services
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -46,34 +59,40 @@ require('dotenv').config();
 //UID=
 //STORE_DIR=
 
-
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
 	console.log("UncaughtException, error = "+e);
   console.error(e.stack);
-  if (ws.isAlive) {
-    //var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
-    //ws.send(serverMessage);
-  }
+  //if (ws.isAlive) {
+  //  var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
+  //  ws.send(serverMessage);
+  //}
+
   // Stop the process
   // 2017-12-29 JJK - Don't stop for now, just log the error
 	//process.exit(1);
 });
 
-// Create an HTTPS web server
-var express = require('express')
-var fs = require('fs')
-//const http = require('http');
-var https = require('https')
-var app = express()
+// Create a web server
+var express = require('express');
+var app = express();
 
-const httpsServer = new https.createServer({
+const http = require('http');
+const webServer = new http.createServer(app)
+  .listen(process.env.WEB_PORT, function () {
+    console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
+  })
+/*
+var https = require('https')
+var fs = require('fs');
+const webServer = new https.createServer({
   key: fs.readFileSync('ssl/ca-private.key'),
   cert: fs.readFileSync('ssl/ca-public.crt')
 }, app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
 })
+*/
 
 const url = require('url');
 var dateTime = require('node-datetime');
@@ -86,23 +105,10 @@ var dataLoaded = false;
 // Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
 const ws = require('ws');
-//const wss = new ws.Server({ port: process.env.WS_PORT, perMessageDeflate: false });
 // WebSocket URL to give to the client browser to establish ws connection
-//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
-
-const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
-const wss = new ws.Server({ port: process.env.WS_PORT, httpsServer, perMessageDeflate: false });
-
-wss.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
-  });
-
-  ws.send('something');
-});
-
-//server.listen(8080);
-
+const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
+//const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
+const webSocketServer = new ws.Server({ port: process.env.WS_PORT, webServer, perMessageDeflate: false });
 
 // Initialize to false at the start
 ws.isAlive = false;
@@ -111,8 +117,9 @@ function heartbeat() {
   this.isAlive = true;
 }
 
+// Ping to monitor the websocket connection and terminate ws if no longer alive
 const interval = setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
+  webSocketServer.clients.forEach(function each(ws) {
     //console.log(dateTime.create().format('Y-m-d H:M:S')+" In the ping, ws.readyState = "+ws.readyState);
     if (ws.isAlive === false) {
       return ws.terminate();
@@ -126,7 +133,7 @@ const interval = setInterval(function ping() {
 //=================================================================================================
 // Successful connection from a web client
 //=================================================================================================
-wss.on('connection', function (ws) {
+webSocketServer.on('connection', function (ws) {
   // Set to true after getting a successfuly connection from a web client
   ws.isAlive = true;
   // If you get a pong response from a client call the heartbeat function to set a variable
@@ -134,7 +141,7 @@ wss.on('connection', function (ws) {
   ws.on('pong', heartbeat);
 
   /* Broadcast example
-  wss.clients.forEach(function each(client) {
+  webSocketServer.clients.forEach(function each(client) {
     if (client.readyState === ws.OPEN) {
       client.send(data);
     }
@@ -143,7 +150,6 @@ wss.on('connection', function (ws) {
 
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
-    console.log('received from client: %s', message)
     // check for manual controls and call function
     //botMessage.
     /*
@@ -166,13 +172,13 @@ wss.on('connection', function (ws) {
   botMessage.headPosition" : 90
     */
     
-    //console.log("botMessageStr = "+botMessageStr);
+    console.log("botMessageStr = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
-    if (botMessage.commandText != null) {
+    if (botMessage.inSpeechText != null) {
       // TEST audio functions
-      audioFunctions.speakText(botMessage.commandText);
+      audioFunctions.speakText(botMessage.inSpeechText);
     } else if (botMessage.loadData != null) {
       dataFunctions.loadData('', function(error,response,status) {
       });
@@ -236,5 +242,4 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
-
 

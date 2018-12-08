@@ -232,7 +232,7 @@ background-color: #4CAF50;
     text-align: left;
     min-height: 150px;
   }
-  #start_button {
+  #SpeechToTextButton {
     border: 0;
     background-color:transparent;
     padding: 0;
