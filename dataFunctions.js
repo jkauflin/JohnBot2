@@ -91,8 +91,8 @@ function searchResponses(searchStr,callback){
 
     var result = responsesSearch.search(searchStr);
     // result: ['Paul'] 
-    //console.log("result.length = "+result.length);    
-    //console.log("result = "+JSON.stringify(result));
+    console.log("result.length = "+result.length);    
+    console.log("result = "+JSON.stringify(result));
     if (result.length > 0) {
         //console.log("result[0].id = "+result[0].id);
         /*

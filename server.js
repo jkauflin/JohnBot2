@@ -178,7 +178,14 @@ webSocketServer.on('connection', function (ws) {
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.inSpeechText != null) {
       // TEST audio functions
-      audioFunctions.speakText(botMessage.inSpeechText);
+      //audioFunctions.speakText(botMessage.inSpeechText);
+
+      dataFunctions.searchResponses(botMessage.searchStr, function (results) {
+        console.log("searchResponse, results = "+results);
+        var serverMessage = { "textToSpeak": results };
+        ws.send(JSON.stringify(serverMessage));
+      });
+
     } else if (botMessage.loadData != null) {
       dataFunctions.loadData('', function(error,response,status) {
       });

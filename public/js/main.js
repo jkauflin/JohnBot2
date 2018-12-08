@@ -74,6 +74,11 @@ var main = (function () {
 					$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
 				}
 				*/
+
+				if (serverMessage.textToSpeak != null) {
+					speech.speakText(serverMessage.textToSpeak);
+				}
+
 			} // on message (from server)
 
 		} // Websocket open
@@ -86,9 +91,10 @@ var main = (function () {
 	$LoadDataButton.click(_loadData);
 
 	function _searchResponses() {
-		//console.log("searchStr = "+$("#searchStr").val());
-		_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
-		$searchStr.html("");
+		console.log("searchStr = " + $searchStr.val());
+		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
+		speech.speakText($searchStr.val());
+		$searchStr.val('');
 	}
 	function _loadData() {
 		_wsSend('{"loadData" : "Y"}');
@@ -312,6 +318,7 @@ var botMessage = {
 
 	function sendSpeechText(speechText) {
 		_wsSend('{"inSpeechText" : "' + speechText + '"}');
+		//speech.speakText(speechText);
 	}
 
 	//=================================================================================================================

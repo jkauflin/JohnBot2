@@ -8,6 +8,7 @@
  * 2018-12-07 JJK   Initial version (from some web example) 
  * 2018-12-08 JJK   Got working with a tight couple to call a main function
  *                  when a final transcript was recognized
+ *                  Added TTS capabilities through window speechSynthesis
  *============================================================================*/
 var speech = (function () {
     'use strict';  // Force declaration of variables before use (among other things)
@@ -20,6 +21,7 @@ var speech = (function () {
     var recognizing = false;
     var ignore_onend;
     var start_timestamp;
+    var speechSynth = window.speechSynthesis;
 
     //=================================================================================================================
     // Variables cached from the DOM
@@ -102,6 +104,8 @@ var speech = (function () {
                     // *** a publish/subscribe framework to send the event
                     main.sendSpeechText(final_transcript);
 
+                    //speakText(final_transcript);
+
                     final_transcript = '';
                 }
             }
@@ -133,9 +137,15 @@ var speech = (function () {
         start_timestamp = event.timeStamp;
     }
 
+    function speakText(textToSpeak) {
+        var utterance = new SpeechSynthesisUtterance(textToSpeak);
+        speechSynth.speak(utterance);
+    }
+
     //=================================================================================================================
     // This is what is exposed from this Module
     return {
+        speakText
     };
 
 })(); // var speech = (function(){
