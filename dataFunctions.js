@@ -26,10 +26,10 @@ function loadData(inStr,callback){
 
 function loadResponses() {
     responsesSearch = new fullTextSearch({
-        minimum_chars: 2      // default = 1, The less minimum chars you want to use for your search, the slower the 'add' method gets 
+        minimum_chars: 3,      // default = 1, The less minimum chars you want to use for your search, the slower the 'add' method gets 
+        ignore_case: false,   // default = true, Ignore case during all search queries 
+        index_amount: 12     // default = 12, The more indexes you have, the faster can be your search but the slower the 'add' method  gets 
     });
-    //ignore_case: false,   // default = true, Ignore case during all search queries 
-    //index_amount: 8,      // default = 12, The more indexes you have, the faster can be your search but the slower the 'add' method  gets 
 
     var updTs = "2017-01-01";
     var table = "responses";
@@ -49,7 +49,10 @@ function loadResponses() {
                     // delete?
                 } else {
                     //console.log("JSON.stringify(urlJsonResponse[current]) = "+JSON.stringify(urlJsonResponse[current]));
-                    responsesSearch.add(urlJsonResponse[current]);
+                    
+                    //responsesSearch.add(urlJsonResponse[current]);
+                    responsesSearch.add(urlJsonResponse[current].keywords + " " + urlJsonResponse[current].verbalResponse);
+
                 } // bulk push
             } // loop through JSON list
 
@@ -86,7 +89,7 @@ function loadResponses() {
                             */
 
 function searchResponses(searchStr,callback){
-    //console.log("in searchResponses, searchStr = "+searchStr);
+    console.log("in searchResponses, searchStr = "+searchStr);
     var responseStr = 'I am not programmed to respond in this area.';
 
     var result = responsesSearch.search(searchStr);

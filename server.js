@@ -180,7 +180,7 @@ webSocketServer.on('connection', function (ws) {
       // TEST audio functions
       //audioFunctions.speakText(botMessage.inSpeechText);
 
-      dataFunctions.searchResponses(botMessage.searchStr, function (results) {
+      dataFunctions.searchResponses(botMessage.inSpeechText, function (results) {
         console.log("searchResponse, results = "+results);
         var serverMessage = { "textToSpeak": results };
         ws.send(JSON.stringify(serverMessage));

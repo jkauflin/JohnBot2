@@ -138,9 +138,48 @@ var speech = (function () {
     }
 
     function speakText(textToSpeak) {
+        // Turn off the speech recognition first before text to speech
+        var restartRecognize = false;
+        if (recognizing) {
+            recognition.stop();
+            restartRecognize = true;
+        }
+        // Create an utterance and speak it
+        // Good documentation: https://flaviocopes.com/speech-synthesis-api/
         var utterance = new SpeechSynthesisUtterance(textToSpeak);
+        // Just using defaults for voice, pitch, and rate
         speechSynth.speak(utterance);
-    }
+
+        // Cancel all utterances
+        // speechSynth.cancel()
+        /*
+        var utterance1 = new SpeechSynthesisUtterance('How about we say this now? This is quite a long sentence to say.');
+        var utterance2 = new SpeechSynthesisUtterance('We should say another sentence too, just to be on the safe side.');
+        synth.speak(utterance1);
+        synth.speak(utterance2);
+        synth.cancel(); // utterance1 stops being spoken immediately, and both are removed from the queue
+
+We have started uttering this speech: Awesome I think I got it
+Utterance has finished being spoken after 2274.800048828125 milliseconds.
+We have started uttering this speech: Hey what do you know about dank memes
+Utterance has finished being spoken after 2983.199951171875 milliseconds.
+        */
+
+        // something that says when utterance is done?
+        utterance.onend = function (event) {
+            //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
+            // If it was recognizing speech, turn it back on after speaking
+            if (restartRecognize) {
+                ignore_onend = false;
+                STTResultsSpan.innerHTML = '';
+                recognition.start();
+            }
+        }
+        utterance.onstart = function (event) {
+            //console.log('We have started uttering this speech: ' + event.utterance.text);
+        }
+
+    } // function speakText(textToSpeak) {
 
     //=================================================================================================================
     // This is what is exposed from this Module

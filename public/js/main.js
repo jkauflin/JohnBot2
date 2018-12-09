@@ -91,7 +91,7 @@ var main = (function () {
 	$LoadDataButton.click(_loadData);
 
 	function _searchResponses() {
-		console.log("searchStr = " + $searchStr.val());
+		//console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
 		speech.speakText($searchStr.val());
 		$searchStr.val('');
