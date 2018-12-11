@@ -91,9 +91,15 @@ var main = (function () {
 	$LoadDataButton.click(_loadData);
 
 	function _searchResponses() {
-		//console.log("searchStr = " + $searchStr.val());
+		console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
-		speech.speakText($searchStr.val());
+		//speech.speakText($searchStr.val());
+
+		var uid = "";
+		$.getJSON("getBotResponsesProxy.php", "searchStr=" + $searchStr.val()+"&uid="+uid, function (responses) {
+			console.log("responses = "+responses);
+		});
+
 		$searchStr.val('');
 	}
 	function _loadData() {
@@ -317,8 +323,10 @@ var botMessage = {
 	}
 
 	function sendSpeechText(speechText) {
-		_wsSend('{"inSpeechText" : "' + speechText + '"}');
+		//_wsSend('{"inSpeechText" : "' + speechText + '"}');
 		//speech.speakText(speechText);
+
+		
 	}
 
 	//=================================================================================================================
