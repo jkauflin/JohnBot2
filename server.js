@@ -39,14 +39,6 @@ Modification History
 "johnny-five": "latest",
 "sound-player": "latest",
 
-#HOST=192.168.1.81
-HOST=johnbot-pizero1
-WEB_PORT=3000
-WS_PORT=3035
-BOT_DATA_URL=http://johnkauflin.com/getBotDataProxy.php
-UID=46655279-d0ef-4e61-941b-eb72d4db52c7
-STORE_DIR=/home/pi/projects/JohnBot2/
-
 2018-12-08 JJK  Working on implementing STT/TTS with google web services
 =============================================================================*/
 
@@ -77,27 +69,27 @@ process.on('uncaughtException', function (e) {
 var express = require('express');
 var app = express();
 
+/*
 const http = require('http');
 const webServer = new http.createServer(app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
   })
-/*
+*/
 var https = require('https')
 var fs = require('fs');
 const webServer = new https.createServer({
-  key: fs.readFileSync('ssl/ca-private.key'),
-  cert: fs.readFileSync('ssl/ca-public.crt')
+  key: fs.readFileSync('ssl/johnbot.key'),
+  cert: fs.readFileSync('ssl/johnbot.crt')
 }, app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
 })
-*/
 
 const url = require('url');
 var dateTime = require('node-datetime');
-var dataFunctions = require('./dataFunctions.js');
-var audioFunctions = require('./audioFunctions.js');
+//var dataFunctions = require('./dataFunctions.js');
+//var audioFunctions = require('./audioFunctions.js');
 //var botFunctions = require('./botFunctions.js');
 var dataLoaded = false;
 
