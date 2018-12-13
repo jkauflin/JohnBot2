@@ -98,8 +98,8 @@ var dataLoaded = false;
 //=================================================================================================
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
-//const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
+//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
+const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
 const webSocketServer = new ws.Server({ port: process.env.WS_PORT, webServer, perMessageDeflate: false });
 
 // Initialize to false at the start
