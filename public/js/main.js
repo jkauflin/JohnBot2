@@ -15,6 +15,7 @@ var main = (function () {
 	//=================================================================================================================
 	// Private variables for the Module
 	var ws = null;
+	var wsUrl;
 	var wsConnected = false;
 	var isTouchDevice = false;
 	var date;
@@ -53,7 +54,8 @@ var main = (function () {
 	logMessage("isTouchDevice = " + isTouchDevice);
 
 	//$.get("start", "", function (wsUrl) {
-	$.get("https://192.168.1.81:3000/start", "", function (wsUrl) {
+	//$.get("https://192.168.1.81:3000/start", "", function (wsUrl) {
+		wsUrl = "wss://192.168.1.81:3000";
 		console.log("on Start, wsUrl = " + wsUrl);
 		ws = new WebSocket(wsUrl);
 		// event emmited when connected
@@ -83,7 +85,7 @@ var main = (function () {
 			} // on message (from server)
 
 		} // Websocket open
-	}); // start
+	//}); // start
 
 	$SearchButton.click(_searchResponses);
 	if (!isTouchDevice) {
