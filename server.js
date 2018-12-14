@@ -40,6 +40,9 @@ Modification History
 "sound-player": "latest",
 
 2018-12-08 JJK  Working on implementing STT/TTS with google web services
+2018-12-12 JJK  Finally got HTTPS and trusted certificates working
+2018-12-13 JJK  Finally got wss secure websocket working over the HTTPS 
+                server (being called from the app running at ISP)
 =============================================================================*/
 
 // Read environment variables from the .env file
@@ -65,6 +68,7 @@ process.on('uncaughtException', function (e) {
 	//process.exit(1);
 });
 
+
 // Create a web server
 var express = require('express');
 var app = express();
@@ -79,12 +83,22 @@ const webServer = new http.createServer(app)
 var https = require('https')
 var fs = require('fs');
 const webServer = new https.createServer({
+  // Key and certificate that have been signed by a CA root authority installed on server
   key: fs.readFileSync('ssl/johnbot.key'),
   cert: fs.readFileSync('ssl/johnbot.crt')
 }, app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
 })
+/*
+var options = {
+  key: fs.readFileSync('/path-to-keys/privkey.pem'),
+  cert: fs.readFileSync('/path-to-keys/cert.pem'),
+  ca: fs.readFileSync('/path-to-keys/chain.pem')
+};
+
+https.createServer(options, ...)
+*/
 
 const url = require('url');
 var dateTime = require('node-datetime');
@@ -98,9 +112,8 @@ var dataLoaded = false;
 //=================================================================================================
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
-//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WS_PORT;
 const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
-const webSocketServer = new ws.Server({ port: process.env.WS_PORT, webServer, perMessageDeflate: false });
+const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
 
 // Initialize to false at the start
 ws.isAlive = false;
@@ -172,22 +185,26 @@ webSocketServer.on('connection', function (ws) {
       // TEST audio functions
       //audioFunctions.speakText(botMessage.inSpeechText);
 
+      /*
       dataFunctions.searchResponses(botMessage.inSpeechText, function (results) {
         console.log("searchResponse, results = "+results);
         var serverMessage = { "textToSpeak": results };
         ws.send(JSON.stringify(serverMessage));
       });
+      */
 
     } else if (botMessage.loadData != null) {
-      dataFunctions.loadData('', function(error,response,status) {
-      });
+      //dataFunctions.loadData('', function(error,response,status) {
+      //});
     } else if (botMessage.searchStr != null) {
-        dataFunctions.searchResponses(botMessage.searchStr, function(results) {
+      /*
+      dataFunctions.searchResponses(botMessage.searchStr, function(results) {
         //console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
         //console.log(results);
         //audioFunctions.speakText(results);
-        audioFunctions.speakText(botMessage.searchStr);
+        //audioFunctions.speakText(botMessage.searchStr);
       });
+      */
 
     } else {
       //botFunctions.manualControl(botMessage);

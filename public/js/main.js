@@ -52,8 +52,9 @@ var main = (function () {
 	isTouchDevice = 'ontouchstart' in document.documentElement;
 	logMessage("isTouchDevice = " + isTouchDevice);
 
-	$.get("start", "", function (wsUrl) {
-		console.log("wsUrl = " + wsUrl);
+	//$.get("start", "", function (wsUrl) {
+	$.get("https://192.168.1.81:3000/start", "", function (wsUrl) {
+		console.log("on Start, wsUrl = " + wsUrl);
 		ws = new WebSocket(wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
