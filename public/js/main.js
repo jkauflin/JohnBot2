@@ -325,17 +325,25 @@ var botMessage = {
 		_wsSend('{"voice" : 0}');
 	}
 
-	function sendSpeechText(speechText) {
+	// Respond to string recognized by speech to text
+	function textFromSpeech(speechText) {
 		//_wsSend('{"inSpeechText" : "' + speechText + '"}');
-		//speech.speakText(speechText);
 
-		
+		// Call service to get responses
+		var uid = "";
+		$.getJSON("https://xxx.com/getBotResponsesProxy.php", "searchStr=" + speechText + "&UID=" + uid, function (responses) {
+			console.log("responses = " + responses);
+			// responses.keywords
+			// responses.verbalResponse
+		});
+
+		speech.speakText(speechText);
 	}
 
 	//=================================================================================================================
 	// This is what is exposed from this Module
 	return {
-		sendSpeechText
+		textFromSpeech
 	};
 
 })(); // var main = (function(){

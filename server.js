@@ -239,6 +239,17 @@ app.use(function(req, res, next) {
 });
 */
 
+//CORS middleware
+/*
+var allowCrossDomain = function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'xxx.com');
+  //res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}
+*/
+
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection
 // Use /start as a trigger to start any robot functions, like a hello sequence

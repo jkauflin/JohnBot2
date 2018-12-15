@@ -32,9 +32,17 @@ var speech = (function () {
     // Bind events
     $SpeechToTextButton.click(_ToggleSpeechToText);
     
-    if (!('webkitSpeechRecognition' in window)) {
-        console.log("webkitSpeechRecognition not supported");
-    } else {
+    /*
+    if (window.hasOwnProperty('webkitSpeechRecognition')) {
+        this.ArtyomWebkitSpeechRecognition = new (<any>window).webkitSpeechRecognition();
+    }else{
+                console.error("Artyom.js can't recognize voice without the Speech Recognition API.");
+        }
+    */
+
+    //if (!('webkitSpeechRecognition' in window)) {
+    //    console.log("webkitSpeechRecognition not supported");
+    //} else {
         //start_button.style.display = 'inline-block';
         var recognition = new webkitSpeechRecognition();
         recognition.continuous = true;
@@ -67,6 +75,7 @@ var speech = (function () {
         };
 
         recognition.onend = function () {
+            console.log("*** recognition.onend ***");
             recognizing = false;
             if (ignore_onend) {
                 return;
@@ -98,12 +107,11 @@ var speech = (function () {
             STTResultsSpan.innerHTML = linebreak(final_transcript);
             if (final_transcript || interim_transcript) {
                 if (final_transcript) {
-                    //console.log(">>> final_transcript = " + final_transcript);
+                    console.log(">>> onresult, final_transcript = " + final_transcript);
                     
                     // *** tightly coupled to a function in main right now, but could implement
                     // *** a publish/subscribe framework to send the event
-                    main.sendSpeechText(final_transcript);
-
+                    main.textFromSpeech(final_transcript);
                     //speakText(final_transcript);
 
                     final_transcript = '';
@@ -111,7 +119,7 @@ var speech = (function () {
             }
 
         };
-    } // if webkitSpeechRecognition
+    //} // if webkitSpeechRecognition
 
     function linebreak(s) {
         return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
@@ -137,12 +145,24 @@ var speech = (function () {
         start_timestamp = event.timeStamp;
     }
 
+    /*
+    _this.ArtyomWebkitSpeechRecognition.onend = function () {
+        if (_this.ArtyomFlags.restartRecognition === true) {
+            if (artyom_is_allowed === true) {
+                _this.ArtyomWebkitSpeechRecognition.start();
+                _this.debug("Continuous mode enabled, restarting", "info");
+    */
+
     function speakText(textToSpeak) {
+        console.log("in speakText, text = "+textToSpeak);
+
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;
         if (recognizing) {
-            recognition.stop();
+            recognition.abort();
             restartRecognize = true;
+            // Wait for recognition to stop (if needed) - or tie into the onend event
+            //util.sleep(500);
         }
         // Create an utterance and speak it
         // Good documentation: https://flaviocopes.com/speech-synthesis-api/
@@ -158,11 +178,6 @@ var speech = (function () {
         synth.speak(utterance1);
         synth.speak(utterance2);
         synth.cancel(); // utterance1 stops being spoken immediately, and both are removed from the queue
-
-We have started uttering this speech: Awesome I think I got it
-Utterance has finished being spoken after 2274.800048828125 milliseconds.
-We have started uttering this speech: Hey what do you know about dank memes
-Utterance has finished being spoken after 2983.199951171875 milliseconds.
         */
 
         // something that says when utterance is done?
@@ -175,9 +190,9 @@ Utterance has finished being spoken after 2983.199951171875 milliseconds.
                 recognition.start();
             }
         }
-        utterance.onstart = function (event) {
-            //console.log('We have started uttering this speech: ' + event.utterance.text);
-        }
+        //utterance.onstart = function (event) {
+        //    console.log('We have started uttering this speech: ' + event.utterance.text);
+        //}
 
     } // function speakText(textToSpeak) {
 
