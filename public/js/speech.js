@@ -75,7 +75,7 @@ var speech = (function () {
         };
 
         recognition.onend = function () {
-            console.log("*** recognition.onend ***");
+            //console.log("*** recognition.onend ***");
             recognizing = false;
             if (ignore_onend) {
                 return;
@@ -107,13 +107,11 @@ var speech = (function () {
             STTResultsSpan.innerHTML = linebreak(final_transcript);
             if (final_transcript || interim_transcript) {
                 if (final_transcript) {
-                    console.log(">>> onresult, final_transcript = " + final_transcript);
-                    
+                    //console.log(">>> onresult, final_transcript = " + final_transcript);
                     // *** tightly coupled to a function in main right now, but could implement
                     // *** a publish/subscribe framework to send the event
                     main.textFromSpeech(final_transcript);
                     //speakText(final_transcript);
-
                     final_transcript = '';
                 }
             }
@@ -154,7 +152,7 @@ var speech = (function () {
     */
 
     function speakText(textToSpeak) {
-        console.log("in speakText, text = "+textToSpeak);
+        //console.log("in speakText, text = "+textToSpeak);
 
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;

@@ -65,6 +65,7 @@ function loadResponses() {
         console.log("Error in loadResponses getJSON, err = " + error);
     });
 
+    /*
     getJSON(tempUrl, function(error, urlJsonResponse){
         if (error != null) {
             console.log("Error in getJSON, err = "+error);
@@ -73,7 +74,8 @@ function loadResponses() {
 
         } // Successful getJSON call
     }); // GetJSON
-
+    */
+   
 } // function loadResponses() {
 
 

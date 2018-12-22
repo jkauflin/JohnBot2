@@ -102,6 +102,14 @@
         return inVal.toString().replace(regexCommaHexStr, '');
     }
 
+     // Change quotes to spaces
+    // 22 double quote 27 single quote
+     var quoteHexStr = "[\x22\x27]";
+     var regexQuoteHexStr = new RegExp(quoteHexStr, "g");
+     function replaceQuotes(inVal) {
+         return inVal.toString().replace(regexQuoteHexStr, ' ');
+     }
+
     //Replace every ascii character except decimal and digits with a null, and round to 2 decimal places
     var nonMoneyCharsStr = "[\x01-\x2D\x2F\x3A-\x7F]";
     //"g" global so it does more than 1 substitution
@@ -111,6 +119,7 @@
         inAmountStr = inAmountStr.replace(regexNonMoneyChars, '');
         return parseFloat(inAmountStr).toFixed(2);
     }
+
 
     function formatDate(inDate) {
         var tempDate = inDate;
@@ -246,6 +255,7 @@
         urlParam:           urlParam,
         cleanStr:           cleanStr,
         csvFilter:          csvFilter,
+        replaceQuotes:      replaceQuotes,
         formatMoney:        formatMoney,
         formatDate:         formatDate,
         waitCursor:         waitCursor,

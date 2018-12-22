@@ -51,12 +51,10 @@ var main = (function () {
 	//=================================================================================================================
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;
-	logMessage("isTouchDevice = " + isTouchDevice);
+	//logMessage("isTouchDevice = " + isTouchDevice);
 
-	//$.get("start", "", function (wsUrl) {
-	//$.get("https://192.168.1.81:3000/start", "", function (wsUrl) {
-		wsUrl = "wss://192.168.1.81:3000";
-		console.log("on Start, wsUrl = " + wsUrl);
+	$.get("start", "", function (wsUrl) {
+		//console.log("on Start, wsUrl = " + wsUrl);
 		ws = new WebSocket(wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
@@ -72,11 +70,9 @@ var main = (function () {
 				}
 
 				// add other bot event handling here
-				/*
 				if (serverMessage.proxIn != null) {
 					$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
 				}
-				*/
 
 				if (serverMessage.textToSpeak != null) {
 					speech.speakText(serverMessage.textToSpeak);
@@ -85,7 +81,7 @@ var main = (function () {
 			} // on message (from server)
 
 		} // Websocket open
-	//}); // start
+	}); // start
 
 	$SearchButton.click(_searchResponses);
 	if (!isTouchDevice) {
@@ -94,19 +90,13 @@ var main = (function () {
 	$LoadDataButton.click(_loadData);
 
 	function _searchResponses() {
+		/*
 		console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
-		//speech.speakText($searchStr.val());
-
-		var uid = "";
-		$.getJSON("getBotResponsesProxy.php", "searchStr=" + $searchStr.val()+"&uid="+uid, function (responses) {
-			console.log("responses = "+responses);
-		});
-
-		$searchStr.val('');
+		*/
 	}
 	function _loadData() {
-		_wsSend('{"loadData" : "Y"}');
+		//_wsSend('{"loadData" : "Y"}');
 	}
 
 	/*
@@ -229,14 +219,8 @@ var botMessage = {
 			//$("#ex6SliderVal").text(slideEvt.value);
 			//console.log("slider value = "+slideEvt.value);
 			if (slideEvt.value != armPos) {
-				//date = new Date();
-				//currMs = date.getTime();
-				//if ((currMs - prevArmMs) > 500) {
-				//console.log("Arm slider value = "+slideEvt.value+", date = "+date.getTime());
 				_wsSend('{"armPosition" : ' + slideEvt.value + '}');
 				armPos = slideEvt.value;
-				//prevArmMs = currMs;
-				//}
 			}
 		})
 		.on("slideStop", function (slideEvt) {
@@ -319,7 +303,9 @@ var botMessage = {
 	}
 
 	function voicePushed() {
-		_wsSend('{"voice" : 1}');
+		//_wsSend('{"voice" : 1}');
+		speech.speakText("I am the John bought.  You cannot kill me");
+
 	}
 	function voiceReleased() {
 		_wsSend('{"voice" : 0}');
@@ -327,17 +313,7 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text
 	function textFromSpeech(speechText) {
-		//_wsSend('{"inSpeechText" : "' + speechText + '"}');
-
-		// Call service to get responses
-		var uid = "";
-		$.getJSON("https://xxx.com/getBotResponsesProxy.php", "searchStr=" + speechText + "&UID=" + uid, function (responses) {
-			console.log("responses = " + responses);
-			// responses.keywords
-			// responses.verbalResponse
-		});
-
-		speech.speakText(speechText);
+		_wsSend('{"inSpeechText" : "' + speechText + '"}');
 	}
 
 	//=================================================================================================================

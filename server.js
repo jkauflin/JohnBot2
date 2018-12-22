@@ -35,24 +35,21 @@ Modification History
 2018-05-27 JJK  Working on data load and full-text-search
 2018-09-02 JJK  Checking capabilities
 2018-12-06 JJK  Implemented HTTPS and ws using the HTTPS server
-
-"johnny-five": "latest",
-"sound-player": "latest",
-
 2018-12-08 JJK  Working on implementing STT/TTS with google web services
 2018-12-12 JJK  Finally got HTTPS and trusted certificates working
 2018-12-13 JJK  Finally got wss secure websocket working over the HTTPS 
                 server (being called from the app running at ISP)
+2018-12-21 JJK  Getting Johnny-Five and the robot working again
 =============================================================================*/
 
 // Read environment variables from the .env file
 require('dotenv').config();
 //HOST=
 //WEB_PORT=
-//WS_PORT=
 //BOT_DATA_URL=
 //UID=
-//STORE_DIR=
+//SSL_PRIVATE_KEY_FILE_LOC=
+//SSL_PUBLIC_CERT_FILE_LOC=
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -69,10 +66,17 @@ process.on('uncaughtException', function (e) {
 });
 
 
+// Change quotes to spaces
+// 22 double quote 27 single quote
+var quoteHexStr = "[\x22\x27]";
+var regexQuoteHexStr = new RegExp(quoteHexStr, "g");
+function replaceQuotes(inVal) {
+  return inVal.toString().replace(regexQuoteHexStr, ' ');
+}
+
 // Create a web server
 var express = require('express');
 var app = express();
-
 /*
 const http = require('http');
 const webServer = new http.createServer(app)
@@ -84,35 +88,27 @@ var https = require('https')
 var fs = require('fs');
 const webServer = new https.createServer({
   // Key and certificate that have been signed by a CA root authority installed on server
-  key: fs.readFileSync('ssl/johnbot.key'),
-  cert: fs.readFileSync('ssl/johnbot.crt')
+  key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
+  cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
 }, app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
 })
-/*
-var options = {
-  key: fs.readFileSync('/path-to-keys/privkey.pem'),
-  cert: fs.readFileSync('/path-to-keys/cert.pem'),
-  ca: fs.readFileSync('/path-to-keys/chain.pem')
-};
 
-https.createServer(options, ...)
-*/
-
+var getJSON = require('get-json');
 const url = require('url');
 var dateTime = require('node-datetime');
 //var dataFunctions = require('./dataFunctions.js');
+//var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
-//var botFunctions = require('./botFunctions.js');
-var dataLoaded = false;
+var botFunctions = require('./botFunctions.js');
 
 //=================================================================================================
 // Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WS_PORT;
+const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
 
 // Initialize to false at the start
@@ -177,14 +173,13 @@ webSocketServer.on('connection', function (ws) {
   botMessage.headPosition" : 90
     */
     
-    console.log("botMessageStr = "+botMessageStr);
+    //console.log("botMessageStr = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.inSpeechText != null) {
       // TEST audio functions
       //audioFunctions.speakText(botMessage.inSpeechText);
-
       /*
       dataFunctions.searchResponses(botMessage.inSpeechText, function (results) {
         console.log("searchResponse, results = "+results);
@@ -193,25 +188,58 @@ webSocketServer.on('connection', function (ws) {
       });
       */
 
+      var tempUrl = process.env.BOT_RESPONSES_URL + "?searchStr=" + replaceQuotes(botMessage.inSpeechText) + "&UID=" + process.env.UID
+      //console.log("botResponses url = "+tempUrl);
+      getJSON(tempUrl).then(function (jsonResponse) {
+          //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+jsonResponse.length);
+
+        var textToSpeak = "I am not programmed to respond in this area.";
+        if (jsonResponse.length > 0) {
+          textToSpeak = jsonResponse[0].verbalResponse;
+        }
+
+          for (var current in jsonResponse) {
+            // how do I know when the update is done - do I care?
+            // log how many records were in the service call JSON response
+            //console.log("id = "+botResponsesList[current].id);
+            
+            //console.log("JSON.stringify(jsonResponse[current]) = "+JSON.stringify(jsonResponse[current]));
+            /*
+            if (jsonResponse[current].deleted == "Y") {
+              // delete?
+            } else {
+              responsesSearch.add(urlJsonResponse[current].keywords + " " + urlJsonResponse[current].verbalResponse);
+            } // bulk push
+            */
+            //speech.speakText(sayText);
+            /*
+            var sayText = "I am not programmed to respond in this area.";
+            if (responses !== 'undefined' && responses.length > 0) {
+              sayText = responses[0].verbalResponse;
+              console.log("responses.verbalResponse = " + responses[0].verbalResponse);
+            }
+            */
+
+          } // loop through JSON list
+
+        var serverMessage = { "textToSpeak": textToSpeak };
+        ws.send(JSON.stringify(serverMessage));
+
+      }).catch(function (error) {
+        console.log("Error in getResponses getJSON, err = " + error);
+      });
+
     } else if (botMessage.loadData != null) {
       //dataFunctions.loadData('', function(error,response,status) {
       //});
     } else if (botMessage.searchStr != null) {
-      /*
-      dataFunctions.searchResponses(botMessage.searchStr, function(results) {
-        //console.log("return from searchResponses "+dateTime.create().format('Y-m-d H:M:S'));
-        //console.log(results);
-        //audioFunctions.speakText(results);
-        //audioFunctions.speakText(botMessage.searchStr);
-      });
-      */
-
+      //
     } else {
-      //botFunctions.manualControl(botMessage);
+      botFunctions.manualControl(botMessage);
     }
+
   })
 
-  /*
   // Register event listeners for the bot events
   botFunctions.botEvent.on("error", function(errorMessage) {
     // JJK - you can either construct it as a string and send with no JSON.stringify
@@ -225,30 +253,19 @@ webSocketServer.on('connection', function (ws) {
     //       or construct a JSON object, with easier syntax, and then you have to stringify it
     var serverMessage = {"proxIn" : proxIn};
     ws.send(JSON.stringify(serverMessage));
+
+    /*
+    >>>>>>>>>> Have to check and make sure the socket is still open before trying to send info
+
+    UncaughtException, error = Error: WebSocket is not open: readyState 3(CLOSED)
+    Error: WebSocket is not open: readyState 3(CLOSED)
+    at WebSocket.send(/home/pi / projects / JohnBot2 / node_modules / ws / lib / websocket.js: 322: 19)
+    at EventEmitter.<anonymous>(/home/pi / projects / JohnBot2 / server.js: 256: 8)
+    */
+
   });
-  */
 
 });
-
-/*
-app.use(function(req, res, next) {
-    // allow any cross origin access - check on how to limit this
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-*/
-
-//CORS middleware
-/*
-var allowCrossDomain = function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'xxx.com');
-  //res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-}
-*/
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection

@@ -1,6 +1,6 @@
 {
   "name": "johnbot2",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "2nd version of hobby robotics project",
   "main": "server.js",
   "scripts": {
@@ -27,6 +27,7 @@
     "ws": "latest",
     "get-json": "latest",
     "full-text-search": "latest",
-    "sound-player": "latest"
+    "sound-player": "latest",
+    "johnny-five": "latest"
   }
 }

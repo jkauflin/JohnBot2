@@ -23,7 +23,7 @@ display of the proximity values for the web page
 action to take for close proximity
 
 2018-12-01 JJK  Updated to johnny-five 1.0.0
-
+2018-12-21 JJK  Getting the robot function working again
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -58,13 +58,13 @@ var motorSpeed = 100;
 var headServo;
 var armServo;
 var proximity;
+var currProx = 0;
+var prevProx = 0;
 var armAnimation;
 var currArmPos = 90;
 
-//const FORWARD_DIRECTION = 'F';
-//const BACKWARD_DIRECTION = 'R';
-const FORWARD_DIRECTION = 'R';
-const BACKWARD_DIRECTION = 'F';
+const FORWARD_DIRECTION = 'F';
+const BACKWARD_DIRECTION = 'R';
 const RIGHT_DIRECTION = 'R';
 const LEFT_DIRECTION = 'L';
 
@@ -82,6 +82,7 @@ board.on("error", function() {
 
 // When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
+  console.log("*** board ready ***");
 
   proximity = new five.Proximity({
     controller: "HCSR04",
@@ -91,7 +92,13 @@ board.on("ready", function() {
   proximity.on("data", function() {
     if (this.in < 12.0) {
       // Send event message for change in proximity inches
-      botEvent.emit("proxIn", this.in);
+      currProx = Math.round(this.in);
+      if (currProx != prevProx) {
+        botEvent.emit("proxIn", currProx);
+        //console.log("Proximity: " + currProx);
+        prevProx = currProx;
+      }
+      //console.log("Proximity: " + this.in);
       if (this.in < 4.0) {
         //console.log("Proximity: "+this.in);
         // stop and turn around
@@ -137,7 +144,7 @@ board.on("ready", function() {
     id: "HeadServo",     // User defined id
     pin: HEAD_SERVO, // Which pin is it attached to?
     type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-    range: [0,180],    // Default: 0-180
+    range: [10,170],    // Default: 0-180
     fps: 100,          // Used to calculate rate of movement between positions
     invert: false,     // Invert all specified positions
     //startAt: 90,       // Immediately move to a degree
@@ -148,7 +155,7 @@ board.on("ready", function() {
     id: "ArmServo",     // User defined id
     pin: ARM_SERVO, // Which pin is it attached to?
     type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-    range: [0,180],    // Default: 0-180
+    range: [10,170],    // Default: 0-180
     fps: 100,          // Used to calculate rate of movement between positions
     invert: false,     // Invert all specified positions
     //startAt: 90,       // Immediately move to a degree
@@ -223,11 +230,11 @@ function manualControl(botMessage) {
     }
     if (botMessage.rotate) {
       if (rotateDirection == LEFT_DIRECTION) {
-        motor2.forward(motorSpeed);
-        motor1.reverse(motorSpeed);
-      } else {
         motor1.forward(motorSpeed);
         motor2.reverse(motorSpeed);
+      } else {
+        motor2.forward(motorSpeed);
+        motor1.reverse(motorSpeed);
       }
       rotating = true;
     } else {
