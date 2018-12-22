@@ -42,6 +42,20 @@ Modification History
 2018-12-21 JJK  Getting Johnny-Five and the robot working again
 =============================================================================*/
 
+// General handler for any uncaught exceptions
+process.on('uncaughtException', function (e) {
+  console.log("UncaughtException, error = " + e);
+  console.error(e.stack);
+  //if (ws.isAlive) {
+  //  var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
+  //  ws.send(serverMessage);
+  //}
+
+  // Stop the process
+  // 2017-12-29 JJK - Don't stop for now, just log the error
+  //process.exit(1);
+});
+
 // Read environment variables from the .env file
 require('dotenv').config();
 //HOST=
@@ -51,20 +65,8 @@ require('dotenv').config();
 //SSL_PRIVATE_KEY_FILE_LOC=
 //SSL_PUBLIC_CERT_FILE_LOC=
 
-// General handler for any uncaught exceptions
-process.on('uncaughtException', function (e) {
-	console.log("UncaughtException, error = "+e);
-  console.error(e.stack);
-  //if (ws.isAlive) {
-  //  var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
-  //  ws.send(serverMessage);
-  //}
-
-  // Stop the process
-  // 2017-12-29 JJK - Don't stop for now, just log the error
-	//process.exit(1);
-});
-
+require('os');
+console.log("os.hostname = " + os.hostname);
 
 // Change quotes to spaces
 // 22 double quote 27 single quote
