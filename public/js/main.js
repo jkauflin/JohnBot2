@@ -314,10 +314,16 @@ var botMessage = {
 		_wsSend('{"inSpeechText" : "' + speechText + '"}');
 	}
 
+	// Respond to string recognized by speech to text
+	function doneSpeaking(speechText) {
+		_wsSend('{"doneSpeaking" : 1}');
+	}
+
 	//=================================================================================================================
 	// This is what is exposed from this Module
 	return {
-		textFromSpeech
+		textFromSpeech,
+		doneSpeaking
 	};
 
 })(); // var main = (function(){

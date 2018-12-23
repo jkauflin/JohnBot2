@@ -220,7 +220,7 @@ webSocketServer.on('connection', function (ws) {
     } else if (botMessage.voice != null) {
       sayAndAnimate("I am the John bought.  You cannot kill me");
     } else {
-      botFunctions.manualControl(botMessage);
+      botFunctions.control(botMessage);
     }
 
   });

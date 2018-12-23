@@ -115,6 +115,9 @@ board.on("ready", function() {
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
 
+  var speechAnimation = new five.Animation([leftEyeLed, rightEyeLed]);
+
+
   // Strobe the pin on/off, defaults to 100ms phases
   //led.strobe();
 /*  
@@ -126,6 +129,24 @@ board.on("ready", function() {
   onstop: function() {
     console.log("Animation stopped");
   }
+
+var led = new five.Led(11);
+
+  led.fade({
+    easing: "linear",
+    duration: 1000,
+    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
+    keyFrames: [0, 250, 25, 150, 100, 125],
+    onstop: function() {
+      console.log("Animation stopped");
+    }
+  });
+
+  // Toggle the led after 2 seconds (shown in ms)
+  this.wait(2000, function() {
+    led.fadeOut();
+  });
+
 */
   // "blink" the led in 500ms
   // on-off phase periods
@@ -181,7 +202,7 @@ board.on("ready", function() {
 
 }); // board.on("ready", function() {
 
-function manualControl(botMessage) {
+function control(botMessage) {
   if (botMessage.motorSpeed != null) {
     motorSpeed = botMessage.motorSpeed;
   }
@@ -265,8 +286,12 @@ function manualControl(botMessage) {
     
   }
 
-  
-} // function manualControl(botMessage) {
+  if (botMessage.doneSpeaking) {
+    // When done speaking, turn the speaking animation off
+
+  }
+
+} // function control(botMessage) {
 
 function testBot(testStr,callback){
     console.log("in testBot "+dateTime.create().format('Y-m-d H:M:S'));
@@ -275,13 +300,26 @@ function testBot(testStr,callback){
 }; // 
 
 function animateSpeech(textToSpeak) {
+
+  speechAnimation.enqueue({
+    easing: "linear",
+    duration: 3000,
+    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
+    keyFrames: [0, 10, 0, 50, 0, 255],
+    onstop: function () {
+      console.log("Animation stopped");
+    }
+  });
+
 }
+//Use onstop functions when your looping animation is halted to return a bot's animated limbs to their home positions.
+//Nearly always use null as the first value in an animation segment. It allows the segment to be started from a variety of positions.
 
 module.exports = {
     testBot,
     botEvent,
-    manualControl,
-  animateSpeech
+    control,
+    animateSpeech
 };
 
 // make the motor objects global in this module, then expose functions that use them
