@@ -303,9 +303,7 @@ var botMessage = {
 	}
 
 	function voicePushed() {
-		//_wsSend('{"voice" : 1}');
-		speech.speakText("I am the John bought.  You cannot kill me");
-
+		_wsSend('{"voice" : 1}');
 	}
 	function voiceReleased() {
 		_wsSend('{"voice" : 0}');

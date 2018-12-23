@@ -206,9 +206,7 @@ webSocketServer.on('connection', function (ws) {
         //} // loop through JSON list
 
         // Send back to the web browser client to use TTS to say the response
-        _wsSend({ "textToSpeak": textToSpeak });
-        // Animate the bot when speaking
-        // botFunctions.animateSpeech(textToSpeak);
+        sayAndAnimate(textToSpeak);
 
       }).catch(function (error) {
         console.log("Error in getResponses getJSON, err = " + error);
@@ -219,12 +217,13 @@ webSocketServer.on('connection', function (ws) {
       //});
     } else if (botMessage.searchStr != null) {
       //
+    } else if (botMessage.voice != null) {
+      sayAndAnimate("I am the John bought.  You cannot kill me");
     } else {
       botFunctions.manualControl(botMessage);
     }
 
   });
-
 
   // Register event listeners for the bot events
   botFunctions.botEvent.on("error", function(errorMessage) {
@@ -236,6 +235,15 @@ webSocketServer.on('connection', function (ws) {
   });
 
 });
+
+function sayAndAnimate(textToSpeak) {
+  _wsSend({ "textToSpeak": textToSpeak });
+  // Animate the bot when speaking
+  botFunctions.animateSpeech(textToSpeak);
+
+}
+
+
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection

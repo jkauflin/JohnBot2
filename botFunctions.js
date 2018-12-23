@@ -17,13 +17,10 @@ Modification History
                 proximity sensor working
 2018-02-10 JJK  Implemented the general botEvent, checking for Board errors,
                 and sending an error event.
-
-Working with proximity sensors
-display of the proximity values for the web page
-action to take for close proximity
-
+                Working with proximity sensors
 2018-12-01 JJK  Updated to johnny-five 1.0.0
 2018-12-21 JJK  Getting the robot function working again
+2018-12-22 JJK  Added animation to go along with speaking text
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -100,6 +97,8 @@ board.on("ready", function() {
       }
       //console.log("Proximity: " + this.in);
       if (this.in < 4.0) {
+        // Take action on close proximity
+        //    stop if moving, and say something
         //console.log("Proximity: "+this.in);
         // stop and turn around
       }
@@ -163,7 +162,6 @@ board.on("ready", function() {
   });
 
   armAnimation = new five.Animation(armServo);
-
 
   //headServo.to(120);
   // Sweep from 0-180.
@@ -267,14 +265,6 @@ function manualControl(botMessage) {
     
   }
 
-  if (botMessage.voice != null) {
-    //console.log("botMessage.voice = "+botMessage.voice);
-    if (botMessage.voice) {
-      // turn on voice (or start playing a random sound clip)
-    } else {
-      // turn off voice (stop playing sound clip)
-    }
-  }
   
 } // function manualControl(botMessage) {
 
@@ -284,10 +274,14 @@ function testBot(testStr,callback){
     
 }; // 
 
+function animateSpeech(textToSpeak) {
+}
+
 module.exports = {
     testBot,
     botEvent,
-    manualControl
+    manualControl,
+  animateSpeech
 };
 
 // make the motor objects global in this module, then expose functions that use them
