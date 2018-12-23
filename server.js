@@ -40,6 +40,8 @@ Modification History
 2018-12-13 JJK  Finally got wss secure websocket working over the HTTPS 
                 server (being called from the app running at ISP)
 2018-12-21 JJK  Getting Johnny-Five and the robot working again
+                Introducing an activity loop to check state and timings, 
+                and trigger activities
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -65,8 +67,8 @@ require('dotenv').config();
 //SSL_PRIVATE_KEY_FILE_LOC=
 //SSL_PUBLIC_CERT_FILE_LOC=
 
-require('os');
-console.log("os.hostname = " + os.hostname);
+const os = require('os');
+//console.log("os.hostname = " + os.hostname);
 
 // Change quotes to spaces
 // 22 double quote 27 single quote
@@ -111,6 +113,7 @@ var botFunctions = require('./botFunctions.js');
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
 const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
+//const wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
 
 // Initialize to false at the start
@@ -143,13 +146,17 @@ webSocketServer.on('connection', function (ws) {
   // showing the connection is still alive
   ws.on('pong', heartbeat);
 
-  /* Broadcast example
-  webSocketServer.clients.forEach(function each(client) {
-    if (client.readyState === ws.OPEN) {
-      client.send(data);
+  // General function to send a message from the bot to the connected browser client
+  function _wsSend(serverMessage) {
+    // Make sure the web socket is connected before trying to send the message
+    if (ws.isAlive === true) {
+      // JJK - you can either construct it as a string and send with no JSON.stringify
+      //       or construct a JSON object, with easier syntax, and then you have to stringify it
+      ws.send(JSON.stringify(serverMessage));
+    } else {
+      console.log("Error trying to send ws message = " + JSON.stringify(serverMessage));
     }
-  });
-  */
+  }
 
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
@@ -180,52 +187,28 @@ webSocketServer.on('connection', function (ws) {
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.inSpeechText != null) {
-      // TEST audio functions
-      //audioFunctions.speakText(botMessage.inSpeechText);
-      /*
-      dataFunctions.searchResponses(botMessage.inSpeechText, function (results) {
-        console.log("searchResponse, results = "+results);
-        var serverMessage = { "textToSpeak": results };
-        ws.send(JSON.stringify(serverMessage));
-      });
-      */
-
+      // Call the responses URL and see if there is a response to the spoken text
       var tempUrl = process.env.BOT_RESPONSES_URL + "?searchStr=" + replaceQuotes(botMessage.inSpeechText) + "&UID=" + process.env.UID
       //console.log("botResponses url = "+tempUrl);
       getJSON(tempUrl).then(function (jsonResponse) {
-          //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+jsonResponse.length);
-
+        //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+jsonResponse.length);
         var textToSpeak = "I am not programmed to respond in this area.";
         if (jsonResponse.length > 0) {
           textToSpeak = jsonResponse[0].verbalResponse;
         }
 
-          for (var current in jsonResponse) {
-            // how do I know when the update is done - do I care?
-            // log how many records were in the service call JSON response
-            //console.log("id = "+botResponsesList[current].id);
-            
-            //console.log("JSON.stringify(jsonResponse[current]) = "+JSON.stringify(jsonResponse[current]));
-            /*
-            if (jsonResponse[current].deleted == "Y") {
-              // delete?
-            } else {
-              responsesSearch.add(urlJsonResponse[current].keywords + " " + urlJsonResponse[current].verbalResponse);
-            } // bulk push
-            */
-            //speech.speakText(sayText);
-            /*
-            var sayText = "I am not programmed to respond in this area.";
-            if (responses !== 'undefined' && responses.length > 0) {
-              sayText = responses[0].verbalResponse;
-              console.log("responses.verbalResponse = " + responses[0].verbalResponse);
-            }
-            */
+        // on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
+        //for (var current in jsonResponse) {
+          // how do I know when the update is done - do I care?
+          // log how many records were in the service call JSON response
+          //console.log("id = "+botResponsesList[current].id);
+          //console.log("JSON.stringify(jsonResponse[current]) = "+JSON.stringify(jsonResponse[current]));
+        //} // loop through JSON list
 
-          } // loop through JSON list
-
-        var serverMessage = { "textToSpeak": textToSpeak };
-        ws.send(JSON.stringify(serverMessage));
+        // Send back to the web browser client to use TTS to say the response
+        _wsSend({ "textToSpeak": textToSpeak });
+        // Animate the bot when speaking
+        // botFunctions.animateSpeech(textToSpeak);
 
       }).catch(function (error) {
         console.log("Error in getResponses getJSON, err = " + error);
@@ -240,31 +223,16 @@ webSocketServer.on('connection', function (ws) {
       botFunctions.manualControl(botMessage);
     }
 
-  })
+  });
+
 
   // Register event listeners for the bot events
   botFunctions.botEvent.on("error", function(errorMessage) {
-    // JJK - you can either construct it as a string and send with no JSON.stringify
-    //       or construct a JSON object, with easier syntax, and then you have to stringify it
-    var serverMessage = {"errorMessage" : errorMessage};
-    ws.send(JSON.stringify(serverMessage));
+    _wsSend({ "errorMessage": errorMessage });
   });
 
   botFunctions.botEvent.on("proxIn", function(proxIn) {
-    // JJK - you can either construct it as a string and send with no JSON.stringify
-    //       or construct a JSON object, with easier syntax, and then you have to stringify it
-    var serverMessage = {"proxIn" : proxIn};
-    ws.send(JSON.stringify(serverMessage));
-
-    /*
-    >>>>>>>>>> Have to check and make sure the socket is still open before trying to send info
-
-    UncaughtException, error = Error: WebSocket is not open: readyState 3(CLOSED)
-    Error: WebSocket is not open: readyState 3(CLOSED)
-    at WebSocket.send(/home/pi / projects / JohnBot2 / node_modules / ws / lib / websocket.js: 322: 19)
-    at EventEmitter.<anonymous>(/home/pi / projects / JohnBot2 / server.js: 256: 8)
-    */
-
+    _wsSend({ "proxIn": proxIn });
   });
 
 });
@@ -288,4 +256,10 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
+
+
+// Main activity loop
+const activityLoop = setInterval(function () {
+  //console.log(dateTime.create().format('Y-m-d H:M:S.N')+" In the activityLoop, now = "+Date.now());
+}, 1000);
 

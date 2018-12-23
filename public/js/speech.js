@@ -164,7 +164,9 @@ var speech = (function () {
         }
         // Create an utterance and speak it
         // Good documentation: https://flaviocopes.com/speech-synthesis-api/
-        var utterance = new SpeechSynthesisUtterance(textToSpeak);
+
+        // 12/22/2018 - Add UM to the beginning to deal with delay sending to bluetooth speakers
+        var utterance = new SpeechSynthesisUtterance("um, "+textToSpeak);
         // Just using defaults for voice, pitch, and rate
         speechSynth.speak(utterance);
 

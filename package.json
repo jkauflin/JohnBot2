@@ -18,16 +18,16 @@
   },
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
-    "nodemon": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "full-text-search": "latest",
+    "get-json": "latest",
+    "johnny-five": "latest",
     "lodash": "latest",
     "merge": "1.2.1",
-    "dotenv": "latest",
     "node-datetime": "latest",
-    "express": "latest",
-    "ws": "latest",
-    "get-json": "latest",
-    "full-text-search": "latest",
+    "nodemon": "latest",
     "sound-player": "latest",
-    "johnny-five": "latest"
+    "ws": "latest"
   }
 }
