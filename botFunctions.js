@@ -35,8 +35,8 @@ var board = new five.Board({
 //var formatted = dt.format('Y-m-d H:M:S');
 
 // Constants for pin numbers
-const LEFT_EYE = 44;
-const RIGHT_EYE = 45;
+const LEFT_EYE = 45;
+const RIGHT_EYE = 44;
 const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
@@ -115,7 +115,6 @@ board.on("ready", function() {
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
 
-  var speechAnimation = new five.Animation([leftEyeLed, rightEyeLed]);
 
 
   // Strobe the pin on/off, defaults to 100ms phases
@@ -270,14 +269,6 @@ function control(botMessage) {
       rightEyeLed.on();
       eyesOn = true;
 
-      /*
-      armAnimation.enqueue({
-        duration: 2000,
-        cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
-        keyFrames: [ {degrees: 90}, {degrees: 130}, {degrees: 45}, {degrees: 120}, {degrees: 90}]
-      });
-      */
-
     } else {
       leftEyeLed.off();
       rightEyeLed.off();
@@ -288,7 +279,7 @@ function control(botMessage) {
 
   if (botMessage.doneSpeaking) {
     // When done speaking, turn the speaking animation off
-
+    console.log("in botFunctions, message = doneSpeaking");
   }
 
 } // function control(botMessage) {
@@ -300,6 +291,53 @@ function testBot(testStr,callback){
 }; // 
 
 function animateSpeech(textToSpeak) {
+  console.log("in animateSpeech");
+
+  //var animation = new five.Animation(led);
+  //var ledAnimation = new five.Animation([leftEyeLed, rightEyeLed]);
+  var ledAnimation = new five.Animation(leftEyeLed);
+  ledAnimation.enqueue({
+    duration: 3000,
+    cuePoints: [0,      0.25,               0.5,              0.75,               1.0],
+    keyFrames: [
+      { intensity: 0 }, { intensity: 100 }, { intensity: 0 }, { intensity: 100 }, { intensity: 0 }
+    ],
+    oncomplete() {
+      console.log("Done ledAnimation!");
+    }
+  });
+
+  /*
+  armAnimation.enqueue({
+    duration: 3000,
+    cuePoints: [0,    0.25,           0.5,            0.75,           1.0],
+    keyFrames: [null, {degrees: 130}, {degrees: 45}, {degrees: 120}, {degrees: 90}],
+    oncomplete() {
+      console.log("arm animation Done!");
+    }
+  });
+  */
+ 
+    /*
+  leftEyeLed.fade({
+    easing: "linear",
+    duration: 1000,
+    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
+    keyFrames: [0, 250, 25, 150, 100, 125],
+    onstop: function() {
+      console.log("Animation stopped");
+    }
+  });
+  */
+
+  // Toggle the led after 2 seconds (shown in ms)
+  /*
+  this.wait(2000, function() {
+    led.fadeOut();
+  });
+  */
+
+/*
 
   speechAnimation.enqueue({
     easing: "linear",
@@ -310,6 +348,9 @@ function animateSpeech(textToSpeak) {
       console.log("Animation stopped");
     }
   });
+
+  //speechAnimation.play();
+*/
 
 }
 //Use onstop functions when your looping animation is halted to return a bot's animated limbs to their home positions.

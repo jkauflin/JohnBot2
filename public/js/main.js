@@ -243,6 +243,7 @@ var botMessage = {
 			_wsSend('{"headPosition" : ' + slideEvt.value + '}');
 		});
 
+
 	//=================================================================================================================
 	// Module methods
 	function logMessage(message) {

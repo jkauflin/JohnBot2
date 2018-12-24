@@ -48,11 +48,6 @@ Modification History
 process.on('uncaughtException', function (e) {
   console.log("UncaughtException, error = " + e);
   console.error(e.stack);
-  //if (ws.isAlive) {
-  //  var serverMessage = {"errorMessage" : "UncaughtException, error = "+e.message};
-  //  ws.send(serverMessage);
-  //}
-
   // Stop the process
   // 2017-12-29 JJK - Don't stop for now, just log the error
   //process.exit(1);
@@ -136,6 +131,7 @@ const interval = setInterval(function ping() {
   });
 }, 30000);
 
+
 //=================================================================================================
 // Successful connection from a web client
 //=================================================================================================
@@ -149,7 +145,7 @@ webSocketServer.on('connection', function (ws) {
   // General function to send a message from the bot to the connected browser client
   function _wsSend(serverMessage) {
     // Make sure the web socket is connected before trying to send the message
-    if (ws.isAlive === true) {
+    if (ws.isAlive == true) {
       // JJK - you can either construct it as a string and send with no JSON.stringify
       //       or construct a JSON object, with easier syntax, and then you have to stringify it
       ws.send(JSON.stringify(serverMessage));
@@ -218,7 +214,9 @@ webSocketServer.on('connection', function (ws) {
     } else if (botMessage.searchStr != null) {
       //
     } else if (botMessage.voice != null) {
-      sayAndAnimate("I am the John bought.  You cannot kill me");
+      if (botMessage.voice) {
+        sayAndAnimate("I am the John bought.  You cannot kill me");
+      }
     } else {
       botFunctions.control(botMessage);
     }
@@ -226,23 +224,21 @@ webSocketServer.on('connection', function (ws) {
   });
 
   // Register event listeners for the bot events
-  botFunctions.botEvent.on("error", function(errorMessage) {
+  botFunctions.botEvent.on("error", function (errorMessage) {
     _wsSend({ "errorMessage": errorMessage });
   });
 
-  botFunctions.botEvent.on("proxIn", function(proxIn) {
+  botFunctions.botEvent.on("proxIn", function (proxIn) {
     _wsSend({ "proxIn": proxIn });
   });
 
+  function sayAndAnimate(textToSpeak) {
+    _wsSend({ "textToSpeak": textToSpeak });
+    // Animate the bot when speaking
+    botFunctions.animateSpeech(textToSpeak);
+  }
+
 });
-
-function sayAndAnimate(textToSpeak) {
-  _wsSend({ "textToSpeak": textToSpeak });
-  // Animate the bot when speaking
-  botFunctions.animateSpeech(textToSpeak);
-
-}
-
 
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
