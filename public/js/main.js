@@ -9,6 +9,7 @@
  * 2017-01-21 JJK	Implementing response to buttons for manual controls
  * 2018-12-07 JJK	Re-factor to use modules
  * i'm always thankful on Christmas
+ * 
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -75,6 +76,7 @@ var main = (function () {
 				}
 
 				if (serverMessage.textToSpeak != null) {
+					//console.log(">>> in client, texttoSpeak = " + serverMessage.textToSpeak)
 					speech.speakText(serverMessage.textToSpeak);
 				}
 

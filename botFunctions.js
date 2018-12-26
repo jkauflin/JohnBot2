@@ -20,7 +20,10 @@ Modification History
                 Working with proximity sensors
 2018-12-01 JJK  Updated to johnny-five 1.0.0
 2018-12-21 JJK  Getting the robot function working again
-2018-12-22 JJK  Added animation to go along with speaking text
+2018-12-22 JJK  Adding animation to go along with speaking text
+2018-12-26 JJK  Got some speech animation working using LED strobe, and
+                servo animations for head and arm (turned off with and event
+                from the client saying the utterance was done speaking)
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -40,12 +43,15 @@ const RIGHT_EYE = 44;
 const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
+const headStartPos = 90;
+const armStartPos = 145;
 
 // create EventEmitter object
 var botEvent = new EventEmitter();
 
 // Event Namespace
 //var RoboEvents = {};
+var eyes;
 var leftEyeLed;
 var rightEyeLed;
 var motorConfig = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
@@ -54,10 +60,11 @@ var motor2;
 var motorSpeed = 100;
 var headServo;
 var armServo;
+var headAndArm;
 var proximity;
 var currProx = 0;
 var prevProx = 0;
-var armAnimation;
+var speechAnimation;
 var currArmPos = 90;
 
 const FORWARD_DIRECTION = 'F';
@@ -114,79 +121,36 @@ board.on("ready", function() {
   // Create an Led on pin 13
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
+  eyes = new five.Leds([leftEyeLed, rightEyeLed]);
 
-
-
-  // Strobe the pin on/off, defaults to 100ms phases
-  //led.strobe();
-/*  
-  led.fade({
-  easing: "outSine",
-  duration: 1000,
-  cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
-  keyFrames: [0, 250, 25, 150, 100, 125],
-  onstop: function() {
-    console.log("Animation stopped");
-  }
-
-var led = new five.Led(11);
-
-  led.fade({
-    easing: "linear",
-    duration: 1000,
-    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
-    keyFrames: [0, 250, 25, 150, 100, 125],
-    onstop: function() {
-      console.log("Animation stopped");
-    }
-  });
-
-  // Toggle the led after 2 seconds (shown in ms)
-  this.wait(2000, function() {
-    led.fadeOut();
-  });
-
-*/
-  // "blink" the led in 500ms
-  // on-off phase periods
-  //led.blink(700);  
-  //led2.blink(700);
-  
- // Initialize a Servo collection
- /*
-  var servos = new five.Servos([9, 10]);
-  servos.center();  
-  servos.stop();
-*/
-
+ // Initialize the Head and Arm servos
   headServo = new five.Servo({
-    id: "HeadServo",     // User defined id
-    pin: HEAD_SERVO, // Which pin is it attached to?
-    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-    range: [10,170],    // Default: 0-180
-    fps: 100,          // Used to calculate rate of movement between positions
-    invert: false,     // Invert all specified positions
-    //startAt: 90,       // Immediately move to a degree
-    center: true,      // overrides startAt if true and moves the servo to the center of the range
+    id: "HeadServo",        // User defined id
+    pin: HEAD_SERVO,        // Which pin is it attached to?
+    type: "standard",       // Default: "standard". Use "continuous" for continuous rotation servos
+    range: [10,170],        // Default: 0-180
+    fps: 100,               // Used to calculate rate of movement between positions
+    invert: false,          // Invert all specified positions
+    startAt: headStartPos,  // Immediately move to a degree
+    //center: true,         // overrides startAt if true and moves the servo to the center of the range
   });
 
   armServo = new five.Servo({
-    id: "ArmServo",     // User defined id
-    pin: ARM_SERVO, // Which pin is it attached to?
-    type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
-    range: [10,170],    // Default: 0-180
-    fps: 100,          // Used to calculate rate of movement between positions
-    invert: false,     // Invert all specified positions
-    //startAt: 90,       // Immediately move to a degree
-    center: true,      // overrides startAt if true and moves the servo to the center of the range
+    id: "ArmServo",         // User defined id
+    pin: ARM_SERVO,         // Which pin is it attached to?
+    type: "standard",       // Default: "standard". Use "continuous" for continuous rotation servos
+    range: [10,170],        // Default: 0-180
+    fps: 100,               // Used to calculate rate of movement between positions
+    invert: false,          // Invert all specified positions
+    startAt: armStartPos,   // Immediately move to a degree
+    //center: true,         // overrides startAt if true and moves the servo to the center of the range
   });
 
-  armAnimation = new five.Animation(armServo);
+  // Create a animation for the head and arm
+  headAndArm = new five.Servos([headServo,armServo]);
+  speechAnimation = new five.Animation(headAndArm);
 
-  //headServo.to(120);
-  // Sweep from 0-180.
-  //headServo.sweep();
-
+  // Initialize the legs
   motor1 = new five.Motor(motorConfig.M1);
   motor2 = new five.Motor(motorConfig.M2);
 
@@ -202,26 +166,17 @@ var led = new five.Led(11);
 }); // board.on("ready", function() {
 
 function control(botMessage) {
-  if (botMessage.motorSpeed != null) {
-    motorSpeed = botMessage.motorSpeed;
-  }
   if (botMessage.armPosition != null) {
     armServo.to(botMessage.armPosition);
-    /*
-    armAnimation.enqueue({
-      duration: 500,
-      cuePoints: [0, 1.0],
-      keyFrames: [ {degrees: currArmPos}, {degrees: botMessage.armPosition}]
-    });
-    */
     currArmPos = botMessage.armPosition;
-
   }
   if (botMessage.headPosition != null) {
     headServo.to(botMessage.headPosition);
-
   }
 
+  if (botMessage.motorSpeed != null) {
+    motorSpeed = botMessage.motorSpeed;
+  }
   if (botMessage.move != null) {
     if (botMessage.moveDirection != null) {
       moveDirection = botMessage.moveDirection;
@@ -265,111 +220,54 @@ function control(botMessage) {
   if (botMessage.eyes != null) {
     //console.log("botMessage.eyes = "+botMessage.eyes);
     if (botMessage.eyes) {
-      leftEyeLed.on();
-      rightEyeLed.on();
+      eyes.on();
       eyesOn = true;
 
     } else {
-      leftEyeLed.off();
-      rightEyeLed.off();
+      eyes.off();
       eyesOn = false;
     }
-    
   }
 
   if (botMessage.doneSpeaking) {
     // When done speaking, turn the speaking animation off
-    console.log("in botFunctions, message = doneSpeaking");
+    //console.log("in botFunctions, message = doneSpeaking");
+    eyes.stop().off();
+    speechAnimation.stop();
   }
 
 } // function control(botMessage) {
 
-function testBot(testStr,callback){
-    console.log("in testBot "+dateTime.create().format('Y-m-d H:M:S'));
-        callback("back");
-    
-}; // 
-
 function animateSpeech(textToSpeak) {
-  console.log("in animateSpeech");
+  eyes.strobe(150);
 
-  //var animation = new five.Animation(led);
-  //var ledAnimation = new five.Animation([leftEyeLed, rightEyeLed]);
-  var ledAnimation = new five.Animation(leftEyeLed);
-  ledAnimation.enqueue({
-    duration: 3000,
-    cuePoints: [0,      0.25,               0.5,              0.75,               1.0],
-    keyFrames: [
-      { intensity: 0 }, { intensity: 100 }, { intensity: 0 }, { intensity: 100 }, { intensity: 0 }
-    ],
-    oncomplete() {
-      console.log("Done ledAnimation!");
-    }
-  });
-
-  /*
-  armAnimation.enqueue({
-    duration: 3000,
-    cuePoints: [0,    0.25,           0.5,            0.75,           1.0],
-    keyFrames: [null, {degrees: 130}, {degrees: 45}, {degrees: 120}, {degrees: 90}],
-    oncomplete() {
-      console.log("arm animation Done!");
-    }
-  });
-  */
- 
-    /*
-  leftEyeLed.fade({
-    easing: "linear",
-    duration: 1000,
-    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
-    keyFrames: [0, 250, 25, 150, 100, 125],
-    onstop: function() {
-      console.log("Animation stopped");
-    }
-  });
-  */
-
-  // Toggle the led after 2 seconds (shown in ms)
-  /*
-  this.wait(2000, function() {
-    led.fadeOut();
-  });
-  */
-
-/*
-
-  speechAnimation.enqueue({
-    easing: "linear",
-    duration: 3000,
-    cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
-    keyFrames: [0, 10, 0, 50, 0, 255],
-    onstop: function () {
-      console.log("Animation stopped");
-    }
-  });
-
-  //speechAnimation.play();
-*/
-
-}
+  try {
+    speechAnimation.enqueue({
+      duration: 2000,
+      cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
+      keyFrames:
+        [
+          [{ degrees: headStartPos }, { degrees: 50 }, { degrees: 130 }, { degrees: 65 }, { degrees: headStartPos}],
+          [{ degrees: armStartPos }, { degrees: 95 }, { degrees: 140 }, { degrees: 100 }, { degrees: armStartPos}]
+        ],
+      loop: true,
+      onstop: function () {
+        //console.log("Animation stopped");
 //Use onstop functions when your looping animation is halted to return a bot's animated limbs to their home positions.
 //Nearly always use null as the first value in an animation segment. It allows the segment to be started from a variety of positions.
+      },
+      oncomplete: function () {
+        //console.log("Animation complete");
+      }
+    });
+  }
+  catch (error) {
+    console.error(">>> speechAnimation error = " + error);
+  }
+}
 
 module.exports = {
-    testBot,
     botEvent,
     control,
     animateSpeech
 };
-
-// make the motor objects global in this module, then expose functions that use them
-/*
-exports.forward = function(){
-  console.log('moving forward');
-
-  //hack for the direction issue
-  leftFront.reverse(255);
-  rightFront.reverse(255);
-}
-*/

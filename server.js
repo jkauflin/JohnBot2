@@ -42,6 +42,7 @@ Modification History
 2018-12-21 JJK  Getting Johnny-Five and the robot working again
                 Introducing an activity loop to check state and timings, 
                 and trigger activities
+2018-12-26 JJK  Got some speech animation working again
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -238,7 +239,20 @@ webSocketServer.on('connection', function (ws) {
     botFunctions.animateSpeech(textToSpeak);
   }
 
-});
+  // Main activity loop
+  var loopStart = true;
+  const activityLoop = setInterval(function () {
+    //console.log(dateTime.create().format('Y-m-d H:M:S.N')+" In the activityLoop, now = "+Date.now());
+    if (loopStart) {
+      //sayAndAnimate("Hello, I am the John bought.");
+      loopStart = false;
+    }
+
+    // put stuff for the state loop in here
+
+  }, 1000);
+
+}); // End of Connection to client
 
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
@@ -260,10 +274,4 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
-
-
-// Main activity loop
-const activityLoop = setInterval(function () {
-  //console.log(dateTime.create().format('Y-m-d H:M:S.N')+" In the activityLoop, now = "+Date.now());
-}, 1000);
 

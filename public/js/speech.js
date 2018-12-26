@@ -183,7 +183,6 @@ var speech = (function () {
         // something that says when utterance is done?
         utterance.onend = function (event) {
             //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
-
             // Report that the utterance is done being spoken
             main.doneSpeaking("");
 
