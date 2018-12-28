@@ -77,6 +77,7 @@ var main = (function () {
 
 				if (serverMessage.textToSpeak != null) {
 					//console.log(">>> in client, texttoSpeak = " + serverMessage.textToSpeak)
+					$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
 					speech.speakText(serverMessage.textToSpeak);
 				}
 

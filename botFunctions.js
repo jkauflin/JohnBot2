@@ -239,6 +239,11 @@ function control(botMessage) {
 } // function control(botMessage) {
 
 function animateSpeech(textToSpeak) {
+  // Cancel any running animations before starting a new one
+  eyes.stop().off();
+  speechAnimation.stop();
+
+  // Start strobing the eye leds
   eyes.strobe(150);
 
   try {

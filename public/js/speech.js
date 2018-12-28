@@ -9,6 +9,7 @@
  * 2018-12-08 JJK   Got working with a tight couple to call a main function
  *                  when a final transcript was recognized
  *                  Added TTS capabilities through window speechSynthesis
+ * 2018-12-28 JJK   Added cancel of speech before starting another utterance
  *============================================================================*/
 var speech = (function () {
     'use strict';  // Force declaration of variables before use (among other things)
@@ -162,11 +163,15 @@ var speech = (function () {
             // Wait for recognition to stop (if needed) - or tie into the onend event
             //util.sleep(500);
         }
+
+        // Cancel any previously queued utterances
+        speechSynth.cancel();
+
         // Create an utterance and speak it
         // Good documentation: https://flaviocopes.com/speech-synthesis-api/
-
         // 12/22/2018 - Add UM to the beginning to deal with delay sending to bluetooth speakers
-        var utterance = new SpeechSynthesisUtterance("um, "+textToSpeak);
+        //var utterance = new SpeechSynthesisUtterance("um, "+textToSpeak);
+        var utterance = new SpeechSynthesisUtterance(textToSpeak);
         // Just using defaults for voice, pitch, and rate
         speechSynth.speak(utterance);
 
