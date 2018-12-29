@@ -179,7 +179,7 @@ webSocketServer.on('connection', function (ws) {
   botMessage.headPosition" : 90
     */
     
-    //console.log("botMessageStr = "+botMessageStr);
+    console.log(dateTime.create().format('H:M:S.N') + ", botMessage = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
@@ -188,19 +188,22 @@ webSocketServer.on('connection', function (ws) {
       var tempUrl = process.env.BOT_RESPONSES_URL + "?searchStr=" + replaceQuotes(botMessage.inSpeechText) + "&UID=" + process.env.UID
       //console.log("botResponses url = "+tempUrl);
       getJSON(tempUrl).then(function (jsonResponse) {
-        //console.log(dateTime.create().format('H:M:S.N')+" table = "+table+", urlJsonResponse.length = "+jsonResponse.length);
+        console.log(dateTime.create().format('H:M:S.N') + ", inSpeechText = " + replaceQuotes(botMessage.inSpeechText));
         var textToSpeak = "I am not programmed to respond in this area.";
-        if (jsonResponse.length > 0) {
-          textToSpeak = jsonResponse[0].verbalResponse;
-        }
+        //if (jsonResponse.length > 0) {
+        //  textToSpeak = jsonResponse[0].verbalResponse;
+        //}
 
         // on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
-        //for (var current in jsonResponse) {
+        for (var current in jsonResponse) {
+          if (current == 0) {
+            textToSpeak = jsonResponse[current].verbalResponse;
+          }
           // how do I know when the update is done - do I care?
           // log how many records were in the service call JSON response
           //console.log("id = "+botResponsesList[current].id);
-          //console.log("JSON.stringify(jsonResponse[current]) = "+JSON.stringify(jsonResponse[current]));
-        //} // loop through JSON list
+          console.log(dateTime.create().format('H:M:S.N')+", response("+current+") = "+JSON.stringify(jsonResponse[current]));
+        } // loop through JSON list
 
         // Send back to the web browser client to use TTS to say the response
         sayAndAnimate(textToSpeak);

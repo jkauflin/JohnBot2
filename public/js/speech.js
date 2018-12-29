@@ -153,7 +153,7 @@ var speech = (function () {
     */
 
     function speakText(textToSpeak) {
-        //console.log("in speakText, text = "+textToSpeak);
+        console.log("in speakText, text = "+textToSpeak);
 
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;
@@ -175,8 +175,6 @@ var speech = (function () {
         // Just using defaults for voice, pitch, and rate
         speechSynth.speak(utterance);
 
-        // Cancel all utterances
-        // speechSynth.cancel()
         /*
         var utterance1 = new SpeechSynthesisUtterance('How about we say this now? This is quite a long sentence to say.');
         var utterance2 = new SpeechSynthesisUtterance('We should say another sentence too, just to be on the safe side.');
