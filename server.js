@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
              communications to the Arduino Mega robot
@@ -77,13 +77,13 @@ function replaceQuotes(inVal) {
 // Create a web server
 var express = require('express');
 var app = express();
-/*
+
 const http = require('http');
 const webServer = new http.createServer(app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
-  })
-*/
+  });
+/*
 var https = require('https')
 var fs = require('fs');
 const webServer = new https.createServer({
@@ -93,7 +93,8 @@ const webServer = new https.createServer({
 }, app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
-})
+});
+*/
 
 var getJSON = require('get-json');
 const url = require('url');
@@ -108,7 +109,8 @@ var botFunctions = require('./botFunctions.js');
 //=================================================================================================
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
+const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
+//const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
 //const wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
 
