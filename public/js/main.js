@@ -315,7 +315,12 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text
 	function textFromSpeech(speechText) {
-		_wsSend('{"inSpeechText" : "' + speechText + '"}');
+		// Search for a response
+
+		
+//		if (robot connected) {
+			_wsSend('{"inSpeechText" : "' + speechText + '"}'); \
+//		}
 	}
 
 	// Respond to string recognized by speech to text
