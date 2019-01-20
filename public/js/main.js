@@ -348,7 +348,7 @@ var botMessage = {
 			*/
 
 			// Ask the speech module to say the response text
-			//speech.speakText(textToSpeak);
+			speech.speakText(textToSpeak);
 			// Send text to robot to animate speech (if connected)
 			//_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
 

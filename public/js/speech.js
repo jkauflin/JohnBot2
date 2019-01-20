@@ -153,7 +153,7 @@ var speech = (function () {
     */
 
     function speakText(textToSpeak) {
-        console.log("in speakText, text = "+textToSpeak);
+        console.log("in speech.speakText, text = "+textToSpeak);
 
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;
