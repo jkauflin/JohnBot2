@@ -93,9 +93,11 @@ var main = (function () {
 		} // Websocket open
 	}); // start
 
-	$SearchButton.click(_searchResponses);
+	// doing this twice
 	if (!isTouchDevice) {
 		$SearchInput.change(_searchResponses);
+	} else {
+		$SearchButton.click(_searchResponses);
 	}
 	$LoadDataButton.click(_loadData);
 
@@ -326,9 +328,8 @@ var botMessage = {
 		console.log("in handleTextFromSpeech, speechText = "+speechText);
 		// Send the speech text to a search service to get a response
 		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
-
+			console.log("response.length = " + response.length);
 			console.log("response = "+JSON.stringify(response));
-			
 		    var textToSpeak = "I am not programmed to respond in this area.";
 		    if (response.length > 0) {
 		      textToSpeak = response[0].verbalResponse;
@@ -350,7 +351,7 @@ var botMessage = {
 			// Ask the speech module to say the response text
 			speech.speakText(textToSpeak);
 			// Send text to robot to animate speech (if connected)
-			//_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
+			_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
 
 		}).catch(function (error) {
 			console.log("Error in getBotResponses getJSON, err = " + error);
