@@ -111,7 +111,7 @@ var speech = (function () {
                     //console.log(">>> onresult, final_transcript = " + final_transcript);
                     // *** tightly coupled to a function in main right now, but could implement
                     // *** a publish/subscribe framework to send the event
-                    main.textFromSpeech(final_transcript);
+                    main.handleTextFromSpeech(final_transcript);
                     //speakText(final_transcript);
                     final_transcript = '';
                 }
@@ -187,7 +187,7 @@ var speech = (function () {
         utterance.onend = function (event) {
             //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
             // Report that the utterance is done being spoken
-            main.doneSpeaking("");
+            main.handleDoneSpeaking("");
 
             // If it was recognizing speech, turn it back on after speaking
             if (restartRecognize) {

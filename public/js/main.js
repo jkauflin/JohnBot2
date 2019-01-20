@@ -8,13 +8,15 @@
  * 2017-12-29 JJK	Initial controls and WebSocket communication
  * 2017-01-21 JJK	Implementing response to buttons for manual controls
  * 2018-12-07 JJK	Re-factor to use modules
- * i'm always thankful on Christmas
- * 
+ * 2018-12-25 JJK	I'm always thankful on Christmas
+ * 2019-01-19 JJK	Change back to search using web site database and new
+ * 					fuzzy match algorithm
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
 	//=================================================================================================================
 	// Private variables for the Module
+	var env;
 	var ws = null;
 	var wsUrl;
 	var wsConnected = false;
@@ -54,16 +56,21 @@ var main = (function () {
 	isTouchDevice = 'ontouchstart' in document.documentElement;
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
-	$.get("start", "", function (wsUrl) {
-		//console.log("on Start, wsUrl = " + wsUrl);
-		ws = new WebSocket(wsUrl);
+	// Call the start service on the server to get environment parameters and establish a websocket connection
+	$.getJSON("start", "", function (inEnv) {
+		env = inEnv;
+		//console.log("on Start, wsUrl = " + env.wsUrl);
+		//console.log("on Start, BOT_RESPONSES_URL = " + env.BOT_RESPONSES_URL);
+		//console.log("on Start, UID = " + env.UID);
+
+		ws = new WebSocket(env.wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
 			wsConnected = true;
 			//console.log('websocket is connected ...')
 			$StatusDisplay.html("Connected");
 
-			// event emmited when receiving message from the server
+			// event emmited when receiving message from the server (messages from the robot)
 			ws.onmessage = function (messageEvent) {
 				var serverMessage = JSON.parse(messageEvent.data);
 				if (serverMessage.errorMessage != null) {
@@ -75,6 +82,7 @@ var main = (function () {
 					$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
 				}
 
+				// Text that the robot want spoken
 				if (serverMessage.textToSpeak != null) {
 					//console.log(">>> in client, texttoSpeak = " + serverMessage.textToSpeak)
 					$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
@@ -93,10 +101,11 @@ var main = (function () {
 	$LoadDataButton.click(_loadData);
 
 	function _searchResponses() {
-		/*
 		console.log("searchStr = " + $searchStr.val());
+		/*
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
 		*/
+		handleTextFromSpeech($searchStr.val());
 	}
 	function _loadData() {
 		//_wsSend('{"loadData" : "Y"}');
@@ -313,26 +322,49 @@ var botMessage = {
 		_wsSend('{"voice" : 0}');
 	}
 
-	// Respond to string recognized by speech to text
-	function textFromSpeech(speechText) {
-		// Search for a response
+	// Respond to string recognized by speech to text (or from search input text box)
+	function handleTextFromSpeech(speechText) {
+		console.log("in handleTextFromSpeech, speechText = "+speechText);
+		// Send the speech text to a search service to get a response
+		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
+		    var textToSpeak = "I am not programmed to respond in this area.";
+		    //if (response.length > 0) {
+		    //  textToSpeak = jsonResponse[0].verbalResponse;
+		    //}
 
-		
-//		if (robot connected) {
-			_wsSend('{"inSpeechText" : "' + speechText + '"}'); \
-//		}
+			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
+			/*
+		    for (var current in jsonResponse) {
+		        if (current == 0) {
+		            textToSpeak = jsonResponse[current].verbalResponse;
+		        }
+		        // how do I know when the update is done - do I care?
+		        // log how many records were in the service call JSON response
+		        //console.log("id = "+botResponsesList[current].id);
+		        console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
+		    } // loop through JSON list
+			*/
+
+			// Ask the speech module to say the response text
+			speech.speakText(textToSpeak);
+			// Send text to robot to animate speech (if connected)
+			_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
+
+		}).catch(function (error) {
+			console.log("Error in getBotResponses getJSON, err = " + error);
+		});
 	}
 
 	// Respond to string recognized by speech to text
-	function doneSpeaking(speechText) {
+	function handleDoneSpeaking(speechText) {
 		_wsSend('{"doneSpeaking" : 1}');
 	}
 
 	//=================================================================================================================
 	// This is what is exposed from this Module
 	return {
-		textFromSpeech,
-		doneSpeaking
+		handleTextFromSpeech,
+		handleDoneSpeaking
 	};
 
 })(); // var main = (function(){

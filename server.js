@@ -43,6 +43,10 @@ Modification History
                 Introducing an activity loop to check state and timings, 
                 and trigger activities
 2018-12-26 JJK  Got some speech animation working again
+2019-01-20 JJK  Modified to pass envStr on start with url's and UID.
+                Shifted text from speech handling back to client browser,
+                just telling the robot to start animating the text being
+                spoken
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -66,24 +70,16 @@ require('dotenv').config();
 const os = require('os');
 //console.log("os.hostname = " + os.hostname);
 
-// Change quotes to spaces
-// 22 double quote 27 single quote
-var quoteHexStr = "[\x22\x27]";
-var regexQuoteHexStr = new RegExp(quoteHexStr, "g");
-function replaceQuotes(inVal) {
-  return inVal.toString().replace(regexQuoteHexStr, ' ');
-}
-
 // Create a web server
 var express = require('express');
 var app = express();
-
+/*
 const http = require('http');
 const webServer = new http.createServer(app)
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
   });
-/*
+*/
 var https = require('https')
 var fs = require('fs');
 const webServer = new https.createServer({
@@ -94,7 +90,7 @@ const webServer = new https.createServer({
   .listen(process.env.WEB_PORT, function () {
     console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
 });
-*/
+
 
 var getJSON = require('get-json');
 const url = require('url');
@@ -109,8 +105,8 @@ var botFunctions = require('./botFunctions.js');
 //=================================================================================================
 const ws = require('ws');
 // WebSocket URL to give to the client browser to establish ws connection
-const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
-//const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
+//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
+const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
 //const wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
 
@@ -186,7 +182,12 @@ webSocketServer.on('connection', function (ws) {
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
     if (botMessage.inSpeechText != null) {
+      // Animate the text being spoken by the browser client
+      botFunctions.animateSpeech(botMessage.inSpeechText);
+
+      // *** OLD CODE - from when I was making the search call from the robot server, instead of back in the client browser ***
       // Call the responses URL and see if there is a response to the spoken text
+      /*
       var tempUrl = process.env.BOT_RESPONSES_URL + "?searchStr=" + replaceQuotes(botMessage.inSpeechText) + "&UID=" + process.env.UID
       //console.log("botResponses url = "+tempUrl);
       getJSON(tempUrl).then(function (jsonResponse) {
@@ -206,13 +207,13 @@ webSocketServer.on('connection', function (ws) {
           //console.log("id = "+botResponsesList[current].id);
           console.log(dateTime.create().format('H:M:S.N')+", response("+current+") = "+JSON.stringify(jsonResponse[current]));
         } // loop through JSON list
-
         // Send back to the web browser client to use TTS to say the response
         sayAndAnimate(textToSpeak);
 
       }).catch(function (error) {
         console.log("Error in getResponses getJSON, err = " + error);
       });
+      */
 
     } else if (botMessage.loadData != null) {
       //dataFunctions.loadData('', function(error,response,status) {
@@ -221,7 +222,7 @@ webSocketServer.on('connection', function (ws) {
       //
     } else if (botMessage.voice != null) {
       if (botMessage.voice) {
-        sayAndAnimate("I am the John bought.  You cannot kill me");
+        //sayAndAnimate("I am the John bought.  You cannot kill me");
       }
     } else {
       botFunctions.control(botMessage);
@@ -238,6 +239,8 @@ webSocketServer.on('connection', function (ws) {
     _wsSend({ "proxIn": proxIn });
   });
 
+  // When initiating speech from the robot, send to browser client to speak
+  // and to robot to animate
   function sayAndAnimate(textToSpeak) {
     _wsSend({ "textToSpeak": textToSpeak });
     // Animate the bot when speaking
@@ -257,6 +260,7 @@ webSocketServer.on('connection', function (ws) {
 
   }, 1000);
 
+
 }); // End of Connection to client
 
 
@@ -264,7 +268,12 @@ webSocketServer.on('connection', function (ws) {
 // the Websocket connection
 // Use /start as a trigger to start any robot functions, like a hello sequence
 app.get('/start', function (req, res, next) {
-  res.send(wsUrl);
+  var env = {
+    "wsUrl": wsUrl,
+    "BOT_RESPONSES_URL": process.env.BOT_RESPONSES_URL,
+    "UID": process.env.UID
+  }
+  res.send(env);
 })
    
 app.use('/',express.static('public'));

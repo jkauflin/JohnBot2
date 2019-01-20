@@ -10,6 +10,7 @@ var search = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
 	//=================================================================================================================
 	// Private variables for the Module
+	/*
 	var docs = [
 		{ "id": "1", "keywords": "who what are you your name", 
 			"verbalResponse": "I am the John Bot. Pleased to meet you." },
@@ -68,11 +69,11 @@ var search = (function () {
 		i = parseInt(result.ref) - 1;
 		console.log('ref = ' + result.ref + ", score = " + result.ref + "  keywords = " + docs[i].keywords + ", verbal = " + docs[i].verbalResponse);
 	});
-
+	*/
 
 	//=================================================================================================================
 	// Variables cached from the DOM
-	var $document = $(document);
+	//var $document = $(document);
 	//var $StatusDisplay = $document.find("#StatusDisplay");
 
 	//=================================================================================================================
