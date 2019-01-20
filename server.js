@@ -263,6 +263,18 @@ webSocketServer.on('connection', function (ws) {
 
 }); // End of Connection to client
 
+/*
+var allowCrossDomain = function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', "*");
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}
+app.configure(function () {
+  app.use(allowCrossDomain);
+  //some other code
+});    
+*/
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection

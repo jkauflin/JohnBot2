@@ -18,7 +18,6 @@ var main = (function () {
 	// Private variables for the Module
 	var env;
 	var ws = null;
-	var wsUrl;
 	var wsConnected = false;
 	var isTouchDevice = false;
 	var date;
@@ -327,10 +326,13 @@ var botMessage = {
 		console.log("in handleTextFromSpeech, speechText = "+speechText);
 		// Send the speech text to a search service to get a response
 		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
+
+			console.log("response = "+JSON.stringify(response));
+			
 		    var textToSpeak = "I am not programmed to respond in this area.";
-		    //if (response.length > 0) {
-		    //  textToSpeak = jsonResponse[0].verbalResponse;
-		    //}
+		    if (response.length > 0) {
+		      textToSpeak = response[0].verbalResponse;
+		    }
 
 			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
 			/*
@@ -346,9 +348,9 @@ var botMessage = {
 			*/
 
 			// Ask the speech module to say the response text
-			speech.speakText(textToSpeak);
+			//speech.speakText(textToSpeak);
 			// Send text to robot to animate speech (if connected)
-			_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
+			//_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
 
 		}).catch(function (error) {
 			console.log("Error in getBotResponses getJSON, err = " + error);
