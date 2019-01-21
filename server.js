@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017,2018 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
              communications to the Arduino Mega robot
@@ -69,32 +69,39 @@ require('dotenv').config();
 
 const os = require('os');
 //console.log("os.hostname = " + os.hostname);
+const http = require('http');
+const https = require('https')
+const fs = require('fs');
+//var getJSON = require('get-json');
+//const url = require('url');
+var dateTime = require('node-datetime');
 
+// WebSocket URL to give to the client browser to establish ws connection
+var wsUrl;
 // Create a web server
 var express = require('express');
 var app = express();
-/*
-const http = require('http');
-const webServer = new http.createServer(app)
-  .listen(process.env.WEB_PORT, function () {
-    console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
+var webServer;
+// If running local server just use HTTP, else use HTTPS
+if (process.env.HOST == "localhost") {
+  wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
+  webServer = new http.createServer(app)
+    .listen(process.env.WEB_PORT, function () {
+      console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
   });
-*/
-var https = require('https')
-var fs = require('fs');
-const webServer = new https.createServer({
-  // Key and certificate that have been signed by a CA root authority installed on server
-  key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
-  cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
-}, app)
+} else {
+  wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
+  //wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
+  webServer = new https.createServer({
+    // Key and certificate that have been signed by a CA root authority installed on server
+    key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
+    cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
+  }, app)
   .listen(process.env.WEB_PORT, function () {
-    console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
-});
+      console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
+  });
+}
 
-
-var getJSON = require('get-json');
-const url = require('url');
-var dateTime = require('node-datetime');
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
@@ -104,12 +111,7 @@ var botFunctions = require('./botFunctions.js');
 // Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
 const ws = require('ws');
-// WebSocket URL to give to the client browser to establish ws connection
-//const wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
-const wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
-//const wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
-
 // Initialize to false at the start
 ws.isAlive = false;
 function heartbeat() {

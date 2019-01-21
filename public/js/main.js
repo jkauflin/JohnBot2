@@ -103,10 +103,9 @@ var main = (function () {
 
 	function _searchResponses() {
 		console.log("searchStr = " + $searchStr.val());
-		/*
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
-		*/
 		handleTextFromSpeech($searchStr.val());
+		$searchStr.val('');
 	}
 	function _loadData() {
 		//_wsSend('{"loadData" : "Y"}');
