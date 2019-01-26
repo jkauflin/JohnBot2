@@ -232,16 +232,24 @@ function control(botMessage) {
   if (botMessage.doneSpeaking) {
     // When done speaking, turn the speaking animation off
     //console.log("in botFunctions, message = doneSpeaking");
-    eyes.stop().off();
-    speechAnimation.stop();
+    doneSpeaking();
   }
 
 } // function control(botMessage) {
 
+function doneSpeaking() {
+    eyes.stop().off();
+    speechAnimation.stop();
+}
+
 function animateSpeech(textToSpeak) {
   // Cancel any running animations before starting a new one
-  eyes.stop().off();
-  speechAnimation.stop();
+  doneSpeaking();
+
+  // Calculate a milliseconds time from the textToSpeak and set a doneSpeaking function call
+  // (in case you don't get a "doneSpeaking" from the client)
+  //*********** just default to 10 seconds for now ****************************** */
+  setTimeout(doneSpeaking, 10000);
 
   // Start strobing the eye leds
   eyes.strobe(150);

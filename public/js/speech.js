@@ -104,7 +104,8 @@ var speech = (function () {
                     interim_transcript += event.results[i][0].transcript;
                 }
             }
-            final_transcript = capitalize(final_transcript);
+            // Don't capitalize - leave lowercase
+            //final_transcript = capitalize(final_transcript);
             STTResultsSpan.innerHTML = linebreak(final_transcript);
             if (final_transcript || interim_transcript) {
                 if (final_transcript) {

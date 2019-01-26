@@ -157,35 +157,13 @@ webSocketServer.on('connection', function (ws) {
 
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
-    // check for manual controls and call function
-    //botMessage.
-    /*
-    "moveDirection" : "F",
-    "move" : 1,
-    "rotateDirection" : "R",
-    "rotate" : 0,
-    "eyes" : 0,
-    "motorSpeed" : 100,
-    "armPosition" : 90,
-    "headPosition" : 90
-
-  botMessage.moveDirection" : "F",
-  botMessage.move" : 1,
-  botMessage.rotateDirection" : "R",
-  botMessage.rotate" : 0,
-  botMessage.eyes" : 0,
-  botMessage.motorSpeed" : 100,
-  botMessage.armPosition" : 90,
-  botMessage.headPosition" : 90
-    */
-    
     console.log(dateTime.create().format('H:M:S.N') + ", botMessage = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
-    if (botMessage.inSpeechText != null) {
+    if (botMessage.textToSpeak != null) {
       // Animate the text being spoken by the browser client
-      botFunctions.animateSpeech(botMessage.inSpeechText);
+      botFunctions.animateSpeech(botMessage.textToSpeak);
 
       // *** OLD CODE - from when I was making the search call from the robot server, instead of back in the client browser ***
       // Call the responses URL and see if there is a response to the spoken text
@@ -217,15 +195,19 @@ webSocketServer.on('connection', function (ws) {
       });
       */
 
+    } else if (botMessage.speechText != null) {
+      var commandStr = botMessage.speechText.toLowerCase();
+      if (commandStr.search("stop") !== -1) {
+        console.log(">>> STOP ");
+      } else if (commandStr.search("walk") !== -1) {
+        console.log(">>> WALK ");
+      }
+
     } else if (botMessage.loadData != null) {
       //dataFunctions.loadData('', function(error,response,status) {
       //});
     } else if (botMessage.searchStr != null) {
       //
-    } else if (botMessage.voice != null) {
-      if (botMessage.voice) {
-        //sayAndAnimate("I am the John bought.  You cannot kill me");
-      }
     } else {
       botFunctions.control(botMessage);
     }

@@ -316,22 +316,30 @@ var botMessage = {
 	}
 
 	function voicePushed() {
-		_wsSend('{"voice" : 1}');
+		sayAndAnimate("I am the John bought.  You cannot kill me");
 	}
 	function voiceReleased() {
-		_wsSend('{"voice" : 0}');
+		//_wsSend('{"voice" : 0}');
 	}
 
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
 		console.log("in handleTextFromSpeech, speechText = "+speechText);
+
+		// Send the speechText to the robot to see if there is a matching command to take action on
+		_wsSend('{"speechText" : "' + speechText + '"}');
+
 		// Send the speech text to a search service to get a response
 		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
-			console.log("response.length = " + response.length);
+			//console.log("response.length = " + response.length);
 			console.log("response = "+JSON.stringify(response));
-		    var textToSpeak = "I am not programmed to respond in this area.";
+
+			// 2019-01-25 Remove the default - if you don't find a response, don't say anything
+			//var textToSpeak = "I am not programmed to respond in this area.";
 		    if (response.length > 0) {
-		      textToSpeak = response[0].verbalResponse;
+				if (response[0].score > 1) {
+					sayAndAnimate(response[0].verbalResponse);
+				}
 		    }
 
 			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
@@ -347,11 +355,6 @@ var botMessage = {
 		    } // loop through JSON list
 			*/
 
-			// Ask the speech module to say the response text
-			speech.speakText(textToSpeak);
-			// Send text to robot to animate speech (if connected)
-			_wsSend('{"inSpeechText" : "' + textToSpeak + '"}');
-
 		}).catch(function (error) {
 			console.log("Error in getBotResponses getJSON, err = " + error);
 		});
@@ -360,6 +363,13 @@ var botMessage = {
 	// Respond to string recognized by speech to text
 	function handleDoneSpeaking(speechText) {
 		_wsSend('{"doneSpeaking" : 1}');
+	}
+
+	function sayAndAnimate(textToSpeak) {
+		// Ask the speech module to say the response text
+		speech.speakText(textToSpeak);
+		// Send text to robot to animate speech (if connected)
+		_wsSend('{"textToSpeak" : "' + textToSpeak + '"}');
 	}
 
 	//=================================================================================================================
