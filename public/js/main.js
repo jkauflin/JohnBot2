@@ -98,19 +98,14 @@ var main = (function () {
 	} else {
 		$SearchButton.click(_searchResponses);
 	}
-	$LoadDataButton.click(_loadData);
+	//$LoadDataButton.click(_loadData);
 
-	/*
 	function _searchResponses() {
 		console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
 		handleTextFromSpeech($searchStr.val());
 		$searchStr.val('');
 	}
-	function _loadData() {
-		//_wsSend('{"loadData" : "Y"}');
-	}
-	*/
 
 	/*
 var botMessage = {
@@ -325,12 +320,11 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
-		console.log("in handleTextFromSpeech, speechText = "+speechText);
+		//console.log(dateTime.create().format('H:M:S.N') + ", in handleTextFromSpeech, speechText = " + speechText);
+		console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
 		// Send the speechText to the robot to see if there is a matching command to take action on
 		_wsSend('{"speechText" : "' + speechText + '"}');
-
-
 
 
 		
@@ -367,6 +361,8 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text
 	function handleDoneSpeaking(speechText) {
+		//console.log(dateTime.create().format('H:M:S.N') + ", in handleTextFromSpeech, speechText = " + speechText);
+		console.log(", in handleTextFromSpeech, speechText = " + speechText);
 		_wsSend('{"doneSpeaking" : 1}');
 	}
 

@@ -166,7 +166,7 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function control(botMessage) {
-  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + botMessageStr);
+  console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
 
   if (botMessage.armPosition != null) {
     armServo.to(botMessage.armPosition);
@@ -256,7 +256,7 @@ function _animateSpeech(textToSpeak) {
   // Calculate a milliseconds time from the textToSpeak and set a _doneSpeaking function call
   // (in case you don't get a "_doneSpeaking" from the client)
   //*********** just default to 10 seconds for now ****************************** */
-  setTimeout(_doneSpeaking, 10000);
+  setTimeout(_doneSpeaking, 5000);
 
   // Start strobing the eye leds
   eyes.strobe(150);
