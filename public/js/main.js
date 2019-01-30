@@ -87,7 +87,6 @@ var main = (function () {
 					$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
 					speech.speakText(serverMessage.textToSpeak);
 				}
-
 			} // on message (from server)
 
 		} // Websocket open
@@ -101,6 +100,7 @@ var main = (function () {
 	}
 	$LoadDataButton.click(_loadData);
 
+	/*
 	function _searchResponses() {
 		console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
@@ -110,6 +110,7 @@ var main = (function () {
 	function _loadData() {
 		//_wsSend('{"loadData" : "Y"}');
 	}
+	*/
 
 	/*
 var botMessage = {
@@ -329,6 +330,10 @@ var botMessage = {
 		// Send the speechText to the robot to see if there is a matching command to take action on
 		_wsSend('{"speechText" : "' + speechText + '"}');
 
+
+
+
+		
 		// Send the speech text to a search service to get a response
 		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);

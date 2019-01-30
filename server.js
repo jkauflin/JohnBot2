@@ -157,13 +157,17 @@ webSocketServer.on('connection', function (ws) {
 
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
-    console.log(dateTime.create().format('H:M:S.N') + ", botMessage = "+botMessageStr);
+    //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = "+botMessageStr);
 
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
-    if (botMessage.textToSpeak != null) {
+    // Send the message object to the botFunctions module
+    botFunctions.control(botMessage);
+
+
+    //if (botMessage.textToSpeak != null) {
       // Animate the text being spoken by the browser client
-      botFunctions.animateSpeech(botMessage.textToSpeak);
+      //botFunctions.animateSpeech(botMessage.textToSpeak);
 
       // *** OLD CODE - from when I was making the search call from the robot server, instead of back in the client browser ***
       // Call the responses URL and see if there is a response to the spoken text
@@ -195,22 +199,9 @@ webSocketServer.on('connection', function (ws) {
       });
       */
 
-    } else if (botMessage.speechText != null) {
-      var commandStr = botMessage.speechText.toLowerCase();
-      if (commandStr.search("stop") !== -1) {
-        console.log(">>> STOP ");
-      } else if (commandStr.search("walk") !== -1) {
-        console.log(">>> WALK ");
-      }
-
-    } else if (botMessage.loadData != null) {
-      //dataFunctions.loadData('', function(error,response,status) {
-      //});
-    } else if (botMessage.searchStr != null) {
-      //
-    } else {
-      botFunctions.control(botMessage);
-    }
+    //} else {
+    //  botFunctions.control(botMessage);
+    //}
 
   });
 
@@ -225,13 +216,17 @@ webSocketServer.on('connection', function (ws) {
 
   // When initiating speech from the robot, send to browser client to speak
   // and to robot to animate
+  //?????
+  /*
   function sayAndAnimate(textToSpeak) {
     _wsSend({ "textToSpeak": textToSpeak });
     // Animate the bot when speaking
     botFunctions.animateSpeech(textToSpeak);
   }
+  */
 
   // Main activity loop
+  /*
   var loopStart = true;
   const activityLoop = setInterval(function () {
     //console.log(dateTime.create().format('Y-m-d H:M:S.N')+" In the activityLoop, now = "+Date.now());
@@ -243,7 +238,7 @@ webSocketServer.on('connection', function (ws) {
     // put stuff for the state loop in here
 
   }, 1000);
-
+  */
 
 }); // End of Connection to client
 

@@ -166,6 +166,8 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function control(botMessage) {
+  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + botMessageStr);
+
   if (botMessage.armPosition != null) {
     armServo.to(botMessage.armPosition);
     currArmPos = botMessage.armPosition;
@@ -229,27 +231,32 @@ function control(botMessage) {
     }
   }
 
-  if (botMessage.doneSpeaking) {
+  if (botMessage.textToSpeak != null) {
+    // Animate the text being spoken by the browser client
+    _animateSpeech(botMessage.textToSpeak);
+  }
+
+  if (botMessage._doneSpeaking) {
     // When done speaking, turn the speaking animation off
-    //console.log("in botFunctions, message = doneSpeaking");
-    doneSpeaking();
+    //console.log("in botFunctions, message = _doneSpeaking");
+    _doneSpeaking();
   }
 
 } // function control(botMessage) {
 
-function doneSpeaking() {
+function _doneSpeaking() {
     eyes.stop().off();
     speechAnimation.stop();
 }
 
-function animateSpeech(textToSpeak) {
+function _animateSpeech(textToSpeak) {
   // Cancel any running animations before starting a new one
-  doneSpeaking();
+  _doneSpeaking();
 
-  // Calculate a milliseconds time from the textToSpeak and set a doneSpeaking function call
-  // (in case you don't get a "doneSpeaking" from the client)
+  // Calculate a milliseconds time from the textToSpeak and set a _doneSpeaking function call
+  // (in case you don't get a "_doneSpeaking" from the client)
   //*********** just default to 10 seconds for now ****************************** */
-  setTimeout(doneSpeaking, 10000);
+  setTimeout(_doneSpeaking, 10000);
 
   // Start strobing the eye leds
   eyes.strobe(150);
@@ -281,6 +288,5 @@ function animateSpeech(textToSpeak) {
 
 module.exports = {
     botEvent,
-    control,
-    animateSpeech
+    control
 };
