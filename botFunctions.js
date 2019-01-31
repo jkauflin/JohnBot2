@@ -24,6 +24,8 @@ Modification History
 2018-12-26 JJK  Got some speech animation working using LED strobe, and
                 servo animations for head and arm (turned off with and event
                 from the client saying the utterance was done speaking)
+2019-01-30 JJK  Modified the animate speech to calculate time from words
+                (like the JohnBot in Android did)
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -65,6 +67,7 @@ var proximity;
 var currProx = 0;
 var prevProx = 0;
 var speechAnimation;
+var speaking = false;
 var currArmPos = 90;
 
 const FORWARD_DIRECTION = 'F';
@@ -166,7 +169,11 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function control(botMessage) {
-  console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+
+  if (botMessage.stop != null) {
+    _allStop();
+  }
 
   if (botMessage.armPosition != null) {
     armServo.to(botMessage.armPosition);
@@ -200,27 +207,21 @@ function control(botMessage) {
   }
 
   if (botMessage.rotate != null) {
-    if (botMessage.rotateDirection != null) {
-      rotateDirection = botMessage.rotateDirection;
-    }
     if (botMessage.rotate) {
-      if (rotateDirection == LEFT_DIRECTION) {
-        motor1.forward(motorSpeed);
-        motor2.reverse(motorSpeed);
-      } else {
-        motor2.forward(motorSpeed);
-        motor1.reverse(motorSpeed);
+      var direction = RIGHT_DIRECTION;
+      if (botMessage.rotateDirection != null) {
+        direction = botMessage.rotateDirection;
       }
-      rotating = true;
+
+      _rotate(direction, duration, degrees, speed);
+
     } else {
-      motor1.stop();
-      motor2.stop();
-      rotating = false;
+      // Call with null parameters to STOP
+      _rotate();
     }
   }
 
   if (botMessage.eyes != null) {
-    //console.log("botMessage.eyes = "+botMessage.eyes);
     if (botMessage.eyes) {
       eyes.on();
       eyesOn = true;
@@ -239,25 +240,85 @@ function control(botMessage) {
   if (botMessage._doneSpeaking) {
     // When done speaking, turn the speaking animation off
     //console.log("in botFunctions, message = _doneSpeaking");
-    _doneSpeaking();
+    // 1/30/2019 - turn off in favor of just handling the timing in botFunctions
+    //_doneSpeaking();
   }
 
 } // function control(botMessage) {
 
+function _rotate(direction,duration,degrees,speed) {
+  // If direction is blank, stop
+  if (direction == null) {
+    motor1.stop();
+    motor2.stop();
+    rotating = false;
+  } else {
+    var tempSpeed = motorSpeed;
+    if (speed != null) {
+      if (speed > 0) {
+        tempSpeed = speed;
+      }
+    }
+
+    var tempDuration = 0;
+    // If degrees are set, calculate duration from speed
+    if (degrees != null) {
+      // tempDuration = degrees * tempSpeed;
+    }
+
+    // If duration or degress are set, then set a timeout of when to stop
+    if (duration != null && tempDuration == 0) {
+      tempDuration = duration;
+    }
+
+    // recursively call with blank direction to stop after a period of time
+    if (tempDuration > 0) {
+      setTimeout(_rotate, tempDuration);
+    }
+
+    if (rotateDirection == LEFT_DIRECTION) {
+      motor1.forward(tempSpeed);
+      motor2.reverse(tempSpeed);
+    } else {
+      motor2.forward(tempSpeed);
+      motor1.reverse(tempSpeed);
+    }
+    rotating = true;
+  }
+
+} // function _rotate() {
+
+
 function _doneSpeaking() {
-    eyes.stop().off();
-    speechAnimation.stop();
+  eyes.stop().off();
+  speechAnimation.stop();
+  speaking = false;
+  clearTimeout(_doneSpeaking);
 }
+
+function _allStop() {
+  motor1.stop();
+  motor2.stop();
+  moving = false;
+  rotating = false;
+  _doneSpeaking();
+}
+
 
 function _animateSpeech(textToSpeak) {
   // Cancel any running animations before starting a new one
   _doneSpeaking();
 
   // Calculate a milliseconds time from the textToSpeak and set a _doneSpeaking function call
-  // (in case you don't get a "_doneSpeaking" from the client)
-  //*********** just default to 10 seconds for now ****************************** */
-  setTimeout(_doneSpeaking, 5000);
+  // (just calculate using the word count for now)
+  var wordList = textToSpeak.split(" ");
+  //for (var i = 0; i < wordList.length; i++) {
+    //wordList[i]
+  //}
+  var speakingDuration = wordList.length * 300;
+  setTimeout(_doneSpeaking, speakingDuration);
 
+  speaking = true;
   // Start strobing the eye leds
   eyes.strobe(150);
 
