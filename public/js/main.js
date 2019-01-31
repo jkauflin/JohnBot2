@@ -103,6 +103,17 @@ var main = (function () {
 	function _searchResponses() {
 		console.log("searchStr = " + $searchStr.val());
 		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
+
+		var speechText = $searchStr.val();
+
+		if (speechText.toLowerCase().search("stop") >= 0) {
+		    _wsSend('{"stop":1}');
+		} else if (speechText.toLowerCase().search("turn") >= 0) {
+		    // rotate - direction, [duration], [degrees], [speed]
+		    // get duration or degrees parameter from next work
+		    _wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":2500}');
+		}
+
 		handleTextFromSpeech($searchStr.val());
 		$searchStr.val('');
 	}
@@ -326,14 +337,6 @@ var botMessage = {
 		// Send the speechText to the robot to see if there is a matching command to take action on
 		//_wsSend('{"speechText" : "' + speechText + '"}');
 
-		if (speechText.toLowerCase().search("stop")) {
-			_wsSend('{"stop":1}');
-		} else if (speechText.toLowerCase().search("turn")) {
-			// rotate - direction, [duration], [degrees], [speed]
-			// get duration or degrees parameter from next work
-			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":3000}');
-		}
-		
 		// Send the speech text to a search service to get a response
 		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);
@@ -382,7 +385,7 @@ var botMessage = {
 	// Main activity loop
 	var loopStart = true;
 	const activityLoop = setInterval(function () {
-  		console.log("In the activityLoop, now = "+Date.now());
+  		//console.log("In the activityLoop, now = "+Date.now());
 		if (loopStart) {
 			//sayAndAnimate("Hello, I am the John bought.");
 			loopStart = false;

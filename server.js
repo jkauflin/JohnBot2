@@ -155,6 +155,17 @@ webSocketServer.on('connection', function (ws) {
     }
   }
 
+  /*
+  20: 57: 23.928, botMessage = {
+    "textToSpeak": "Of course I love you.  How could you ask me such a question?"
+  }
+  UncaughtException, error = Error: WebSocket is not open: readyState 3(CLOSED)
+  Error: WebSocket is not open: readyState 3(CLOSED)
+  at WebSocket.send(/home/pi / projects / JohnBot2 / node_modules / ws / lib / websocket.js: 322: 19)
+  at _wsSend(/home/pi / projects / JohnBot2 / server.js: 152: 10)
+  */
+
+  
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
     //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = "+botMessageStr);

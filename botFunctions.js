@@ -169,7 +169,7 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function control(botMessage) {
-  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+  console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
 
   if (botMessage.stop != null) {
     _allStop();
@@ -213,7 +213,7 @@ function control(botMessage) {
         direction = botMessage.rotateDirection;
       }
 
-      _rotate(direction, duration, degrees, speed);
+      _rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
 
     } else {
       // Call with null parameters to STOP
@@ -276,7 +276,7 @@ function _rotate(direction,duration,degrees,speed) {
       setTimeout(_rotate, tempDuration);
     }
 
-    if (rotateDirection == LEFT_DIRECTION) {
+    if (direction == LEFT_DIRECTION) {
       motor1.forward(tempSpeed);
       motor2.reverse(tempSpeed);
     } else {
@@ -315,7 +315,7 @@ function _animateSpeech(textToSpeak) {
   //for (var i = 0; i < wordList.length; i++) {
     //wordList[i]
   //}
-  var speakingDuration = wordList.length * 300;
+  var speakingDuration = wordList.length * 310;
   setTimeout(_doneSpeaking, speakingDuration);
 
   speaking = true;
