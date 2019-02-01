@@ -11,6 +11,8 @@
  * 2018-12-25 JJK	I'm always thankful on Christmas
  * 2019-01-19 JJK	Change back to search using web site database and new
  * 					fuzzy match algorithm
+ * 2019-02-01 JJK	Implement command check on spoken text
+ * 					Working on activity loop
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
