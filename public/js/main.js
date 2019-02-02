@@ -58,7 +58,8 @@ var main = (function () {
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
 	// Call the start service on the server to get environment parameters and establish a websocket connection
-	$.getJSON("start", "", function (inEnv) {
+	var jqxhr = $.getJSON("start", "", function (inEnv, status) {
+		console.log("After start, status = "+status);
 		env = inEnv;
 		//console.log("on Start, wsUrl = " + env.wsUrl);
 		//console.log("on Start, BOT_RESPONSES_URL = " + env.BOT_RESPONSES_URL);
@@ -92,7 +93,16 @@ var main = (function () {
 			} // on message (from server)
 
 		} // Websocket open
-	}); // start
+	})
+    .done(function () {
+        console.log("second success");
+    })
+    .fail(function () {
+        console.log("error");
+    })
+    .always(function () {
+        console.log("complete");
+    });
 
 	// doing this twice
 	if (!isTouchDevice) {

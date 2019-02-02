@@ -32,6 +32,7 @@
     //=================================================================================================================
     // Bind events
     // General AJAX error handler to log the exception and set a message in DIV tags with a ajaxError class
+    /* >>> No catch errors at each call
     $document.ajaxError(function (e, xhr, settings, exception) {
         console.log("ajax exception = " + exception);
         console.log("ajax url = " + settings.url);
@@ -39,6 +40,7 @@
         defaultCursor();
         $ajaxError.html("An Error has occurred (see console log)");
     });
+    */
 
      // Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
      $document.on('click', '.navbar-collapse.in', function (e) {
