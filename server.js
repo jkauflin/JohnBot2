@@ -47,6 +47,8 @@ Modification History
                 Shifted text from speech handling back to client browser,
                 just telling the robot to start animating the text being
                 spoken
+2019-02-02 JJK  Ran this to turn off package-lock.json creation:
+                  npm config set package-lock false
 =============================================================================*/
 
 // General handler for any uncaught exceptions
