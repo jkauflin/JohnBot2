@@ -272,13 +272,15 @@ app.configure(function () {
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection
 // Use /start as a trigger to start any robot functions, like a hello sequence
-app.get('/start', function (req, res, next) {
+app.get('/getWsUrl', function (req, res, next) {
+  /*
   var env = {
     "wsUrl": wsUrl,
     "BOT_RESPONSES_URL": process.env.BOT_RESPONSES_URL,
     "UID": process.env.UID
   }
-  res.send(env);
+  */
+  res.send(wsUrl);
 })
    
 app.use('/',express.static('public'));

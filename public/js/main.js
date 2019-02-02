@@ -58,11 +58,10 @@ var main = (function () {
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
 	// Call the start service on the server to get environment parameters and establish a websocket connection
-	var jqxhr = $.getJSON("start", "", function (inEnv) {
-		env = inEnv;
-		//console.log("on Start, wsUrl = " + env.wsUrl);
+	var jqxhr = $.getJSON("getWsUrl", "", function (wsUrl) {
+		//console.log("on Start, wsUrl = " + wsUrl);
 
-		ws = new WebSocket(env.wsUrl);
+		ws = new WebSocket(wsUrl);
 		// event emmited when connected
 		ws.onopen = function () {
 			wsConnected = true;
@@ -93,21 +92,17 @@ var main = (function () {
 
 		} // Websocket open
 	}).fail(function () {
-		console.log("error in start - try local env");
-		// get parameters from the private credentials service
-		// ?????   local PHP ???
-
+		//console.log("error getting wsUrl");
     });
 
+	// Get environment variables from a local service
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
 		env = inEnv;
-		console.log("botEnv, BOT_DATA_URL = " + env.BOT_DATA_URL);
+		console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
 		console.log("botEnv, UID = " + env.UID);
 
 	}).fail(function () {
-			console.log("error in botEnv");
-			// get parameters from the private credentials service
-			// ?????   local PHP ???
+		console.log("Error getting environment variables");
 	});
 
 	// doing this twice
@@ -356,7 +351,7 @@ var botMessage = {
 		//_wsSend('{"speechText" : "' + speechText + '"}');
 
 		// Send the speech text to a search service to get a response
-		$.getJSON(env.BOT_RESPONSES_URL, "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
+		$.getJSON(env.BOT_WEB_URL+"getBotResponses.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);
 			console.log("response = "+JSON.stringify(response));
 
