@@ -58,12 +58,9 @@ var main = (function () {
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
 	// Call the start service on the server to get environment parameters and establish a websocket connection
-	var jqxhr = $.getJSON("start", "", function (inEnv, status) {
-		console.log("After start, status = "+status);
+	var jqxhr = $.getJSON("start", "", function (inEnv) {
 		env = inEnv;
 		//console.log("on Start, wsUrl = " + env.wsUrl);
-		//console.log("on Start, BOT_RESPONSES_URL = " + env.BOT_RESPONSES_URL);
-		//console.log("on Start, UID = " + env.UID);
 
 		ws = new WebSocket(env.wsUrl);
 		// event emmited when connected
@@ -85,24 +82,33 @@ var main = (function () {
 				}
 
 				// Text that the robot want spoken
+				// (*** No, just have the robot report events, and let the
+				//  main client controller decide what to say ***)
+				/*
 				if (serverMessage.textToSpeak != null) {
-					//console.log(">>> in client, texttoSpeak = " + serverMessage.textToSpeak)
-					$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
-					speech.speakText(serverMessage.textToSpeak);
+					sayAndAnimate(serverMessage.textToSpeak);
 				}
+				*/
 			} // on message (from server)
 
 		} // Websocket open
-	})
-    .done(function () {
-        console.log("second success");
-    })
-    .fail(function () {
-        console.log("error");
-    })
-    .always(function () {
-        console.log("complete");
+	}).fail(function () {
+		console.log("error in start - try local env");
+		// get parameters from the private credentials service
+		// ?????   local PHP ???
+
     });
+
+	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
+		env = inEnv;
+		console.log("botEnv, BOT_DATA_URL = " + env.BOT_DATA_URL);
+		console.log("botEnv, UID = " + env.UID);
+
+	}).fail(function () {
+			console.log("error in botEnv");
+			// get parameters from the private credentials service
+			// ?????   local PHP ???
+	});
 
 	// doing this twice
 	if (!isTouchDevice) {
@@ -389,6 +395,7 @@ var botMessage = {
 
 	function sayAndAnimate(textToSpeak) {
 		// Ask the speech module to say the response text
+		$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
 		speech.speakText(textToSpeak);
 		// Send text to robot to animate speech (if connected)
 		_wsSend('{"textToSpeak" : "' + textToSpeak + '"}');
