@@ -44,12 +44,12 @@
     });
     */
 
-     // Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
-     $document.on('click', '.navbar-collapse.in', function (e) {
-         if ($(e.target).is('a') && $(e.target).attr('class') != 'dropdown-toggle') {
-             $(this).collapse('hide');
-         }
-     });
+    // Auto-close the collapse menu after clicking a non-dropdown menu item (in the bootstrap nav header)
+    $document.on('click', '.navbar-collapse.in', function (e) {
+        if ($(e.target).is('a') && $(e.target).attr('class') != 'dropdown-toggle') {
+            $(this).collapse('hide');
+        }
+    });
 
      // Using addClear plug-in function to add a clear button on input text fields
      $resetval.addClear();

@@ -58,7 +58,7 @@ var main = (function () {
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
 	// Call the start service on the server to get environment parameters and establish a websocket connection
-	var jqxhr = $.getJSON("getWsUrl", "", function (wsUrl) {
+	var jqxhr = $.get("getWsUrl", "", function (wsUrl) {
 		//console.log("on Start, wsUrl = " + wsUrl);
 
 		ws = new WebSocket(wsUrl);
@@ -92,15 +92,14 @@ var main = (function () {
 
 		} // Websocket open
 	}).fail(function () {
-		//console.log("error getting wsUrl");
+		console.log("error getting wsUrl");
     });
 
 	// Get environment variables from a local service
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
 		env = inEnv;
-		console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
-		console.log("botEnv, UID = " + env.UID);
-
+		//console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
+		//console.log("botEnv, UID = " + env.UID);
 	}).fail(function () {
 		console.log("Error getting environment variables");
 	});
@@ -344,14 +343,13 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
-		//console.log(dateTime.create().format('H:M:S.N') + ", in handleTextFromSpeech, speechText = " + speechText);
 		console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
 		// Send the speechText to the robot to see if there is a matching command to take action on
 		//_wsSend('{"speechText" : "' + speechText + '"}');
 
 		// Send the speech text to a search service to get a response
-		$.getJSON(env.BOT_WEB_URL+"getBotResponses.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
+		$.getJSON(env.BOT_WEB_URL+"getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);
 			console.log("response = "+JSON.stringify(response));
 
@@ -390,7 +388,7 @@ var botMessage = {
 
 	function sayAndAnimate(textToSpeak) {
 		// Ask the speech module to say the response text
-		$("#VerbalRepsonse").html("*** Verbal response: " + serverMessage.textToSpeak);
+		$("#VerbalRepsonse").html(textToSpeak);
 		speech.speakText(textToSpeak);
 		// Send text to robot to animate speech (if connected)
 		_wsSend('{"textToSpeak" : "' + textToSpeak + '"}');

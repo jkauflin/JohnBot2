@@ -282,7 +282,16 @@ app.get('/getWsUrl', function (req, res, next) {
   */
   res.send(wsUrl);
 })
-   
+
+app.get('/dotenv.php', function (req, res, next) {
+  var env = {
+    "wsUrl": wsUrl,
+    "BOT_WEB_URL": process.env.BOT_WEB_URL,
+    "UID": process.env.UID
+  }
+  res.send(env);
+})
+
 app.use('/',express.static('public'));
 
 app.use("*",function(req,res){
