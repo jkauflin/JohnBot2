@@ -57,49 +57,59 @@ var main = (function () {
 	isTouchDevice = 'ontouchstart' in document.documentElement;
 	//logMessage("isTouchDevice = " + isTouchDevice);
 
+	// track when start button is hit - say hello
+	//$SpeechToTextButton.click(_ToggleSpeechToText);
+
 	// Call the start service on the server to get environment parameters and establish a websocket connection
-	var jqxhr = $.get("getWsUrl", "", function (wsUrl) {
-		//console.log("on Start, wsUrl = " + wsUrl);
-
-		ws = new WebSocket(wsUrl);
-		// event emmited when connected
-		ws.onopen = function () {
-			wsConnected = true;
-			//console.log('websocket is connected ...')
-			$StatusDisplay.html("Connected");
-
-			// event emmited when receiving message from the server (messages from the robot)
-			ws.onmessage = function (messageEvent) {
-				var serverMessage = JSON.parse(messageEvent.data);
-				if (serverMessage.errorMessage != null) {
-					logMessage(serverMessage.errorMessage);
-				}
-
-				// add other bot event handling here
-				if (serverMessage.proxIn != null) {
-					$("#proximityInches").html("Proximity inches: "+serverMessage.proxIn);
-				}
-
-				// Text that the robot want spoken
-				// (*** No, just have the robot report events, and let the
-				//  main client controller decide what to say ***)
-				/*
-				if (serverMessage.textToSpeak != null) {
-					sayAndAnimate(serverMessage.textToSpeak);
-				}
-				*/
-			} // on message (from server)
-
-		} // Websocket open
-	}).fail(function () {
+	/*
+	var jqxhr = $.get("getWsUrl", "", connectToBot).fail(function () {
 		console.log("error getting wsUrl");
-    });
+	});
+	*/
+
+	function connectToBot(wsUrl) {
+	    console.log("in connectToBot, wsUrl = " + wsUrl);
+
+	    ws = new WebSocket(wsUrl);
+	    // event emmited when connected
+	    ws.onopen = function () {
+	        wsConnected = true;
+	        //console.log('websocket is connected ...')
+	        $StatusDisplay.html("Connected");
+
+	        // event emmited when receiving message from the server (messages from the robot)
+	        ws.onmessage = function (messageEvent) {
+	            var serverMessage = JSON.parse(messageEvent.data);
+	            if (serverMessage.errorMessage != null) {
+	                logMessage(serverMessage.errorMessage);
+	            }
+
+	            // add other bot event handling here
+	            if (serverMessage.proxIn != null) {
+	                $("#proximityInches").html("Proximity inches: " + serverMessage.proxIn);
+	            }
+
+	            // Text that the robot want spoken
+	            // (*** No, just have the robot report events, and let the
+	            //  main client controller decide what to say ***)
+	            /*
+	            if (serverMessage.textToSpeak != null) {
+	            	sayAndAnimate(serverMessage.textToSpeak);
+	            }
+	            */
+	        } // on message (from server)
+
+	    } // Websocket open
+	}
 
 	// Get environment variables from a local service
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
 		env = inEnv;
 		//console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
 		//console.log("botEnv, UID = " + env.UID);
+
+		connectToBot(env.wsUrl);
+
 	}).fail(function () {
 		console.log("Error getting environment variables");
 	});
