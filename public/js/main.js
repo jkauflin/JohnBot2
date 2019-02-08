@@ -108,6 +108,8 @@ var main = (function () {
 		//console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
 		//console.log("botEnv, UID = " + env.UID);
 
+		getJokes();
+
 		connectToBot(env.wsUrl);
 
 	}).fail(function () {
@@ -386,6 +388,43 @@ var botMessage = {
 
 		}).catch(function (error) {
 			console.log("Error in getBotResponses getJSON, err = " + error);
+		});
+	}
+
+	// Respond to string recognized by speech to text (or from search input text box)
+	function getJokes() {
+		console.log(" in getJokes ");
+
+		// Send the speech text to a search service to get a response
+		$.getJSON(env.BOT_WEB_URL + "getBotDataProxy.php", "table=jokes" + "&UID=" + env.UID, function (response) {
+			//console.log("response.length = " + response.length);
+			console.log("response = " + JSON.stringify(response));
+
+			// 2019-01-25 Remove the default - if you don't find a response, don't say anything
+			//var textToSpeak = "I am not programmed to respond in this area.";
+			if (response.length > 0) {
+				/*
+				if (response[0].score > 1) {
+					sayAndAnimate(response[0].verbalResponse);
+				}
+				*/
+			}
+
+			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
+			/*
+		    for (var current in jsonResponse) {
+		        if (current == 0) {
+		            textToSpeak = jsonResponse[current].verbalResponse;
+		        }
+		        // how do I know when the update is done - do I care?
+		        // log how many records were in the service call JSON response
+		        //console.log("id = "+botResponsesList[current].id);
+		        console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
+		    } // loop through JSON list
+			*/
+
+		}).catch(function (error) {
+			console.log("Error in getBotData getJSON, err = " + error);
 		});
 	}
 
