@@ -23,6 +23,10 @@ var speech = (function () {
     var ignore_onend;
     var start_timestamp;
     var speechSynth = window.speechSynthesis;
+    var recognition = new webkitSpeechRecognition();
+    //if (!('webkitSpeechRecognition' in window)) {
+    //    console.log("webkitSpeechRecognition not supported");
+    //if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
     //=================================================================================================================
     // Variables cached from the DOM
@@ -32,94 +36,87 @@ var speech = (function () {
     //=================================================================================================================
     // Bind events
     $SpeechToTextButton.click(_ToggleSpeechToText);
-    
-    /*
-    if (window.hasOwnProperty('webkitSpeechRecognition')) {
-        this.ArtyomWebkitSpeechRecognition = new (<any>window).webkitSpeechRecognition();
-    }else{
-                console.error("Artyom.js can't recognize voice without the Speech Recognition API.");
-        }
-    */
 
-    //if (!('webkitSpeechRecognition' in window)) {
-    //    console.log("webkitSpeechRecognition not supported");
-    //} else {
-        //start_button.style.display = 'inline-block';
-        var recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onstart = function () {
-            recognizing = true;
-            //showInfo('info_speak_now');
-            STTButtonImage.src = './img/mic-animate.gif';
-        };
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onstart = function () {
+        recognizing = true;
+        main.handleRecognitionStarted();
+        //showInfo('info_speak_now');
+        STTButtonImage.src = './img/mic-animate.gif';
+    };
 
-        recognition.onerror = function (event) {
-            if (event.error == 'no-speech') {
-                STTButtonImage.src = './img/mic.gif';
-                //showInfo('info_no_speech');
-                ignore_onend = true;
-            }
-            if (event.error == 'audio-capture') {
-                STTButtonImage.src = './img/mic.gif';
-                //showInfo('info_no_microphone');
-                ignore_onend = true;
-            }
-            if (event.error == 'not-allowed') {
-                if (event.timeStamp - start_timestamp < 100) {
-                    //showInfo('info_blocked');
-                } else {
-                    //showInfo('info_denied');
-                }
-                ignore_onend = true;
-            }
-        };
-
-        recognition.onend = function () {
-            //console.log("*** recognition.onend ***");
-            recognizing = false;
-            if (ignore_onend) {
-                return;
-            }
+    recognition.onerror = function (event) {
+        if (event.error == 'no-speech') {
             STTButtonImage.src = './img/mic.gif';
-            if (!final_transcript) {
-                //showInfo('info_start');
-                return;
+            //showInfo('info_no_speech');
+            ignore_onend = true;
+        }
+        if (event.error == 'audio-capture') {
+            STTButtonImage.src = './img/mic.gif';
+            //showInfo('info_no_microphone');
+            ignore_onend = true;
+        }
+        if (event.error == 'not-allowed') {
+            /*
+            if (event.timeStamp - start_timestamp < 100) {
+                //showInfo('info_blocked');
+            } else {
+                //showInfo('info_denied');
             }
-            //showInfo('');
-            if (window.getSelection) {
-                window.getSelection().removeAllRanges();
-                var range = document.createRange();
-                range.selectNode(document.getElementById('STTResultsSpan'));
-                window.getSelection().addRange(range);
-            }
-        };
+            */
+            ignore_onend = true;
+        }
+    };
 
-        recognition.onresult = function (event) {
-            var interim_transcript = '';
-            for (var i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    final_transcript += event.results[i][0].transcript;
-                } else {
-                    interim_transcript += event.results[i][0].transcript;
-                }
-            }
-            // Don't capitalize - leave lowercase
-            //final_transcript = capitalize(final_transcript);
-            STTResultsSpan.innerHTML = linebreak(final_transcript);
-            if (final_transcript || interim_transcript) {
-                if (final_transcript) {
-                    //console.log(">>> onresult, final_transcript = " + final_transcript);
-                    // *** tightly coupled to a function in main right now, but could implement
-                    // *** a publish/subscribe framework to send the event
-                    main.handleTextFromSpeech(final_transcript);
-                    //speakText(final_transcript);
-                    final_transcript = '';
-                }
-            }
+    recognition.onend = function () {
+        //console.log("*** recognition.onend ***");
+        recognizing = false;
 
-        };
-    //} // if webkitSpeechRecognition
+        main.handleRecognitionStopped();
+
+        if (ignore_onend) {
+            return;
+        }
+        STTButtonImage.src = './img/mic.gif';
+        if (!final_transcript) {
+            //showInfo('info_start');
+            return;
+        }
+        //showInfo('');
+        if (window.getSelection) {
+            window.getSelection().removeAllRanges();
+            var range = document.createRange();
+            range.selectNode(document.getElementById('STTResultsSpan'));
+            window.getSelection().addRange(range);
+        }
+    };
+
+    recognition.onresult = function (event) {
+        var interim_transcript = '';
+        for (var i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                final_transcript += event.results[i][0].transcript;
+            } else {
+                interim_transcript += event.results[i][0].transcript;
+            }
+        }
+        // Don't capitalize - leave lowercase
+        //final_transcript = capitalize(final_transcript);
+        STTResultsSpan.innerHTML = linebreak(final_transcript);
+        if (final_transcript || interim_transcript) {
+            if (final_transcript) {
+                //console.log(">>> onresult, final_transcript = " + final_transcript);
+                // *** tightly coupled to a function in main right now, but could implement
+                // *** a publish/subscribe framework to send the event
+                main.handleTextFromSpeech(final_transcript);
+                //speakText(final_transcript);
+                final_transcript = '';
+            }
+        }
+
+    };
 
     function linebreak(s) {
         return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
@@ -128,22 +125,29 @@ var speech = (function () {
     function capitalize(s) {
         return s.replace(first_char, function (m) { return m.toUpperCase(); });
     }
+
     function _ToggleSpeechToText(event) {
         if (recognizing) {
             recognition.stop();
             return;
         }
         final_transcript = '';
-        //recognition.lang = select_dialect.value;
-        recognition.lang = 'en-US';
         recognition.start();
         ignore_onend = false;
         STTResultsSpan.innerHTML = '';
         STTButtonImage.src = './img/mic-slash.gif';
-        //showInfo('info_allow');
-        //showButtons('none');
-        start_timestamp = event.timeStamp;
+        //start_timestamp = event.timeStamp;
     }
+
+    function startRecognition() {
+        if (!recognizing) {
+            _ToggleSpeechToText();
+        }
+
+//        main.handleTextFromSpeech(final_transcript);
+
+    }
+
 
     /*
     _this.ArtyomWebkitSpeechRecognition.onend = function () {
@@ -206,6 +210,7 @@ var speech = (function () {
     //=================================================================================================================
     // This is what is exposed from this Module
     return {
+        startRecognition,
         speakText
     };
 

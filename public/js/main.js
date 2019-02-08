@@ -29,8 +29,16 @@ var main = (function () {
 	var armPos = 0;
 	var motorPos = 0;
 
-	var currMs = 0;
-	var prevArmMs = 0;
+	var jokeQuestions = [];
+	var jokeAnswers = [];
+	var jokeStarted = false;
+	var prevJoke = -1;
+	var currJoke = 0;
+
+	var recognitionStarted = false;
+	var initialStart = true;
+	var userName = '';
+	var getUserName = false;
 
 	//=================================================================================================================
 	// Variables cached from the DOM
@@ -57,9 +65,6 @@ var main = (function () {
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;
 	//logMessage("isTouchDevice = " + isTouchDevice);
-
-	// track when start button is hit - say hello
-	//$SpeechToTextButton.click(_ToggleSpeechToText);
 
 	// Get environment variables
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
@@ -322,52 +327,81 @@ var botMessage = {
 		$searchStr.val('');
 	}
 
+	function _getRandomInt(min, max) {
+		return Math.floor(Math.random() * (max - min)) + min;
+	}
+
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
+		speechText = speechText.toLowerCase();
 		console.log(" in handleTextFromSpeech, speechText = " + speechText);
+		var textToSpeak = "";
 
 		// Check the speech text for commands to send to the robot
-		if (speechText.toLowerCase().search("stop") >= 0) {
+		if (speechText.search("stop") >= 0) {
 			_wsSend('{"stop":1}');
-		} else if (speechText.toLowerCase().search("turn") >= 0) {
+		} else if (speechText.search("turn") >= 0) {
 			// rotate - direction, [duration], [degrees], [speed]
 			// get duration or degrees parameter from next work
 			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":2500}');
+
+		} else if (getUserName) {
+			userName = speechText;
+			getUserName = false;
+			sayAndAnimate("Hello, "+userName+".  It is nice to meet you.");
+
+		} else if (speechText.search("tell") >= 0 && speechText.search("joke") >= 0) {
+			currJoke = _getRandomInt(0, jokeQuestions.length);
+			if (currJoke == prevJoke) {
+				currJoke = _getRandomInt(0, jokeQuestions.length);
+			}
+			textToSpeak = jokeQuestions[currJoke];
+			jokeStarted = true;
+		} else if (jokeStarted) {
+			textToSpeak = jokeAnswers[currJoke];
+			jokeStarted = false;
+		} else {
+			// eventually cache responses and implement the search in the client
+			// using the pairs check?
+			// Send the speech text to a search service to check for response
+			$.getJSON(env.BOT_WEB_URL + "getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
+				//console.log("response.length = " + response.length);
+				console.log("response = " + JSON.stringify(response));
+
+				// 2019-01-25 Remove the default - if you don't find a response, don't say anything
+				//var textToSpeak = "I am not programmed to respond in this area.";
+				if (response.length > 0) {
+					if (response[0].score > 1) {
+						textToSpeak = response[0].verbalResponse;
+					}
+				}
+
+				// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
+				/*
+				for (var current in jsonResponse) {
+					if (current == 0) {
+						textToSpeak = jsonResponse[current].verbalResponse;
+					}
+					// how do I know when the update is done - do I care?
+					// log how many records were in the service call JSON response
+					//console.log("id = "+botResponsesList[current].id);
+					console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
+				} // loop through JSON list
+				*/
+
+			}).catch(function (error) {
+				console.log("Error in getBotResponses getJSON, err = " + error);
+			});
 		}
 
-		// eventually cache responses and implement the search in the client
-		// using the pairs check?
 
-		// Send the speech text to a search service to check for response
-		$.getJSON(env.BOT_WEB_URL+"getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
-			//console.log("response.length = " + response.length);
-			console.log("response = "+JSON.stringify(response));
+		// If there is something to say, say it
+		if (textToSpeak != "") {
+			sayAndAnimate(textToSpeak);
+		}
 
-			// 2019-01-25 Remove the default - if you don't find a response, don't say anything
-			//var textToSpeak = "I am not programmed to respond in this area.";
-		    if (response.length > 0) {
-				if (response[0].score > 1) {
-					sayAndAnimate(response[0].verbalResponse);
-				}
-		    }
+	} // function handleTextFromSpeech(speechText) {
 
-			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
-			/*
-		    for (var current in jsonResponse) {
-		        if (current == 0) {
-		            textToSpeak = jsonResponse[current].verbalResponse;
-		        }
-		        // how do I know when the update is done - do I care?
-		        // log how many records were in the service call JSON response
-		        //console.log("id = "+botResponsesList[current].id);
-		        console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
-		    } // loop through JSON list
-			*/
-
-		}).catch(function (error) {
-			console.log("Error in getBotResponses getJSON, err = " + error);
-		});
-	}
 
 	// Respond to string recognized by speech to text (or from search input text box)
 	function _cacheJokes() {
@@ -378,8 +412,10 @@ var botMessage = {
 
 			if (response.length > 0) {
 				for (var current in response) {
-					console.log("question = "+response[current].question);
-					console.log("answer = "+response[current].answer);
+					//console.log("question = " + response[current].question);
+					//console.log("answer = " + response[current].answer);
+					jokeQuestions.push(response[current].question);
+					jokeAnswers.push(response[current].answer);
 				} // loop through JSON list
 			}
 
@@ -392,6 +428,13 @@ var botMessage = {
 	function handleDoneSpeaking(speechText) {
 		//console.log("Done speaking");
 		//_wsSend('{"doneSpeaking" : 1}');
+	}
+
+	function handleRecognitionStarted() {
+		recognitionStarted = true;
+	}
+	function handleRecognitionStopped() {
+		recognitionStarted = false;
 	}
 
 	function sayAndAnimate(textToSpeak) {
@@ -411,7 +454,22 @@ var botMessage = {
 			loopStart = false;
 		}
 
-  		// put stuff for the state loop in here
+		// put stuff for the state loop in here
+		  
+		if (recognitionStarted && initialStart) {
+			initialStart = false;
+			getUserName = true;
+			sayAndAnimate("Hello, I am the John bought.  What is your name?");
+		}
+
+		// Track the amount of time that recognizing is off
+		/*
+		if (elapsedTime > X) {
+			speech.startRecognition();
+			sayAndAnimate("Hello, "+userName+".  Are you still there?");
+		}
+		*/
+		
 
 	}, 1000);
 
@@ -419,7 +477,9 @@ var botMessage = {
 	// This is what is exposed from this Module
 	return {
 		handleTextFromSpeech,
-		handleDoneSpeaking
+		handleDoneSpeaking,
+		handleRecognitionStarted,
+		handleRecognitionStopped
 	};
 
 })(); // var main = (function(){
