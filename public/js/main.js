@@ -13,6 +13,7 @@
  * 					fuzzy match algorithm
  * 2019-02-01 JJK	Implement command check on spoken text
  * 					Working on activity loop
+ * 2019-02-08 JJK	Implementing jokes query and cache
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -60,86 +61,21 @@ var main = (function () {
 	// track when start button is hit - say hello
 	//$SpeechToTextButton.click(_ToggleSpeechToText);
 
-	// Call the start service on the server to get environment parameters and establish a websocket connection
-	/*
-	var jqxhr = $.get("getWsUrl", "", connectToBot).fail(function () {
-		console.log("error getting wsUrl");
-	});
-	*/
-
-	function connectToBot(wsUrl) {
-	    console.log("in connectToBot, wsUrl = " + wsUrl);
-
-	    ws = new WebSocket(wsUrl);
-	    // event emmited when connected
-	    ws.onopen = function () {
-	        wsConnected = true;
-	        //console.log('websocket is connected ...')
-	        $StatusDisplay.html("Connected");
-
-	        // event emmited when receiving message from the server (messages from the robot)
-	        ws.onmessage = function (messageEvent) {
-	            var serverMessage = JSON.parse(messageEvent.data);
-	            if (serverMessage.errorMessage != null) {
-	                logMessage(serverMessage.errorMessage);
-	            }
-
-	            // add other bot event handling here
-	            if (serverMessage.proxIn != null) {
-	                $("#proximityInches").html("Proximity inches: " + serverMessage.proxIn);
-	            }
-
-	            // Text that the robot want spoken
-	            // (*** No, just have the robot report events, and let the
-	            //  main client controller decide what to say ***)
-	            /*
-	            if (serverMessage.textToSpeak != null) {
-	            	sayAndAnimate(serverMessage.textToSpeak);
-	            }
-	            */
-	        } // on message (from server)
-
-	    } // Websocket open
-	}
-
-	// Get environment variables from a local service
+	// Get environment variables
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
 		env = inEnv;
 		//console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
 		//console.log("botEnv, UID = " + env.UID);
-
-		getJokes();
-
-		connectToBot(env.wsUrl);
-
+		_cacheJokes();
+		_connectToBot(env.wsUrl);
 	}).fail(function () {
 		console.log("Error getting environment variables");
 	});
 
-	// doing this twice
 	if (!isTouchDevice) {
 		$SearchInput.change(_searchResponses);
 	} else {
 		$SearchButton.click(_searchResponses);
-	}
-	//$LoadDataButton.click(_loadData);
-
-	function _searchResponses() {
-		console.log("searchStr = " + $searchStr.val());
-		//_wsSend('{"searchStr" : "' + $searchStr.val() + '"}');
-
-		var speechText = $searchStr.val();
-
-		if (speechText.toLowerCase().search("stop") >= 0) {
-		    _wsSend('{"stop":1}');
-		} else if (speechText.toLowerCase().search("turn") >= 0) {
-		    // rotate - direction, [duration], [degrees], [speed]
-		    // get duration or degrees parameter from next work
-		    _wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":2500}');
-		}
-
-		handleTextFromSpeech($searchStr.val());
-		$searchStr.val('');
 	}
 
 	/*
@@ -353,14 +289,56 @@ var botMessage = {
 		//_wsSend('{"voice" : 0}');
 	}
 
+	// Try to establish a websocket connection with the robot
+	function _connectToBot(wsUrl) {
+		//console.log("in connectToBot, wsUrl = " + wsUrl);
+		ws = new WebSocket(wsUrl);
+		// event emmited when connected
+		ws.onopen = function () {
+			wsConnected = true;
+			//console.log('websocket is connected ...')
+			$StatusDisplay.html("Connected");
+
+			// event emmited when receiving message from the server (messages from the robot)
+			ws.onmessage = function (messageEvent) {
+				var serverMessage = JSON.parse(messageEvent.data);
+				if (serverMessage.errorMessage != null) {
+					logMessage(serverMessage.errorMessage);
+				}
+
+				// add other bot event handling here
+				if (serverMessage.proxIn != null) {
+					$("#proximityInches").html("Proximity inches: " + serverMessage.proxIn);
+				}
+
+			} // on message (from server)
+
+		} // Websocket open
+	}
+
+	function _searchResponses() {
+		//console.log("searchStr = " + $searchStr.val());
+		handleTextFromSpeech($searchStr.val());
+		$searchStr.val('');
+	}
+
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
 		console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
-		// Send the speechText to the robot to see if there is a matching command to take action on
-		//_wsSend('{"speechText" : "' + speechText + '"}');
+		// Check the speech text for commands to send to the robot
+		if (speechText.toLowerCase().search("stop") >= 0) {
+			_wsSend('{"stop":1}');
+		} else if (speechText.toLowerCase().search("turn") >= 0) {
+			// rotate - direction, [duration], [degrees], [speed]
+			// get duration or degrees parameter from next work
+			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":2500}');
+		}
 
-		// Send the speech text to a search service to get a response
+		// eventually cache responses and implement the search in the client
+		// using the pairs check?
+
+		// Send the speech text to a search service to check for response
 		$.getJSON(env.BOT_WEB_URL+"getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);
 			console.log("response = "+JSON.stringify(response));
@@ -392,36 +370,18 @@ var botMessage = {
 	}
 
 	// Respond to string recognized by speech to text (or from search input text box)
-	function getJokes() {
-		console.log(" in getJokes ");
-
-		// Send the speech text to a search service to get a response
+	function _cacheJokes() {
+		// Get the joke data and cache in an array
 		$.getJSON(env.BOT_WEB_URL + "getBotDataProxy.php", "table=jokes" + "&UID=" + env.UID, function (response) {
 			//console.log("response.length = " + response.length);
-			console.log("response = " + JSON.stringify(response));
+			//console.log("response = " + JSON.stringify(response));
 
-			// 2019-01-25 Remove the default - if you don't find a response, don't say anything
-			//var textToSpeak = "I am not programmed to respond in this area.";
 			if (response.length > 0) {
-				/*
-				if (response[0].score > 1) {
-					sayAndAnimate(response[0].verbalResponse);
-				}
-				*/
+				for (var current in response) {
+					console.log("question = "+response[current].question);
+					console.log("answer = "+response[current].answer);
+				} // loop through JSON list
 			}
-
-			// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
-			/*
-		    for (var current in jsonResponse) {
-		        if (current == 0) {
-		            textToSpeak = jsonResponse[current].verbalResponse;
-		        }
-		        // how do I know when the update is done - do I care?
-		        // log how many records were in the service call JSON response
-		        //console.log("id = "+botResponsesList[current].id);
-		        console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
-		    } // loop through JSON list
-			*/
 
 		}).catch(function (error) {
 			console.log("Error in getBotData getJSON, err = " + error);
@@ -430,8 +390,7 @@ var botMessage = {
 
 	// Respond to string recognized by speech to text
 	function handleDoneSpeaking(speechText) {
-		//console.log(dateTime.create().format('H:M:S.N') + ", in handleTextFromSpeech, speechText = " + speechText);
-		//console.log(", in handleTextFromSpeech, speechText = " + speechText);
+		//console.log("Done speaking");
 		//_wsSend('{"doneSpeaking" : 1}');
 	}
 
