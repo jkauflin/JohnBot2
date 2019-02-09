@@ -64,7 +64,7 @@ process.on('uncaughtException', function (e) {
 require('dotenv').config();
 //HOST=
 //WEB_PORT=
-//BOT_DATA_URL=
+//BOT_WEB_URL=
 //UID=
 //SSL_PRIVATE_KEY_FILE_LOC=
 //SSL_PUBLIC_CERT_FILE_LOC=
