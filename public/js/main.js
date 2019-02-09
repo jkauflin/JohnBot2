@@ -14,6 +14,7 @@
  * 2019-02-01 JJK	Implement command check on spoken text
  * 					Working on activity loop
  * 2019-02-08 JJK	Implementing jokes query and cache
+ * 2019-02-09 JJK	Implementing robotCommand, and getUserName
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -39,6 +40,7 @@ var main = (function () {
 	var initialStart = true;
 	var userName = '';
 	var getUserName = false;
+	var lastTextToSpeak = '';
 
 	//=================================================================================================================
 	// Variables cached from the DOM
@@ -351,8 +353,11 @@ var botMessage = {
 
 		} else if (getUserName) {
 			userName = speechText;
+			// strip out any - my name is, I am, they call me
 			getUserName = false;
 			sayAndAnimate("Hello, "+userName+".  It is nice to meet you.");
+
+			// confirm - did you say your name was?  yes no
 
 		} else if (speechText.search("tell") >= 0 && speechText.search("joke") >= 0) {
 			currJoke = _getRandomInt(0, jokeQuestions.length);
@@ -443,6 +448,7 @@ var botMessage = {
 		speech.speakText(textToSpeak);
 		// Send text to robot to animate speech (if connected)
 		_wsSend('{"textToSpeak" : "' + textToSpeak + '"}');
+		lastTextToSpeak = textToSpeak;
 	}
 
 	// Main activity loop

@@ -266,7 +266,15 @@ function _rotate(direction,duration,degrees,speed) {
     if (degrees != null) {
       // tempDuration = degrees * tempSpeed;
 
-      Milliseconds = (242521.3 * Math.pow(motorSpeed, -2.113871)) * targetDegrees
+      // make sure degrees is positive > 0?
+
+      if (degrees > 360) {
+        degrees = 360;
+      } else if (degrees < 0) {
+        degrees = 0;
+      }
+
+      tempDuration = (242521.3 * Math.pow(motorSpeed, -2.113871)) * degrees
 
     }
 
