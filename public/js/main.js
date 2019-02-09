@@ -63,6 +63,8 @@ var main = (function () {
 	var $ArmPosition = $document.find("#ArmPosition");
 	var $HeadPosition = $document.find("#HeadPosition");
 
+	var $ContinuousListening = $document.find("#ContinuousListening");
+
 	//=================================================================================================================
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;
@@ -435,11 +437,16 @@ var botMessage = {
 
 	function handleRecognitionStarted() {
 		recognitionStarted = true;
-		console.log("recognitionStarted = true");
+		//console.log("recognitionStarted = true");
 	}
 	function handleRecognitionStopped() {
 		recognitionStarted = false;
-		console.log("recognitionStarted = false");
+		//console.log("recognitionStarted = false");
+
+		if ($ContinuousListening.prop('checked')) {
+			speech.startRecognition();
+		}
+
 	}
 
 	function sayAndAnimate(textToSpeak) {
