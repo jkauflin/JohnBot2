@@ -59,6 +59,7 @@ var rightEyeLed;
 var motorConfig = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
 var motor1;
 var motor2;
+//var motorSpeed = 100;
 var motorSpeed = 100;
 var headServo;
 var armServo;
@@ -264,6 +265,9 @@ function _rotate(direction,duration,degrees,speed) {
     // If degrees are set, calculate duration from speed
     if (degrees != null) {
       // tempDuration = degrees * tempSpeed;
+
+      Milliseconds = (242521.3 * Math.pow(motorSpeed, -2.113871)) * targetDegrees
+
     }
 
     // If duration or degress are set, then set a timeout of when to stop

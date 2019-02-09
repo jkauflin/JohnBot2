@@ -335,15 +335,19 @@ var botMessage = {
 	function handleTextFromSpeech(speechText) {
 		speechText = speechText.toLowerCase();
 		console.log(" in handleTextFromSpeech, speechText = " + speechText);
-		var textToSpeak = "";
+
+		// what was did you say that again 
+		// can you repeat that
+		// --> repeat last textToSpeak
 
 		// Check the speech text for commands to send to the robot
 		if (speechText.search("stop") >= 0) {
 			_wsSend('{"stop":1}');
 		} else if (speechText.search("turn") >= 0) {
 			// rotate - direction, [duration], [degrees], [speed]
-			// get duration or degrees parameter from next work
-			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":2500}');
+			//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
+			//_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
+			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + speechText.substr(5) + '}');
 
 		} else if (getUserName) {
 			userName = speechText;
@@ -355,10 +359,10 @@ var botMessage = {
 			if (currJoke == prevJoke) {
 				currJoke = _getRandomInt(0, jokeQuestions.length);
 			}
-			textToSpeak = jokeQuestions[currJoke];
+			sayAndAnimate(jokeQuestions[currJoke]);
 			jokeStarted = true;
 		} else if (jokeStarted) {
-			textToSpeak = jokeAnswers[currJoke];
+			sayAndAnimate(jokeAnswers[currJoke]);
 			jokeStarted = false;
 		} else {
 			// eventually cache responses and implement the search in the client
@@ -372,7 +376,7 @@ var botMessage = {
 				//var textToSpeak = "I am not programmed to respond in this area.";
 				if (response.length > 0) {
 					if (response[0].score > 1) {
-						textToSpeak = response[0].verbalResponse;
+						sayAndAnimate(response[0].verbalResponse);
 					}
 				}
 
@@ -394,12 +398,6 @@ var botMessage = {
 			});
 		}
 
-
-		// If there is something to say, say it
-		if (textToSpeak != "") {
-			sayAndAnimate(textToSpeak);
-		}
-
 	} // function handleTextFromSpeech(speechText) {
 
 
@@ -407,7 +405,7 @@ var botMessage = {
 	function _cacheJokes() {
 		// Get the joke data and cache in an array
 		$.getJSON(env.BOT_WEB_URL + "getBotDataProxy.php", "table=jokes" + "&UID=" + env.UID, function (response) {
-			//console.log("response.length = " + response.length);
+			console.log("Number of Jokes = " + response.length);
 			//console.log("response = " + JSON.stringify(response));
 
 			if (response.length > 0) {
@@ -432,9 +430,11 @@ var botMessage = {
 
 	function handleRecognitionStarted() {
 		recognitionStarted = true;
+		console.log("recognitionStarted = true");
 	}
 	function handleRecognitionStopped() {
 		recognitionStarted = false;
+		console.log("recognitionStarted = false");
 	}
 
 	function sayAndAnimate(textToSpeak) {
@@ -457,6 +457,7 @@ var botMessage = {
 		// put stuff for the state loop in here
 		  
 		if (recognitionStarted && initialStart) {
+			console.log("*** recognitionStarted && initialStart");
 			initialStart = false;
 			getUserName = true;
 			sayAndAnimate("Hello, I am the John bought.  What is your name?");
