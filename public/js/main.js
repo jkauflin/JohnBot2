@@ -1,5 +1,5 @@
 /*==============================================================================
- * (C) Copyright 2017,2018 John J Kauflin, All rights reserved. 
+ * (C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
  *----------------------------------------------------------------------------
  * DESCRIPTION: Client-side JS functions and logic for JohnBot2
  *----------------------------------------------------------------------------
@@ -15,6 +15,7 @@
  * 					Working on activity loop
  * 2019-02-08 JJK	Implementing jokes query and cache
  * 2019-02-09 JJK	Implementing robotCommand, and getUserName
+ * 2019-02-10 JJK	Moved manual controls to seperate module
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -26,17 +27,12 @@ var main = (function () {
 	var isTouchDevice = false;
 	var date;
 
-	var headPos = 0;
-	var armPos = 0;
-	var motorPos = 0;
-
 	var jokeQuestions = [];
 	var jokeAnswers = [];
 	var jokeStarted = false;
 	var prevJoke = -1;
 	var currJoke = 0;
 
-	var recognitionStarted = false;
 	var initialStart = true;
 	var userName = '';
 	var getUserName = false;
@@ -51,24 +47,10 @@ var main = (function () {
 	var $SearchButton = $document.find("#SearchButton");
 	var $SearchInput = $document.find("#SearchInput");
 	var $searchStr = $document.find("#searchStr");
-	var $LoadDataButton = $document.find("#LoadDataButton");
-
-	var $ForwardButton = $document.find("#ForwardButton");
-	var $BackwardButton  = $document.find("#BackwardButton");
-	var $RotateLeftButton = $document.find("#RotateLeftButton");
-	var $RotateRightButton = $document.find("#RotateRightButton");
-	var $EyeButton = $document.find("#EyeButton");
-	var $VoiceButton = $document.find("#VoiceButton");
-	var $MotorSpeed = $document.find("#MotorSpeed");
-	var $ArmPosition = $document.find("#ArmPosition");
-	var $HeadPosition = $document.find("#HeadPosition");
-
-	var $ContinuousListening = $document.find("#ContinuousListening");
 
 	//=================================================================================================================
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;
-	//logMessage("isTouchDevice = " + isTouchDevice);
 
 	// Get environment variables
 	var jqxhr = $.getJSON("dotenv.php", "", function (inEnv) {
@@ -87,151 +69,6 @@ var main = (function () {
 		$SearchButton.click(_searchResponses);
 	}
 
-	/*
-var botMessage = {
-"moveDirection" : "F",
-"move" : 1,
-"rotateDirection" : "R",
-"rotate" : 0,
-"eyes" : 0,
-"motorSpeed" : 100,
-"armPosition" : 90,
-"headPosition" : 90
-};
-	*/
-	$ForwardButton
-		.mousedown(function () {
-			if (!isTouchDevice) { forwardPushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { forwardReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { forwardPushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { forwardReleased(); }
-		});
-
-	$BackwardButton
-		.mousedown(function () {
-			if (!isTouchDevice) { backwardPushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { backwardReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { backwardPushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { backwardReleased(); }
-		});
-
-	$RotateLeftButton
-		.mousedown(function () {
-			if (!isTouchDevice) { rotateLeftPushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { rotateLeftReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { rotateLeftPushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { rotateLeftReleased(); }
-		});
-
-	$RotateRightButton
-		.mousedown(function () {
-			if (!isTouchDevice) { rotateRightPushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { rotateRightReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { rotateRightPushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { rotateRightReleased(); }
-		});
-
-	$EyeButton
-		.mousedown(function () {
-			if (!isTouchDevice) { eyePushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { eyeReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { eyePushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { eyeReleased(); }
-		});
-
-	$VoiceButton
-		.mousedown(function () {
-			if (!isTouchDevice) { voicePushed(); }
-		})
-		.mouseup(function () {
-			if (!isTouchDevice) { voiceReleased(); }
-		})
-		.on('touchstart', function () {
-			if (isTouchDevice) { voicePushed(); }
-		})
-		.on('touchend', function () {
-			if (isTouchDevice) { voiceReleased(); }
-		});
-
-	$MotorSpeed.slider({
-		reversed: true
-	})
-		.on("slide", function (slideEvt) {
-			//$("#ex6SliderVal").text(slideEvt.value);
-			//console.log("slider value = "+slideEvt.value);
-			if (slideEvt.value != motorPos) {
-				_wsSend('{"motorSpeed" : ' + slideEvt.value + '}');
-				motorPos = slideEvt.value;
-			}
-		})
-		.on("slideStop", function (slideEvt) {
-			//$("#ex6SliderVal").text(slideEvt.value);
-			//console.log("slider value = "+slideEvt.value);
-			_wsSend('{"motorSpeed" : ' + slideEvt.value + '}');
-		});
-
-	$ArmPosition.slider({
-		reversed: true
-	})
-		.on("slide", function (slideEvt) {
-			//$("#ex6SliderVal").text(slideEvt.value);
-			//console.log("slider value = "+slideEvt.value);
-			if (slideEvt.value != armPos) {
-				_wsSend('{"armPosition" : ' + slideEvt.value + '}');
-				armPos = slideEvt.value;
-			}
-		})
-		.on("slideStop", function (slideEvt) {
-			//$("#ex6SliderVal").text(slideEvt.value);
-			//console.log("slider value = "+slideEvt.value);
-			_wsSend('{"armPosition" : ' + slideEvt.value + '}');
-		});
-
-	$HeadPosition.slider({
-	})
-		.on("slide", function (slideEvt) {
-			if (slideEvt.value != headPos) {
-				//console.log("Head slider value = "+slideEvt.value);
-				_wsSend('{"headPosition" : ' + slideEvt.value + '}');
-				headPos = slideEvt.value;
-			}
-		})
-		.on("slideStop", function (slideEvt) {
-			//console.log("sliderStop value = "+slideEvt.value);
-			_wsSend('{"headPosition" : ' + slideEvt.value + '}');
-		});
-
-
 	//=================================================================================================================
 	// Module methods
 	function logMessage(message) {
@@ -240,62 +77,12 @@ var botMessage = {
 	}
 
 	// General function to send the botMessageStr to the server if Websocket is connected
-	function _wsSend(botMessageStr) {
-		//console.log("in _wsSend, wsConnected = "+wsConnected);
+	function sendCommand(botMessageStr) {
+		//console.log("in sendCommand, wsConnected = "+wsConnected);
 		if (wsConnected) {
-			//console.log("in _wsSend, botMessageStr = "+botMessageStr);
+			//console.log("in sendCommand, botMessageStr = "+botMessageStr);
 			ws.send(botMessageStr);
 		}
-	}
-
-	function forwardPushed() {
-		//console.log("EYES - Pushed");
-		//$("#logMessage").html("EYES - Pushed");
-		_wsSend('{"moveDirection" : "F","move" : 1}');
-	}
-	function forwardReleased() {
-		//console.log("EYES - Released");
-		//$("#logMessage").html("EYES - Released");
-		_wsSend('{"move" : 0}');
-	}
-
-	function backwardPushed() {
-		//console.log("EYES - Pushed");
-		//$("#logMessage").html("EYES - Pushed");
-		_wsSend('{"moveDirection" : "R","move" : 1}');
-	}
-	function backwardReleased() {
-		//console.log("EYES - Released");
-		//$("#logMessage").html("EYES - Released");
-		_wsSend('{"move" : 0}');
-	}
-
-	function rotateLeftPushed() {
-		_wsSend('{"rotateDirection" : "L","rotate" : 1}');
-	}
-	function rotateLeftReleased() {
-		_wsSend('{"rotate" : 0}');
-	}
-
-	function rotateRightPushed() {
-		_wsSend('{"rotateDirection" : "R","rotate" : 1}');
-	}
-	function rotateRightReleased() {
-		_wsSend('{"rotate" : 0}');
-	}
-
-	function eyePushed() {
-		_wsSend('{"eyes" : 1}');
-	}
-	function eyeReleased() {
-		_wsSend('{"eyes" : 0}');
-	}
-
-	function voicePushed() {
-		sayAndAnimate("I am the John bought.  You cannot kill me");
-	}
-	function voiceReleased() {
-		//_wsSend('{"voice" : 0}');
 	}
 
 	// Try to establish a websocket connection with the robot
@@ -346,14 +133,11 @@ var botMessage = {
 
 		// Check the speech text for commands to send to the robot
 		if (speechText.search("stop") >= 0) {
-			_wsSend('{"stop":1}');
-		/*
-		} else if (speechText.search("turn") >= 0) {
-			// rotate - direction, [duration], [degrees], [speed]
-			//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
-			//_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
-			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + speechText.substr(5) + '}');
-		*/
+			sendCommand('{"stop":1}');
+		} else if (speechText.search("rotate") >= 0) {
+			// botMessage.
+			//_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
+			sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + speechText.substr(5) + '}');
 		} else if (getUserName) {
 			userName = speechText;
 			// strip out any - my name is, I am, they call me
@@ -386,11 +170,12 @@ var botMessage = {
 					if (response[0].score > 1) {
 						sayAndAnimate(response[0].verbalResponse);
 
-						if (response[0].robotCommand.search("rotate") >= 0) {
+						// *** maybe a function that translates commands to command strings
+						if (response[0].robotCommand != null && response[0].robotCommand.search("rotate") >= 0) {
 							// rotate - direction, [duration], [degrees], [speed]
 							//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
-							//_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
-							_wsSend('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + response[0].robotCommand.substr(7) + '}');
+							//sendCommand('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
+							sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + response[0].robotCommand.substr(7) + '}');
 						}
 					}
 				}
@@ -414,12 +199,11 @@ var botMessage = {
 
 	} // function handleTextFromSpeech(speechText) {
 
-
 	// Respond to string recognized by speech to text (or from search input text box)
 	function _cacheJokes() {
 		// Get the joke data and cache in an array
 		$.getJSON(env.BOT_WEB_URL + "getBotDataProxy.php", "table=jokes" + "&UID=" + env.UID, function (response) {
-			console.log("Number of Jokes = " + response.length);
+			//console.log("Number of Jokes = " + response.length);
 			//console.log("response = " + JSON.stringify(response));
 
 			if (response.length > 0) {
@@ -432,28 +216,17 @@ var botMessage = {
 			}
 
 		}).catch(function (error) {
-			console.log("Error in getBotData getJSON, err = " + error);
+			console.log("Error in getJSON for Jokes, err = " + error);
 		});
 	}
 
-	// Respond to string recognized by speech to text
-	function handleDoneSpeaking(speechText) {
-		//console.log("Done speaking");
-		//_wsSend('{"doneSpeaking" : 1}');
-	}
-
 	function handleRecognitionStarted() {
-		recognitionStarted = true;
-		console.log("recognitionStarted = true");
-	}
-	function handleRecognitionStopped() {
-		recognitionStarted = false;
-		console.log("recognitionStarted = false");
-
-		if ($ContinuousListening.prop('checked')) {
-			setTimeout(speech.startRecognition(), 3000);
+		if (initialStart) {
+			//console.log("*** recognitionStarted && initialStart");
+			initialStart = false;
+			getUserName = true;
+			sayAndAnimate("Hello, I am the John bought.  What is your name?");
 		}
-
 	}
 
 	function sayAndAnimate(textToSpeak) {
@@ -461,7 +234,7 @@ var botMessage = {
 		$("#VerbalRepsonse").html(textToSpeak);
 		speech.speakText(textToSpeak);
 		// Send text to robot to animate speech (if connected)
-		_wsSend('{"textToSpeak" : "' + textToSpeak + '"}');
+		sendCommand('{"textToSpeak" : "' + textToSpeak + '"}');
 		lastTextToSpeak = textToSpeak;
 	}
 
@@ -476,13 +249,6 @@ var botMessage = {
 
 		// put stuff for the state loop in here
 		  
-		if (recognitionStarted && initialStart) {
-			console.log("*** recognitionStarted && initialStart");
-			initialStart = false;
-			getUserName = true;
-			sayAndAnimate("Hello, I am the John bought.  What is your name?");
-		}
-
 		// Track the amount of time that recognizing is off
 		/*
 		if (elapsedTime > X) {
@@ -497,10 +263,10 @@ var botMessage = {
 	//=================================================================================================================
 	// This is what is exposed from this Module
 	return {
+		sendCommand,
+		sayAndAnimate,
 		handleTextFromSpeech,
-		handleDoneSpeaking,
-		handleRecognitionStarted,
-		handleRecognitionStopped
+		handleRecognitionStarted
 	};
 
 })(); // var main = (function(){

@@ -28,10 +28,16 @@ var speech = (function () {
     //    console.log("webkitSpeechRecognition not supported");
     //if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
+    var recognitionStarted = false;
+    var initialStart = true;
+
+    var speaking = false;
+
     //=================================================================================================================
     // Variables cached from the DOM
     var $document = $(document);
     var $SpeechToTextButton = $document.find("#SpeechToTextButton");
+    var $ContinuousListening = $document.find("#ContinuousListening");
 
     //=================================================================================================================
     // Bind events
@@ -40,6 +46,7 @@ var speech = (function () {
     recognition.lang = 'en-US';
     recognition.continuous = true;
     recognition.interimResults = true;
+
     recognition.onstart = function () {
         recognizing = true;
         main.handleRecognitionStarted();
@@ -74,7 +81,12 @@ var speech = (function () {
         //console.log("*** recognition.onend ***");
         recognizing = false;
 
-        main.handleRecognitionStopped();
+        // Check to restart recognizer if in continuous mode
+        if ($ContinuousListening.prop('checked') && !speaking) {
+            ignore_onend = false;
+            STTResultsSpan.innerHTML = '';
+            recognition.start();
+        }
 
         if (ignore_onend) {
             return;
@@ -139,11 +151,13 @@ var speech = (function () {
         //start_timestamp = event.timeStamp;
     }
 
+    /*
     function startRecognition() {
         if (!recognizing) {
             _ToggleSpeechToText();
         }
     }
+    */
     /*
     _this.ArtyomWebkitSpeechRecognition.onend = function () {
         if (_this.ArtyomFlags.restartRecognition === true) {
@@ -152,17 +166,27 @@ var speech = (function () {
                 _this.debug("Continuous mode enabled, restarting", "info");
     */
 
+    function handleRecognitionStarted() {
+        recognitionStarted = true;
+        console.log("recognitionStarted = true");
+    }
+    function handleRecognitionStopped() {
+        recognitionStarted = false;
+        console.log("recognitionStarted = false");
+
+
+    }
+
     function speakText(textToSpeak) {
-        console.log("in speech.speakText, text = "+textToSpeak);
+        //console.log("in speech.speakText, text = "+textToSpeak);
 
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;
         if (recognizing) {
-            console.log("$$$ aborting recognition (before speaking)");
+            //console.log("$$$ aborting recognition (before speaking)");
             recognition.abort();
-            restartRecognize = true;
-            // Wait for recognition to stop (if needed) - or tie into the onend event
-            //util.sleep(500);
+
+            //restartRecognize = true;
         }
 
         // Cancel any previously queued utterances
@@ -175,6 +199,7 @@ var speech = (function () {
         var utterance = new SpeechSynthesisUtterance(textToSpeak);
         // Just using defaults for voice, pitch, and rate
         speechSynth.speak(utterance);
+        speaking = true;
 
         /*
         var utterance1 = new SpeechSynthesisUtterance('How about we say this now? This is quite a long sentence to say.');
@@ -187,16 +212,14 @@ var speech = (function () {
         // something that says when utterance is done?
         utterance.onend = function (event) {
             //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
-            // Report that the utterance is done being spoken
-            main.handleDoneSpeaking("");
+            speaking = false;
 
             // If it was recognizing speech, turn it back on after speaking
-            if (restartRecognize) {
+            //if (restartRecognize) {
                 ignore_onend = false;
                 STTResultsSpan.innerHTML = '';
-                console.log("*** Starting recognition (after speaking)");
                 recognition.start();
-            }
+            //}
         }
         //utterance.onstart = function (event) {
         //    console.log('We have started uttering this speech: ' + event.utterance.text);
@@ -207,7 +230,6 @@ var speech = (function () {
     //=================================================================================================================
     // This is what is exposed from this Module
     return {
-        startRecognition,
         speakText
     };
 
