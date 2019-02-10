@@ -143,12 +143,7 @@ var speech = (function () {
         if (!recognizing) {
             _ToggleSpeechToText();
         }
-
-//        main.handleTextFromSpeech(final_transcript);
-
     }
-
-
     /*
     _this.ArtyomWebkitSpeechRecognition.onend = function () {
         if (_this.ArtyomFlags.restartRecognition === true) {

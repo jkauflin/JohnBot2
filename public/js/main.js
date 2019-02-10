@@ -437,14 +437,14 @@ var botMessage = {
 
 	function handleRecognitionStarted() {
 		recognitionStarted = true;
-		//console.log("recognitionStarted = true");
+		console.log("recognitionStarted = true");
 	}
 	function handleRecognitionStopped() {
 		recognitionStarted = false;
-		//console.log("recognitionStarted = false");
+		console.log("recognitionStarted = false");
 
 		if ($ContinuousListening.prop('checked')) {
-			speech.startRecognition();
+			setTimeout(speech.startRecognition(), 3000);
 		}
 
 	}
