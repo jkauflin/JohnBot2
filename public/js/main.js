@@ -37,6 +37,7 @@ var main = (function () {
 	var userName = '';
 	var getUserName = false;
 	var lastTextToSpeak = '';
+	var confirmName = false;
 
 	//=================================================================================================================
 	// Variables cached from the DOM
@@ -127,25 +128,32 @@ var main = (function () {
 		speechText = speechText.toLowerCase();
 		console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
-		// what was did you say that again 
-		// can you repeat that
-		// --> repeat last textToSpeak
-
 		// Check the speech text for commands to send to the robot
-		if (speechText.search("stop") >= 0) {
-			sendCommand('{"stop":1}');
-		} else if (speechText.search("rotate") >= 0) {
-			// botMessage.
-			//_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
-			sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + speechText.substr(5) + '}');
+		checkRobotCommands(speechText);
+
+		// after X period of time without a command (or verbal response?)
+		// require a "wake up" phrase to accept commands again
+		// or if it start executing something like playing music
+
+		// Check the speech text for other actions, or query response
+		if (speechText == "what" || speechText.search("repeat that") >= 0 || speechText.search("say that again") >= 0 ||
+			speechText.search("what was that") >= 0 || speechText.search("you say") >= 0) {
+			sayAndAnimate(lastTextToSpeak);
+		} else if (confirmName) {
+			confirmName = false;
+			if (speechText.search("yes") >= 0) {
+				sayAndAnimate("Hello, " + userName + ".  It is nice to meet you.");
+				// *** save the user name at this point ***
+			} else {
+				getUserName = true;
+				sayAndAnimate("I'm sorry, what was your name?");
+			}
 		} else if (getUserName) {
+			getUserName = false;
 			userName = speechText;
 			// strip out any - my name is, I am, they call me
-			getUserName = false;
-			sayAndAnimate("Hello, "+userName+".  It is nice to meet you.");
-
-			// confirm - did you say your name was?  yes no
-
+			sayAndAnimate("Did you say your name was " + userName);
+			confirmName = true;
 		} else if (speechText.search("tell") >= 0 && speechText.search("joke") >= 0) {
 			currJoke = _getRandomInt(0, jokeQuestions.length);
 			if (currJoke == prevJoke) {
@@ -162,20 +170,15 @@ var main = (function () {
 			// Send the speech text to a search service to check for response
 			$.getJSON(env.BOT_WEB_URL + "getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
 				//console.log("response.length = " + response.length);
-				console.log("response = " + JSON.stringify(response));
+				//console.log("response = " + JSON.stringify(response));
 
 				// 2019-01-25 Remove the default - if you don't find a response, don't say anything
 				//var textToSpeak = "I am not programmed to respond in this area.";
 				if (response.length > 0) {
 					if (response[0].score > 1) {
 						sayAndAnimate(response[0].verbalResponse);
-
-						// *** maybe a function that translates commands to command strings
-						if (response[0].robotCommand != null && response[0].robotCommand.search("rotate") >= 0) {
-							// rotate - direction, [duration], [degrees], [speed]
-							//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
-							//sendCommand('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
-							sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + response[0].robotCommand.substr(7) + '}');
+						if (response[0].robotCommand != null && response[0].robotCommand != '') {
+							checkRobotCommands(response[0].robotCommand);
 						}
 					}
 				}
@@ -199,6 +202,15 @@ var main = (function () {
 
 	} // function handleTextFromSpeech(speechText) {
 
+	function checkRobotCommands(cmdStr) {
+		if (cmdStr.search("stop") >= 0) {
+			sendCommand('{"stop":1}');
+		} else if (cmdStr.search("rotate") >= 0) {
+			//_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
+			sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + cmdStr.substr(7) + '}');
+		}
+	} // function checkRobotCommands(cmdStr) {
+
 	// Respond to string recognized by speech to text (or from search input text box)
 	function _cacheJokes() {
 		// Get the joke data and cache in an array
@@ -214,7 +226,6 @@ var main = (function () {
 					jokeAnswers.push(response[current].answer);
 				} // loop through JSON list
 			}
-
 		}).catch(function (error) {
 			console.log("Error in getJSON for Jokes, err = " + error);
 		});

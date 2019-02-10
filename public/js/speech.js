@@ -10,6 +10,7 @@
  *                  when a final transcript was recognized
  *                  Added TTS capabilities through window speechSynthesis
  * 2018-12-28 JJK   Added cancel of speech before starting another utterance
+ * 2018-02-10 JJK   Got continuous recognition working fairly well
  *============================================================================*/
 var speech = (function () {
     'use strict';  // Force declaration of variables before use (among other things)
@@ -28,9 +29,7 @@ var speech = (function () {
     //    console.log("webkitSpeechRecognition not supported");
     //if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
-    var recognitionStarted = false;
     var initialStart = true;
-
     var speaking = false;
 
     //=================================================================================================================
@@ -119,10 +118,12 @@ var speech = (function () {
         STTResultsSpan.innerHTML = linebreak(final_transcript);
         if (final_transcript || interim_transcript) {
             if (final_transcript) {
-                //console.log(">>> onresult, final_transcript = " + final_transcript);
+                console.log(">>> onresult, final_transcript = " + final_transcript);
                 // *** tightly coupled to a function in main right now, but could implement
                 // *** a publish/subscribe framework to send the event
-                main.handleTextFromSpeech(final_transcript);
+                //if (!speaking) {  // ???
+                    main.handleTextFromSpeech(final_transcript);
+                //}
                 //speakText(final_transcript);
                 final_transcript = '';
             }
@@ -151,42 +152,13 @@ var speech = (function () {
         //start_timestamp = event.timeStamp;
     }
 
-    /*
-    function startRecognition() {
-        if (!recognizing) {
-            _ToggleSpeechToText();
-        }
-    }
-    */
-    /*
-    _this.ArtyomWebkitSpeechRecognition.onend = function () {
-        if (_this.ArtyomFlags.restartRecognition === true) {
-            if (artyom_is_allowed === true) {
-                _this.ArtyomWebkitSpeechRecognition.start();
-                _this.debug("Continuous mode enabled, restarting", "info");
-    */
-
-    function handleRecognitionStarted() {
-        recognitionStarted = true;
-        console.log("recognitionStarted = true");
-    }
-    function handleRecognitionStopped() {
-        recognitionStarted = false;
-        console.log("recognitionStarted = false");
-
-
-    }
-
     function speakText(textToSpeak) {
         //console.log("in speech.speakText, text = "+textToSpeak);
 
         // Turn off the speech recognition first before text to speech
-        var restartRecognize = false;
         if (recognizing) {
             //console.log("$$$ aborting recognition (before speaking)");
             recognition.abort();
-
-            //restartRecognize = true;
         }
 
         // Cancel any previously queued utterances
@@ -213,13 +185,16 @@ var speech = (function () {
         utterance.onend = function (event) {
             //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
             speaking = false;
-
-            // If it was recognizing speech, turn it back on after speaking
-            //if (restartRecognize) {
-                ignore_onend = false;
-                STTResultsSpan.innerHTML = '';
-                recognition.start();
-            //}
+            /*
+            if (initialStart) {
+                initialStart = false;
+                _ToggleSpeechToText();
+            }
+            */
+            
+            ignore_onend = false;
+            STTResultsSpan.innerHTML = '';
+            recognition.start();
         }
         //utterance.onstart = function (event) {
         //    console.log('We have started uttering this speech: ' + event.utterance.text);

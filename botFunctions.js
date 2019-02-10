@@ -176,6 +176,7 @@ board.on("ready", function() {
 
 function control(botMessage) {
   //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+  
   if (!boardReady) {
     return;
   }
@@ -244,13 +245,6 @@ function control(botMessage) {
   if (botMessage.textToSpeak != null) {
     // Animate the text being spoken by the browser client
     _animateSpeech(botMessage.textToSpeak);
-  }
-
-  if (botMessage._doneSpeaking) {
-    // When done speaking, turn the speaking animation off
-    //console.log("in botFunctions, message = _doneSpeaking");
-    // 1/30/2019 - turn off in favor of just handling the timing in botFunctions
-    //_doneSpeaking();
   }
 
 } // function control(botMessage) {
