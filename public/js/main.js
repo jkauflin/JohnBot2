@@ -63,8 +63,6 @@ var main = (function () {
 	var $ArmPosition = $document.find("#ArmPosition");
 	var $HeadPosition = $document.find("#HeadPosition");
 
-	var $ContinuousListening = $document.find("#ContinuousListening");
-
 	//=================================================================================================================
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;
@@ -347,12 +345,13 @@ var botMessage = {
 		// Check the speech text for commands to send to the robot
 		if (speechText.search("stop") >= 0) {
 			_wsSend('{"stop":1}');
+		/*
 		} else if (speechText.search("turn") >= 0) {
 			// rotate - direction, [duration], [degrees], [speed]
 			//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
 			//_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
 			_wsSend('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + speechText.substr(5) + '}');
-
+		*/
 		} else if (getUserName) {
 			userName = speechText;
 			// strip out any - my name is, I am, they call me
@@ -384,9 +383,15 @@ var botMessage = {
 				if (response.length > 0) {
 					if (response[0].score > 1) {
 						sayAndAnimate(response[0].verbalResponse);
+
+						if (response[0].robotCommand.search("rotate") >= 0) {
+							// rotate - direction, [duration], [degrees], [speed]
+							//_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
+							//_wsSend('{"rotate":1,"rotateDirection":"R","rotateDuration":' + speechText.substr(5) + '}');
+							_wsSend('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + response[0].robotCommand.substr(7) + '}');
+						}
 					}
 				}
-
 				// on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
 				/*
 				for (var current in jsonResponse) {

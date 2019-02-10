@@ -26,8 +26,6 @@ Modification History
                 from the client saying the utterance was done speaking)
 2019-01-30 JJK  Modified the animate speech to calculate time from words
                 (like the JohnBot in Android did)
-2019-02-09 JJK  Added a check for board error and a calculation to get
-                turn duration from degrees (from Johnny)
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -83,18 +81,16 @@ var moving = false;
 var rotateDirection = RIGHT_DIRECTION;
 var rotating = false;
 var eyesOn = false;
-var boardError = false;
 
 board.on("error", function() {
-  console.log("*** Error in Board ***");
-  boardError = true;
-  //botEvent.emit("error", "*** Error in Board ***");
+  //console.log("*** Error in Board ***");
+  botEvent.emit("error", "*** Error in Board ***");
 }); // board.on("error", function() {
   
 
 // When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
-  console.log("*** Board ready ***");
+  console.log("*** board ready ***");
 
   proximity = new five.Proximity({
     controller: "HCSR04",
@@ -174,10 +170,7 @@ board.on("ready", function() {
 }); // board.on("ready", function() {
 
 function control(botMessage) {
-  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
-  if (boardError) {
-    return;
-  }
+  console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
 
   if (botMessage.stop != null) {
     _allStop();
