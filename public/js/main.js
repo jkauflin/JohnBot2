@@ -63,6 +63,8 @@ var main = (function () {
 	var $ArmPosition = $document.find("#ArmPosition");
 	var $HeadPosition = $document.find("#HeadPosition");
 
+	var $ContinuousListening = $document.find("#ContinuousListening");
+
 	//=================================================================================================================
 	// Bind events
 	isTouchDevice = 'ontouchstart' in document.documentElement;

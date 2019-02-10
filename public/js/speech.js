@@ -158,6 +158,7 @@ var speech = (function () {
         // Turn off the speech recognition first before text to speech
         var restartRecognize = false;
         if (recognizing) {
+            console.log("$$$ aborting recognition (before speaking)");
             recognition.abort();
             restartRecognize = true;
             // Wait for recognition to stop (if needed) - or tie into the onend event
@@ -193,6 +194,7 @@ var speech = (function () {
             if (restartRecognize) {
                 ignore_onend = false;
                 STTResultsSpan.innerHTML = '';
+                console.log("*** Starting recognition (after speaking)");
                 recognition.start();
             }
         }
