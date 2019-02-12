@@ -16,6 +16,7 @@
  * 2019-02-08 JJK	Implementing jokes query and cache
  * 2019-02-09 JJK	Implementing robotCommand, and getUserName
  * 2019-02-10 JJK	Moved manual controls to seperate module
+ * 2019-02-11 JJK	Added button to Start interaction (and ask for name)
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -33,7 +34,6 @@ var main = (function () {
 	var prevJoke = -1;
 	var currJoke = 0;
 
-	var initialStart = true;
 	var userName = '';
 	var getUserName = false;
 	var lastTextToSpeak = '';
@@ -45,6 +45,7 @@ var main = (function () {
 	var $logMessage = $document.find("#logMessage");
 	var $StatusDisplay = $document.find("#StatusDisplay");
 
+	var $StartButton = $document.find("#StartButton");
 	var $SearchButton = $document.find("#SearchButton");
 	var $SearchInput = $document.find("#SearchInput");
 	var $searchStr = $document.find("#searchStr");
@@ -69,6 +70,8 @@ var main = (function () {
 	} else {
 		$SearchButton.click(_searchResponses);
 	}
+
+	$StartButton.click(_startInteraction);
 
 	//=================================================================================================================
 	// Module methods
@@ -111,6 +114,11 @@ var main = (function () {
 			} // on message (from server)
 
 		} // Websocket open
+	}
+
+	function _startInteraction() {
+		getUserName = true;
+		sayAndAnimate("Hello, I am the John bought.  What is your name?");
 	}
 
 	function _searchResponses() {
@@ -231,15 +239,6 @@ var main = (function () {
 		});
 	}
 
-	function handleRecognitionStarted() {
-		if (initialStart) {
-			//console.log("*** recognitionStarted && initialStart");
-			initialStart = false;
-			getUserName = true;
-			sayAndAnimate("Hello, I am the John bought.  What is your name?");
-		}
-	}
-
 	function sayAndAnimate(textToSpeak) {
 		// Ask the speech module to say the response text
 		$("#VerbalRepsonse").html(textToSpeak);
@@ -276,8 +275,7 @@ var main = (function () {
 	return {
 		sendCommand,
 		sayAndAnimate,
-		handleTextFromSpeech,
-		handleRecognitionStarted
+		handleTextFromSpeech
 	};
 
 })(); // var main = (function(){

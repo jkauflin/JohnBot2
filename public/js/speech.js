@@ -48,7 +48,6 @@ var speech = (function () {
 
     recognition.onstart = function () {
         recognizing = true;
-        main.handleRecognitionStarted();
         //showInfo('info_speak_now');
         STTButtonImage.src = './img/mic-animate.gif';
     };
@@ -118,13 +117,10 @@ var speech = (function () {
         STTResultsSpan.innerHTML = linebreak(final_transcript);
         if (final_transcript || interim_transcript) {
             if (final_transcript) {
-                console.log(">>> onresult, final_transcript = " + final_transcript);
+                //console.log(">>> onresult, final_transcript = " + final_transcript);
                 // *** tightly coupled to a function in main right now, but could implement
                 // *** a publish/subscribe framework to send the event
-                //if (!speaking) {  // ???
-                    main.handleTextFromSpeech(final_transcript);
-                //}
-                //speakText(final_transcript);
+                main.handleTextFromSpeech(final_transcript);
                 final_transcript = '';
             }
         }
@@ -185,13 +181,7 @@ var speech = (function () {
         utterance.onend = function (event) {
             //console.log('Utterance has finished being spoken after ' + event.elapsedTime + ' milliseconds.');
             speaking = false;
-            /*
-            if (initialStart) {
-                initialStart = false;
-                _ToggleSpeechToText();
-            }
-            */
-            
+            // Make sure the recognition is restarted
             ignore_onend = false;
             STTResultsSpan.innerHTML = '';
             recognition.start();
