@@ -166,7 +166,7 @@ board.on("ready", function() {
           commands.push("_slowAndStop");
           commandParams.push([]);
           commands.push("_rotate");
-          commandParams.push([RIGHT, 0, 360, 160]);
+          commandParams.push([RIGHT, 0, 180, 160]);
 
           // If walkAbout, add that to the command list to start again after turning around
           if (walkAbout) {
@@ -339,7 +339,7 @@ function _walkAbout() {
 } // function _walkAbout() {
 
 function _rotate(direction,duration,degrees,speed) {
-  console.log("%%%%%%% starting rotate, degrees = "+degrees);
+  console.log("%%%%%%% starting rotate, degrees = "+degrees+", speed = "+speed);
   // If direction is blank, stop
   if (direction == null) {
     //_allStop();
@@ -365,7 +365,7 @@ function _rotate(direction,duration,degrees,speed) {
       }
 
       // Calculate duration given speed and degrees
-      tempDuration = (242521.3 * Math.pow(motorSpeed, -2.113871)) * degrees
+      tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * degrees
     }
 
     // If duration or degress are set, then set a timeout of when to stop
