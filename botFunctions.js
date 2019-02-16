@@ -27,6 +27,7 @@ Modification History
 2019-01-30 JJK  Modified the animate speech to calculate time from words
                 (like the JohnBot in Android did)
 2019-02-10 JJK  Added boardReady check before executing commands
+2019-02-15 JJK  Added logic for walkAbout
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -72,17 +73,18 @@ var speechAnimation;
 var speaking = false;
 var currArmPos = 90;
 
-const FORWARD_DIRECTION = 'F';
-const BACKWARD_DIRECTION = 'R';
-const RIGHT_DIRECTION = 'R';
-const LEFT_DIRECTION = 'L';
+const FORWARD = 'F';
+const BACKWARD = 'R';
+const RIGHT = 'R';
+const LEFT = 'L';
 
-var moveDirection = FORWARD_DIRECTION;
+var moveDirection = FORWARD;
 var moving = false;
-var rotateDirection = RIGHT_DIRECTION;
+var rotateDirection = RIGHT;
 var rotating = false;
 var eyesOn = false;
 var boardReady = false;
+var walkAbout = false;
 
 board.on("error", function() {
   //console.log("*** Error in Board ***");
@@ -115,7 +117,20 @@ board.on("ready", function() {
         // Take action on close proximity
         //    stop if moving, and say something
         //console.log("Proximity: "+this.in);
+
         // stop and turn around
+        if (walkAbout) {
+          _slowAndStop();
+          _rotate(RIGHT,0,360,150); // async - won't wait???
+          _walkAbout();
+
+            // ************** need a command queue, and a processing loop
+            // check when I'm done with something - look to execute the next command
+
+        } else if (moving) {
+          _allStop();
+        }
+
       }
     }
   });
@@ -168,8 +183,6 @@ board.on("ready", function() {
 //.reverse
 //.stop
 // parameter speed - 255 max
-  
-//});
 
 }); // board.on("ready", function() {
 
@@ -201,7 +214,7 @@ function control(botMessage) {
       moveDirection = botMessage.moveDirection;
     }
     if (botMessage.move) {
-      if (moveDirection == BACKWARD_DIRECTION) {
+      if (moveDirection == BACKWARD) {
         motor1.reverse(motorSpeed);
         motor2.reverse(motorSpeed);
       } else {
@@ -216,9 +229,13 @@ function control(botMessage) {
     }
   }
 
+  if (botMessage.walkAbout != null) {
+    _walkAbout();
+  }
+
   if (botMessage.rotate != null) {
     if (botMessage.rotate) {
-      var direction = RIGHT_DIRECTION;
+      var direction = RIGHT;
       if (botMessage.rotateDirection != null) {
         direction = botMessage.rotateDirection;
       }
@@ -249,12 +266,40 @@ function control(botMessage) {
 
 } // function control(botMessage) {
 
+
+function _slowAndStop() {
+  if (moving) {
+    motor1.stop();
+    motor2.stop();
+    moving = false;
+  }
+}
+
+function _walkAbout() {
+  if (moving) {
+    _slowAndStop();
+  // random degrees of rotate
+  }
+
+
+  //setTimeout(_rotate, tempDuration);
+
+  // delay random seconds (between 3 and 8? 5 and 10?)
+        motor2.forward(motorSpeed);
+        motor1.forward(motorSpeed);
+        moving = true;
+
+}
+
+
+
 function _rotate(direction,duration,degrees,speed) {
   // If direction is blank, stop
   if (direction == null) {
-    motor1.stop();
-    motor2.stop();
-    rotating = false;
+    _allStop();
+    // checkCommandQueue - for next command
+      // thing to do
+      // end condition - check for next command
   } else {
     var tempSpeed = motorSpeed;
     if (speed != null) {
@@ -266,18 +311,14 @@ function _rotate(direction,duration,degrees,speed) {
     var tempDuration = 0;
     // If degrees are set, calculate duration from speed
     if (degrees != null) {
-      // tempDuration = degrees * tempSpeed;
-
-      // make sure degrees is positive > 0?
-
       if (degrees > 360) {
         degrees = 360;
       } else if (degrees < 0) {
         degrees = 0;
       }
 
+      // Calculate duration given speed and degrees
       tempDuration = (242521.3 * Math.pow(motorSpeed, -2.113871)) * degrees
-
     }
 
     // If duration or degress are set, then set a timeout of when to stop
@@ -290,7 +331,7 @@ function _rotate(direction,duration,degrees,speed) {
       setTimeout(_rotate, tempDuration);
     }
 
-    if (direction == LEFT_DIRECTION) {
+    if (direction == LEFT) {
       motor1.forward(tempSpeed);
       motor2.reverse(tempSpeed);
     } else {
@@ -298,6 +339,7 @@ function _rotate(direction,duration,degrees,speed) {
       motor1.reverse(tempSpeed);
     }
     rotating = true;
+    moving = true;
   }
 
 } // function _rotate() {
@@ -308,14 +350,6 @@ function _doneSpeaking() {
   speechAnimation.stop();
   speaking = false;
   clearTimeout(_doneSpeaking);
-}
-
-function _allStop() {
-  motor1.stop();
-  motor2.stop();
-  moving = false;
-  rotating = false;
-  _doneSpeaking();
 }
 
 
@@ -359,6 +393,15 @@ function _animateSpeech(textToSpeak) {
   catch (error) {
     console.error(">>> speechAnimation error = " + error);
   }
+}
+
+function _allStop() {
+  motor1.stop();
+  motor2.stop();
+  moving = false;
+  rotating = false;
+  _doneSpeaking();
+  walkAbout = false;
 }
 
 module.exports = {

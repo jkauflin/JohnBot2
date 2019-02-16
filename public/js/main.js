@@ -139,6 +139,12 @@ var main = (function () {
 		// Check the speech text for commands to send to the robot
 		checkRobotCommands(speechText);
 
+		// clever
+		// no i get it, that's very clever
+		// how's that working out for you
+		// what 
+		// being clever
+
 		// after X period of time without a command (or verbal response?)
 		// require a "wake up" phrase to accept commands again
 		// or if it start executing something like playing music
@@ -213,6 +219,8 @@ var main = (function () {
 	function checkRobotCommands(cmdStr) {
 		if (cmdStr.search("stop") >= 0) {
 			sendCommand('{"stop":1}');
+		} else if (cmdStr == "walkAbout") {
+		    sendCommand('{"walkAbout":1}');
 		} else if (cmdStr.search("rotate") >= 0) {
 			//_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
 			sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + cmdStr.substr(7) + '}');
