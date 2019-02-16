@@ -27,7 +27,10 @@ Modification History
 2019-01-30 JJK  Modified the animate speech to calculate time from words
                 (like the JohnBot in Android did)
 2019-02-10 JJK  Added boardReady check before executing commands
-2019-02-15 JJK  Added logic for walkAbout
+2019-02-15 JJK  Added logic for walkAbout - realized I needed a way to 
+                execute multiple async loop commands in order, so implemented
+                an execution controller and a command request array
+2019-02-16 JJK  Added stop and turn around on close proximity
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -85,6 +88,8 @@ var rotating = false;
 var eyesOn = false;
 var boardReady = false;
 var walkAbout = false;
+var commands = [];
+var commandParams = [];
 
 board.on("error", function() {
   //console.log("*** Error in Board ***");
@@ -92,7 +97,6 @@ board.on("error", function() {
   botEvent.emit("error", "*** Error in Board ***");
 }); // board.on("error", function() {
   
-
 // When the board is ready, create and intialize global component objects (to be used by functions)
 board.on("ready", function() {
   console.log("*** board ready ***");
@@ -103,44 +107,6 @@ board.on("ready", function() {
     pin: PROXIMITY_PIN
   });
 
-  proximity.on("data", function() {
-    if (this.in < 12.0) {
-      // Send event message for change in proximity inches
-      currProx = Math.round(this.in);
-      if (currProx != prevProx) {
-        botEvent.emit("proxIn", currProx);
-        //console.log("Proximity: " + currProx);
-        prevProx = currProx;
-      }
-      //console.log("Proximity: " + this.in);
-      if (this.in < 4.0) {
-        // Take action on close proximity
-        //    stop if moving, and say something
-        //console.log("Proximity: "+this.in);
-
-        // stop and turn around
-        if (walkAbout) {
-          _slowAndStop();
-          _rotate(RIGHT,0,360,150); // async - won't wait???
-          _walkAbout();
-
-            // ************** need a command queue, and a processing loop
-            // check when I'm done with something - look to execute the next command
-
-        } else if (moving) {
-          _allStop();
-        }
-
-      }
-    }
-  });
-
-  /*
-  proximity.on("change", function() {
-    console.log("The obstruction has moved.");
-  });
-  */
-  
   // Create an Led on pin 13
   leftEyeLed = new five.Led(LEFT_EYE);
   rightEyeLed = new five.Led(RIGHT_EYE);
@@ -176,20 +142,55 @@ board.on("ready", function() {
   // Initialize the legs
   motor1 = new five.Motor(motorConfig.M1);
   motor2 = new five.Motor(motorConfig.M2);
-
   // Start the motor at maximum speed
   //motor2.forward(200);
   //motor1.forward(200);
-//.reverse
-//.stop
-// parameter speed - 255 max
+  //.reverse
+  //.stop
+  // parameter speed - 255 max
+
+  // Check for changes in the proximity sensor
+  proximity.on("data", function () {
+    if (this.in < 12.0) {
+      // Send event message for change in proximity inches
+      currProx = Math.round(this.in);
+      if (currProx != prevProx) {
+        botEvent.emit("proxIn", currProx);
+        //console.log("Proximity: " + currProx);
+
+        // If getting close to something, slow, stop, and turn around
+        if (prevProx >= 5 && currProx < 5) {
+          commands.length = 0;
+          commandParams.length = 0;
+          commands.push("_slowAndStop");
+          commandParams.push([]);
+          commands.push("_rotate");
+          commandParams.push([RIGHT, 0, 360, 150]);
+
+          // If walkAbout, add that to the command list to start again after turning around
+          if (walkAbout) {
+            commands.push("_walkAbout");
+            commandParams.push([]);
+          }
+          
+          _executeCommands();
+        }
+
+        prevProx = currProx;
+      } // if (currProx != prevProx) {
+    } // if (this.in < 12.0) {
+  }); // proximity.on("data", function () {
+  /*
+  proximity.on("change", function() {
+    console.log("The obstruction has moved.");
+  });
+  */
 
 }); // board.on("ready", function() {
 
 
-function control(botMessage) {
+function command(botMessage) {
   //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
-  
   if (!boardReady) {
     return;
   }
@@ -230,7 +231,12 @@ function control(botMessage) {
   }
 
   if (botMessage.walkAbout != null) {
-    _walkAbout();
+    _allStop();
+    commands.length = 0;
+    commandParams.length = 0;
+    commands.push("_walkAbout");
+    commandParams.push([]);
+    _executeCommands();
   }
 
   if (botMessage.rotate != null) {
@@ -240,7 +246,10 @@ function control(botMessage) {
         direction = botMessage.rotateDirection;
       }
 
-      _rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
+      //_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
+      commands.push("_rotate");
+      commandParams.push([direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed]);
+      _executeCommands();
 
     } else {
       // Call with null parameters to STOP
@@ -266,40 +275,63 @@ function control(botMessage) {
 
 } // function control(botMessage) {
 
-
 function _slowAndStop() {
   if (moving) {
-    motor1.stop();
-    motor2.stop();
-    moving = false;
+    if (motorSpeed < 60) {
+      // When slow enough, just stop
+      motor1.stop();
+      motor2.stop();
+      moving = false;
+    } else {
+      // Reduce speed by a % and wait a small period of milliseconds before checking again
+      motorSpeed = motorSpeed - Math.round(motorSpeed * 0.1);
+      motor1.forward(motorSpeed);
+      motor2.forward(motorSpeed);
+      setTimeout(_slowAndStop, 100);
+    }
+  }
+
+  // Once it's stopped we're done, so send back to execute more commands
+  if (!moving) {
+    _executeCommands();
   }
 }
 
 function _walkAbout() {
-  if (moving) {
-    _slowAndStop();
-  // random degrees of rotate
+  // *** at some point add logic to specify the size of a circle to stay in
+  // how far in one direction - speed * duration
+
+  // *** maybe stop after a maximum time?
+
+  var randomDuration = _getRandomInt(3, 10);
+  var randomSpeed = _getRandomInt(80, 200);
+  var randomRotate = _getRandomInt(25, 200);
+  var randomDirection = RIGHT;
+  if (_getRandomInt(0,1)) {
+    randomDirection = RIGHT;
+  } else {
+    randomDirection = LEFT;
   }
 
+  motor2.forward(randomSpeed);
+  motor1.forward(randomSpeed);
+  moving = true;
 
-  //setTimeout(_rotate, tempDuration);
+  // After a random duration at this speed in this direction, rotate and start again
+  commands.push("_rotate");
+  commandParams.push([randomDirection, 0, randomRotate, randomSpeed]);
+  commands.push("_walkAbout");
+  commandParams.push([]);
 
-  // delay random seconds (between 3 and 8? 5 and 10?)
-        motor2.forward(motorSpeed);
-        motor1.forward(motorSpeed);
-        moving = true;
+  setTimeout(_executeCommands, randomDuration);
 
-}
-
-
+} // function _walkAbout() {
 
 function _rotate(direction,duration,degrees,speed) {
   // If direction is blank, stop
   if (direction == null) {
     _allStop();
-    // checkCommandQueue - for next command
-      // thing to do
-      // end condition - check for next command
+    _executeCommands();
   } else {
     var tempSpeed = motorSpeed;
     if (speed != null) {
@@ -402,9 +434,42 @@ function _allStop() {
   rotating = false;
   _doneSpeaking();
   walkAbout = false;
+  // Clear out the command queue
+  commands.length = 0;
+  commandParams.length = 0;
+}
+
+//=============================================================================================
+// Execution controller for multiple commands
+// Commands and parameters are pushed into arrays, and after every command completes it
+// calls this function to see if there is another command to execute
+//=============================================================================================
+function _executeCommands() {
+  if (commands.length < 1) {
+    return;
+  }
+
+  // Pop the command and parameters off the beginning of the arrays
+  var command = commands.shift();
+  var params = commandParams.shift();
+
+  // Execute the specified command with the parameters
+  if (command = "_slowAndStop") {
+    _slowAndStop();
+  } else if (command == "_rotate") {
+    _rotate(params[0], params[1], params[2], params[3]);
+  } else if (command = "_walkAbout") {
+    _walkAbout();
+  }
+
+} // function _executeCommands() {
+
+function _getRandomInt(min, max) {
+  // Floor - rounded down to the nearest integer
+	return Math.floor(Math.random() * (max - min)) + min;
 }
 
 module.exports = {
     botEvent,
-    control
+    command
 };

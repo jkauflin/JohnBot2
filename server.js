@@ -176,7 +176,7 @@ webSocketServer.on('connection', function (ws) {
     var botMessage = JSON.parse(botMessageStr);
    
     // Send the message object to the botFunctions module
-    botFunctions.control(botMessage);
+    botFunctions.command(botMessage);
 
 
     //if (botMessage.textToSpeak != null) {
@@ -214,7 +214,7 @@ webSocketServer.on('connection', function (ws) {
       */
 
     //} else {
-    //  botFunctions.control(botMessage);
+    //  botFunctions.command(botMessage);
     //}
 
   });

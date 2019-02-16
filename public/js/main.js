@@ -128,6 +128,7 @@ var main = (function () {
 	}
 
 	function _getRandomInt(min, max) {
+  		// Floor - rounded down to the nearest integer
 		return Math.floor(Math.random() * (max - min)) + min;
 	}
 
