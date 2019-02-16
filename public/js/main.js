@@ -17,6 +17,7 @@
  * 2019-02-09 JJK	Implementing robotCommand, and getUserName
  * 2019-02-10 JJK	Moved manual controls to seperate module
  * 2019-02-11 JJK	Added button to Start interaction (and ask for name)
+ * 2019-02-16 JJK	Added walkAbout and Stop button
  *============================================================================*/
 var main = (function () {
 	'use strict';  // Force declaration of variables before use (among other things)
@@ -46,6 +47,7 @@ var main = (function () {
 	var $StatusDisplay = $document.find("#StatusDisplay");
 
 	var $StartButton = $document.find("#StartButton");
+	var $StopButton = $document.find("#StopButton");
 	var $SearchButton = $document.find("#SearchButton");
 	var $SearchInput = $document.find("#SearchInput");
 	var $searchStr = $document.find("#searchStr");
@@ -72,6 +74,7 @@ var main = (function () {
 	}
 
 	$StartButton.click(_startInteraction);
+	$StopButton.click(_stop);
 
 	//=================================================================================================================
 	// Module methods
@@ -87,6 +90,8 @@ var main = (function () {
 			//console.log("in sendCommand, botMessageStr = "+botMessageStr);
 			ws.send(botMessageStr);
 		}
+
+		// figure out when not connected anymore (and set display)
 	}
 
 	// Try to establish a websocket connection with the robot
@@ -120,7 +125,11 @@ var main = (function () {
 		getUserName = true;
 		sayAndAnimate("Hello, I am the John bought.  What is your name?");
 	}
-
+		
+	function _stop() {
+		sendCommand('{"stop":1}');
+	}
+	
 	function _searchResponses() {
 		//console.log("searchStr = " + $searchStr.val());
 		handleTextFromSpeech($searchStr.val());
@@ -135,7 +144,7 @@ var main = (function () {
 	// Respond to string recognized by speech to text (or from search input text box)
 	function handleTextFromSpeech(speechText) {
 		speechText = speechText.toLowerCase();
-		console.log(" in handleTextFromSpeech, speechText = " + speechText);
+		//console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
 		// Check the speech text for commands to send to the robot
 		checkRobotCommands(speechText);

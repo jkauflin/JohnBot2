@@ -159,13 +159,14 @@ board.on("ready", function() {
         //console.log("Proximity: " + currProx);
 
         // If getting close to something, slow, stop, and turn around
-        if (prevProx >= 5 && currProx < 5) {
+        if (prevProx >= 6 && currProx < 6) {
+          console.log("*** Proximity - slow, rotate, and walkAbout (if on)");
           commands.length = 0;
           commandParams.length = 0;
           commands.push("_slowAndStop");
           commandParams.push([]);
           commands.push("_rotate");
-          commandParams.push([RIGHT, 0, 360, 150]);
+          commandParams.push([RIGHT, 0, 360, 160]);
 
           // If walkAbout, add that to the command list to start again after turning around
           if (walkAbout) {
@@ -190,7 +191,7 @@ board.on("ready", function() {
 
 
 function command(botMessage) {
-  //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+  console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
   if (!boardReady) {
     return;
   }
@@ -276,8 +277,15 @@ function command(botMessage) {
 } // function control(botMessage) {
 
 function _slowAndStop() {
+  console.log("$$$$$ in slow and Stop, motorSpeed = " + motorSpeed + ", moving = " + moving);
+  if (rotating) {
+    motor1.stop();
+    motor2.stop();
+    rotating = false;
+    clearTimeout(_rotate);
+  }
   if (moving) {
-    if (motorSpeed < 60) {
+    if (motorSpeed < 70) {
       // When slow enough, just stop
       motor1.stop();
       motor2.stop();
@@ -302,10 +310,12 @@ function _walkAbout() {
   // how far in one direction - speed * duration
 
   // *** maybe stop after a maximum time?
+  walkAbout = true;
+  console.log("starting _walkAbout");
 
-  var randomDuration = _getRandomInt(3, 10);
-  var randomSpeed = _getRandomInt(80, 200);
-  var randomRotate = _getRandomInt(25, 200);
+  var randomDuration = _getRandomInt(7, 11);
+  var randomSpeed = _getRandomInt(80, 180);
+  var randomRotate = _getRandomInt(25, 100);
   var randomDirection = RIGHT;
   if (_getRandomInt(0,1)) {
     randomDirection = RIGHT;
@@ -313,6 +323,7 @@ function _walkAbout() {
     randomDirection = LEFT;
   }
 
+  console.log("_walkAbout, randomSpeed = "+randomSpeed);
   motor2.forward(randomSpeed);
   motor1.forward(randomSpeed);
   moving = true;
@@ -328,9 +339,13 @@ function _walkAbout() {
 } // function _walkAbout() {
 
 function _rotate(direction,duration,degrees,speed) {
+  console.log("%%%%%%% starting rotate, degrees = "+degrees);
   // If direction is blank, stop
   if (direction == null) {
-    _allStop();
+    //_allStop();
+    motor1.stop();
+    motor2.stop();
+    rotating = false;
     _executeCommands();
   } else {
     var tempSpeed = motorSpeed;
@@ -371,11 +386,9 @@ function _rotate(direction,duration,degrees,speed) {
       motor1.reverse(tempSpeed);
     }
     rotating = true;
-    moving = true;
   }
 
 } // function _rotate() {
-
 
 function _doneSpeaking() {
   eyes.stop().off();
@@ -383,7 +396,6 @@ function _doneSpeaking() {
   speaking = false;
   clearTimeout(_doneSpeaking);
 }
-
 
 function _animateSpeech(textToSpeak) {
   // Cancel any running animations before starting a new one
@@ -437,6 +449,10 @@ function _allStop() {
   // Clear out the command queue
   commands.length = 0;
   commandParams.length = 0;
+  // Clear the function calls
+  clearTimeout(_executeCommands);
+  clearTimeout(_slowAndStop);
+  clearTimeout(_rotate);
 }
 
 //=============================================================================================
@@ -453,12 +469,14 @@ function _executeCommands() {
   var command = commands.shift();
   var params = commandParams.shift();
 
+  console.log("_executeCommands, command = "+command);
+
   // Execute the specified command with the parameters
-  if (command = "_slowAndStop") {
+  if (command == "_slowAndStop") {
     _slowAndStop();
   } else if (command == "_rotate") {
     _rotate(params[0], params[1], params[2], params[3]);
-  } else if (command = "_walkAbout") {
+  } else if (command == "_walkAbout") {
     _walkAbout();
   }
 
