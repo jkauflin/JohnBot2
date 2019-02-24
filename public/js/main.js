@@ -42,6 +42,37 @@ var main = (function () {
     var lastTextToSpeak = '';
     var confirmName = false;
 
+    // Create our RiveScript interpreter.
+    var brain = new RiveScript();
+
+    // Load our files from the brain/ folder.
+    brain.loadFile([
+        "js/brain/begin.rive",
+        "js/brain/admin.rive",
+        "js/brain/clients.rive",
+        "js/brain/eliza.rive",
+        "js/brain/myself.rive",
+        "js/brain/rpg.rive",
+        "js/brain/javascript.rive"
+    ]).then(onReady).catch(onError);
+    
+    function onError(err, filename, lineno) {
+        console.log("err = "+err);
+    }
+
+    function onReady() {
+        // Now to sort the replies!
+        brain.sortReplies();
+    }
+
+    // You can register objects that can then be called
+    // using <call></call> syntax
+    /*
+    brain.setSubroutine('fancyJSObject', function (rs, args) {
+        // doing complex stuff here
+    });
+    */
+
     //=================================================================================================================
     // Variables cached from the DOM
     var $document = $(document);
@@ -192,9 +223,21 @@ var main = (function () {
             sayAndAnimate(jokeAnswers[currJoke]);
             jokeStarted = false;
         } else {
-            // eventually cache responses and implement the search in the client
-            // using the pairs check?
-            // Send the speech text to a search service to check for response
+
+
+            //var reply = bot.reply(username, message);
+            /*
+            brain.reply(username, message).then(function (reply) {
+                +console.log("Bot> ", reply); +
+            });
+            */
+            brain.reply("soandso", speechText, this).then(function (reply) {
+                sayAndAnimate(reply);
+            }).catch(function (e) {
+                console.log(e);
+            });
+
+            /*
             $.getJSON(env.BOT_WEB_URL + "getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
                 //console.log("response.length = " + response.length);
                 //console.log("response = " + JSON.stringify(response));
@@ -209,22 +252,10 @@ var main = (function () {
                         }
                     }
                 }
-                // on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
-                /*
-                for (var current in jsonResponse) {
-                	if (current == 0) {
-                		textToSpeak = jsonResponse[current].verbalResponse;
-                	}
-                	// how do I know when the update is done - do I care?
-                	// log how many records were in the service call JSON response
-                	//console.log("id = "+botResponsesList[current].id);
-                	console.log(dateTime.create().format('H:M:S.N') + ", response(" + current + ") = " + JSON.stringify(jsonResponse[current]));
-                } // loop through JSON list
-                */
-
             }).catch(function (error) {
                 console.log("Error in getBotResponses getJSON, err = " + error);
             });
+            */
         }
 
     } // function handleTextFromSpeech(speechText) {
