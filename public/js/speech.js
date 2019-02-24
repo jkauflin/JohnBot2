@@ -11,25 +11,27 @@
  *                  Added TTS capabilities through window speechSynthesis
  * 2018-12-28 JJK   Added cancel of speech before starting another utterance
  * 2018-02-10 JJK   Got continuous recognition working fairly well
+ * 2019-02-23 JJK   Investigated P5.speech but am sticking with what I wrote
+ * 2019-02-24 JJK   Turned off interim results to just get final.
+ *                  Still having the recognition turn off when speaking
+ *                  (when still on it seems to disrupt the speech at the
+ *                  beginning - they seem to interfere with each other)
  *============================================================================*/
 var speech = (function () {
     'use strict';  // Force declaration of variables before use (among other things)
     //=================================================================================================================
     // Private variables for the Module
+    var speechSynth = window.speechSynthesis;
+    var recognition = new webkitSpeechRecognition();
+    if (!('webkitSpeechRecognition' in window)) {
+        console.log("webkitSpeechRecognition not supported in this browser");
+    }
+    //if (window.hasOwnProperty('webkitSpeechRecognition')) {
     const two_line = /\n\n/g;
     const one_line = /\n/g;
     const first_char = /\S/;
-    var final_transcript = '';
     var recognizing = false;
     var ignore_onend;
-    var start_timestamp;
-    var speechSynth = window.speechSynthesis;
-    var recognition = new webkitSpeechRecognition();
-    //if (!('webkitSpeechRecognition' in window)) {
-    //    console.log("webkitSpeechRecognition not supported");
-    //if (window.hasOwnProperty('webkitSpeechRecognition')) {
-
-    var initialStart = true;
     var speaking = false;
 
     //=================================================================================================================
@@ -37,6 +39,7 @@ var speech = (function () {
     var $document = $(document);
     var $SpeechToTextButton = $document.find("#SpeechToTextButton");
     var $ContinuousListening = $document.find("#ContinuousListening");
+    var $STTResultsSpan = $document.find("#STTResultsSpan");
 
     //=================================================================================================================
     // Bind events
@@ -50,67 +53,46 @@ var speech = (function () {
 
     recognition.onstart = function () {
         recognizing = true;
-        //showInfo('info_speak_now');
         STTButtonImage.src = './img/mic-animate.gif';
     };
 
     recognition.onerror = function (event) {
         if (event.error == 'no-speech') {
             STTButtonImage.src = './img/mic.gif';
-            //showInfo('info_no_speech');
+            //console.log("recognition error = no-speech");
             ignore_onend = true;
         }
         if (event.error == 'audio-capture') {
             STTButtonImage.src = './img/mic.gif';
-            //showInfo('info_no_microphone');
+            console.log("recognition error = audio-capture no-microphone");
             ignore_onend = true;
         }
         if (event.error == 'not-allowed') {
-            /*
-            if (event.timeStamp - start_timestamp < 100) {
-                //showInfo('info_blocked');
-            } else {
-                //showInfo('info_denied');
-            }
-            */
+            console.log("recognition error = not-allowed");
             ignore_onend = true;
         }
     };
 
     recognition.onend = function () {
-        //console.log("*** recognition.onend ***");
         recognizing = false;
-
         // Check to restart recognizer if in continuous mode
         if ($ContinuousListening.prop('checked') && !speaking) {
             ignore_onend = false;
-            STTResultsSpan.innerHTML = '';
             recognition.start();
+            //console.log("*** recognition Re-start ***");
         }
-
         if (ignore_onend) {
             return;
         }
         STTButtonImage.src = './img/mic.gif';
-        if (!final_transcript) {
-            //showInfo('info_start');
-            return;
-        }
-        //showInfo('');
-        if (window.getSelection) {
-            window.getSelection().removeAllRanges();
-            var range = document.createRange();
-            range.selectNode(document.getElementById('STTResultsSpan'));
-            window.getSelection().addRange(range);
-        }
     };
 
     recognition.onresult = function (event) {
+        // Get the transcript from the event
+        var final_transcript = event.results[0][0].transcript;
 
-        final_transcript = event.results[0][0].transcript;
-
-        var interim_transcript = '';
         /*
+        var interim_transcript = '';
         for (var i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
                 final_transcript += event.results[i][0].transcript;
@@ -120,18 +102,15 @@ var speech = (function () {
         }
         */
 
-        // Don't capitalize - leave lowercase
-        //final_transcript = capitalize(final_transcript);
-        STTResultsSpan.innerHTML = linebreak(final_transcript);
-        if (final_transcript || interim_transcript) {
+        $STTResultsSpan.html(linebreak(final_transcript));
+        //if (final_transcript || interim_transcript) {
             if (final_transcript) {
                 console.log(">>> onresult, final_transcript = " + final_transcript);
                 // *** tightly coupled to a function in main right now, but could implement
                 // *** a publish/subscribe framework to send the event
                 main.handleTextFromSpeech(final_transcript);
-                final_transcript = '';
             }
-        }
+        //}
 
     };
 
@@ -139,21 +118,14 @@ var speech = (function () {
         return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
     }
 
-    function capitalize(s) {
-        return s.replace(first_char, function (m) { return m.toUpperCase(); });
-    }
-
     function _ToggleSpeechToText(event) {
         if (recognizing) {
             recognition.stop();
             return;
         }
-        final_transcript = '';
         recognition.start();
         ignore_onend = false;
-        STTResultsSpan.innerHTML = '';
         STTButtonImage.src = './img/mic-slash.gif';
-        //start_timestamp = event.timeStamp;
     }
 
     function speakText(textToSpeak) {
@@ -161,7 +133,6 @@ var speech = (function () {
 
         // Turn off the speech recognition first before text to speech
         if (recognizing) {
-            //console.log("$$$ aborting recognition (before speaking)");
             recognition.abort();
         }
 
@@ -191,7 +162,6 @@ var speech = (function () {
             speaking = false;
             // Make sure the recognition is restarted
             ignore_onend = false;
-            STTResultsSpan.innerHTML = '';
             recognition.start();
         }
         //utterance.onstart = function (event) {
@@ -200,10 +170,17 @@ var speech = (function () {
 
     } // function speakText(textToSpeak) {
 
+    function stopSpeaking() {
+        if (speaking) {
+            speechSynth.cancel();
+        }
+    }
+
     //=================================================================================================================
     // This is what is exposed from this Module
     return {
-        speakText
+        speakText,
+        stopSpeaking
     };
 
 })(); // var speech = (function(){
