@@ -53,7 +53,7 @@ var main = (function () {
         "js/brain/eliza.rive",
         "js/brain/myself.rive",
         "js/brain/rpg.rive",
-        "js/brain/javascript.rive"
+//        "js/brain/javascript.rive"
     ]).then(onReady).catch(onError);
     
     function onError(err, filename, lineno) {
