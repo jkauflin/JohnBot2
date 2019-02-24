@@ -43,8 +43,10 @@ var speech = (function () {
     $SpeechToTextButton.click(_ToggleSpeechToText);
 
     recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    //recognition.continuous = true;
+    recognition.continuous = false;
+    //recognition.interimResults = true;
+    recognition.interimResults = false;
 
     recognition.onstart = function () {
         recognizing = true;
@@ -104,7 +106,11 @@ var speech = (function () {
     };
 
     recognition.onresult = function (event) {
+
+        final_transcript = event.results[0][0].transcript;
+
         var interim_transcript = '';
+        /*
         for (var i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
                 final_transcript += event.results[i][0].transcript;
@@ -112,12 +118,14 @@ var speech = (function () {
                 interim_transcript += event.results[i][0].transcript;
             }
         }
+        */
+
         // Don't capitalize - leave lowercase
         //final_transcript = capitalize(final_transcript);
         STTResultsSpan.innerHTML = linebreak(final_transcript);
         if (final_transcript || interim_transcript) {
             if (final_transcript) {
-                //console.log(">>> onresult, final_transcript = " + final_transcript);
+                console.log(">>> onresult, final_transcript = " + final_transcript);
                 // *** tightly coupled to a function in main right now, but could implement
                 // *** a publish/subscribe framework to send the event
                 main.handleTextFromSpeech(final_transcript);

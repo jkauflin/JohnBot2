@@ -18,10 +18,8 @@
  * 2019-02-10 JJK	Moved manual controls to seperate module
  * 2019-02-11 JJK	Added button to Start interaction (and ask for name)
  * 2019-02-16 JJK	Added walkAbout and Stop button
- * 2019-02-23 JJK   Implementing rivescript for bot responses (after watching
- *                  Coding Train chatbot videos)
  *============================================================================*/
-var main = (function () {
+var identityManagement = (function () {
     'use strict'; // Force declaration of variables before use (among other things)
     //=================================================================================================================
     // Private variables for the Module
@@ -263,7 +261,6 @@ var main = (function () {
         // Ask the speech module to say the response text
         $("#VerbalRepsonse").html(textToSpeak);
         speech.speakText(textToSpeak);
-
         // Send text to robot to animate speech (if connected)
         sendCommand('{"textToSpeak" : "' + textToSpeak + '"}');
         lastTextToSpeak = textToSpeak;
@@ -299,4 +296,4 @@ var main = (function () {
         handleTextFromSpeech
     };
 
-})(); // var main = (function(){
+})(); // var identityManagement = (function(){

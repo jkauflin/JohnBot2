@@ -151,72 +151,25 @@ webSocketServer.on('connection', function (ws) {
     if (ws.isAlive == true) {
       // JJK - you can either construct it as a string and send with no JSON.stringify
       //       or construct a JSON object, with easier syntax, and then you have to stringify it
-      ws.send(JSON.stringify(serverMessage));
+      try {
+          ws.send(JSON.stringify(serverMessage));
+      } catch (error) {
+          // Ignore errors - just log to the console
+          console.error("Error in ws send to client, err = "+error);
+      }
+      
     } else {
       console.log("Error trying to send ws message = " + JSON.stringify(serverMessage));
     }
   }
 
-  /*
-  20: 57: 23.928, botMessage = {
-    "textToSpeak": "Of course I love you.  How could you ask me such a question?"
-  }
-  UncaughtException, error = Error: WebSocket is not open: readyState 3(CLOSED)
-  Error: WebSocket is not open: readyState 3(CLOSED)
-  at WebSocket.send(/home/pi / projects / JohnBot2 / node_modules / ws / lib / websocket.js: 322: 19)
-  at _wsSend(/home/pi / projects / JohnBot2 / server.js: 152: 10)
-  */
-
-  
   // Handle messages from the client browser
   ws.on('message', function (botMessageStr) {
     //console.log(dateTime.create().format('H:M:S.N') + ", botMessageStr = "+botMessageStr);
-
     // Use JSON.parse to turn the string into a JSON object
     var botMessage = JSON.parse(botMessageStr);
-   
     // Send the message object to the botFunctions module
     botFunctions.command(botMessage);
-
-
-    //if (botMessage.textToSpeak != null) {
-      // Animate the text being spoken by the browser client
-      //botFunctions.animateSpeech(botMessage.textToSpeak);
-
-      // *** OLD CODE - from when I was making the search call from the robot server, instead of back in the client browser ***
-      // Call the responses URL and see if there is a response to the spoken text
-      /*
-      var tempUrl = process.env.BOT_RESPONSES_URL + "?searchStr=" + replaceQuotes(botMessage.inSpeechText) + "&UID=" + process.env.UID
-      //console.log("botResponses url = "+tempUrl);
-      getJSON(tempUrl).then(function (jsonResponse) {
-        console.log(dateTime.create().format('H:M:S.N') + ", inSpeechText = " + replaceQuotes(botMessage.inSpeechText));
-        var textToSpeak = "I am not programmed to respond in this area.";
-        //if (jsonResponse.length > 0) {
-        //  textToSpeak = jsonResponse[0].verbalResponse;
-        //}
-
-        // on repeats, maybe try to use another response in the array (to change it up and make it variable - don't take the top one always)
-        for (var current in jsonResponse) {
-          if (current == 0) {
-            textToSpeak = jsonResponse[current].verbalResponse;
-          }
-          // how do I know when the update is done - do I care?
-          // log how many records were in the service call JSON response
-          //console.log("id = "+botResponsesList[current].id);
-          console.log(dateTime.create().format('H:M:S.N')+", response("+current+") = "+JSON.stringify(jsonResponse[current]));
-        } // loop through JSON list
-        // Send back to the web browser client to use TTS to say the response
-        sayAndAnimate(textToSpeak);
-
-      }).catch(function (error) {
-        console.log("Error in getResponses getJSON, err = " + error);
-      });
-      */
-
-    //} else {
-    //  botFunctions.command(botMessage);
-    //}
-
   });
 
   // Register event listeners for the bot events
@@ -239,35 +192,7 @@ webSocketServer.on('connection', function (ws) {
   }
   */
 
-  // Main activity loop
-  /*
-  var loopStart = true;
-  const activityLoop = setInterval(function () {
-    //console.log(dateTime.create().format('Y-m-d H:M:S.N')+" In the activityLoop, now = "+Date.now());
-    if (loopStart) {
-      //sayAndAnimate("Hello, I am the John bought.");
-      loopStart = false;
-    }
-
-    // put stuff for the state loop in here
-
-  }, 1000);
-  */
-
 }); // End of Connection to client
-
-/*
-var allowCrossDomain = function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', "*");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-}
-app.configure(function () {
-  app.use(allowCrossDomain);
-  //some other code
-});    
-*/
 
 // When the web browser client requests a "/start" URL, send back the url to use to establish
 // the Websocket connection
