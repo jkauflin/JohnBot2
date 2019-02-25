@@ -1,0 +1,71 @@
+
+
+/*
+
+High-priority robot commands
+
+        if (cmdStr.search("stop") >= 0) {
+            sendCommand('{"stop":1}');
+        } else if (cmdStr == "walkAbout") {
+            sendCommand('{"walkAbout":1}');
+        } else if (cmdStr.search("rotate") >= 0) {
+            //_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
+            sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + cmdStr.substr(7) + '}');
+
+
+"1","N","who what are you is your name","I am the John Bot. Pleased to meet you.",,"2019-02-09 19:52:41"
+"2","N","shut up","No. You shut up.",,"2019-02-10 16:56:50"
+"4","N","what can you do","I can walk, raise my arm, turn my head, and flash my eyes.  I can also tell jokes.",,"2018-12-28 21:29:56"
+"5","N","are you alive","What is your definition of life?  I am not alive in the traditional sense, but I am certainly animated.",,"2019-01-25 18:46:43"
+"6","N","philosophical","Philosophy is the systematic and critical study of fundamental questions that arise both in everyday life and through the practice of other disciplines.",,"2017-10-26 22:08:17"
+"7","N","philosophy","The aim in Philosophy is not to master a body of facts, so much as think clearly and sharply through any set of facts.",,"2017-10-26 22:08:17"
+"8","N","do you love me","Of course I love you.  How could you ask me such a question?",,"2019-01-25 18:47:12"
+"9","N","dank meems means","Would you like to buy some John's meem oil?  It will make your meems dank.",,"2018-12-20 19:07:08"
+"11","N","why is the rum gone","Yes, the rum is gone.",,"2019-01-25 18:47:44"
+"12","N","you think you're funny","I don't think, I know.",,"2019-01-25 18:48:20"
+"13","N","it is nice pleasure to meet you","Thank you.  It is a pleasure to meet you as well",,"2019-02-10 13:33:58"
+"14","N","what would you like to do","I'd like to teach the world to sing.",,"2019-01-25 18:49:57"
+"15","N","snake snakes loki thor kill me","Loki was always trying to kill me.  Once when we were children he turned into a snake, and I love snakes and I went to hug it, then he turned back into Loki and said awe, and stabbed me.",,"2018-12-20 19:09:00"
+"16","N","now that is that's funny","Yes, I know that it is.",,"2019-01-25 18:51:28"
+"17","N","that is that's true all","Yes it is.",,"2019-01-26 14:31:29"
+"19","N","how are you","I am well thank you",,"2018-12-28 21:28:30"
+"20","N","hello","hello to you",,"2018-12-28 21:32:39"
+"22","N","turn around","Okay, I'm turning around","rotate 360","2019-02-09 19:56:40"
+"23","N","that's pretty good","isn't it though",,"2019-02-15 20:15:02"
+"24","N","walk around about","i am starting to walk about","walkAbout","2019-02-15 20:51:00"
+
+        // clever
+        // no i get it, that's very clever
+        // how's that working out for you
+        // what 
+        // being clever
+
+                //var textToSpeak = "I am not programmed to respond in this area.";
+
+"1","N","What's Irish and stays out all night?","Patio furniture.","2017-12-26 18:38:56"
+"2","N","What did they do to the cannibal who was late for dinner?","They gave him the cold shoulder.","2017-10-26 22:10:27"
+"3","N","How does Moses get his coffee?","He brews it.","2017-10-26 22:10:27"
+"4","N","Where is engagement Ohio?","Between Dayton and Marion.","2017-10-26 22:10:27"
+"5","N","What's a pirate's favorite letter?","You would think that, but his first love is the sea.","2017-10-26 22:10:27"
+"6","N","Why does it take a pirate so long to learn the alphabet?","Because he spends years at sea.","2017-10-26 22:10:27"
+"7","N","Do you know who an apple a day will keep away?","An apple a day will keep anyone away if you throw it hard enough.","2017-10-26 22:10:27"
+"8","N","Two cannibals were eating a clown.  One turns to the other and says?","Does this taste funny to you?","2017-10-26 22:10:27"
+"9","N","A horse walks into a bar and orders a beer.  The bartender looks up and says?","Why the long face?","2017-10-26 22:10:27"
+"10","N","What do you do when attacked by a group of clowns?","You go for the juggler.","2017-10-26 22:10:27"
+"11","N","Why does a chicken coop only have two doors?","Because if it had four it would be a chicken sedan.","2017-10-26 22:10:27"
+"12","N","How do you make holy water?","You boil the hell out of it.","2017-10-26 22:10:27"
+"13","N","Why does everyone want to hang out with the mushroom?","Because he was such a fun guy","2019-02-10 17:01:27"
+"14","N","What do ghosts drink at Halloween parties?","They drink booze.","2017-10-26 22:10:27"
+"15","N","Why was six afraid of seven?","Because seven ate nine.","2017-10-26 22:10:27"
+"16","N","Why didn't two want to go out with three?","Because he was a little odd.","2017-10-26 22:10:27"
+"17","N","What do you call four Spaniards in quicksand?","Quatro sinko.","2017-10-26 22:10:27"
+"19","N","What time is it when it's time to call the dentist?","Two thirty.","2017-10-26 22:10:27"
+"20","N","What do you call a boomerang that doesn't come back?","A stick.","2017-10-26 22:10:27"
+"21","N","Who was the roundest knight at King Arthur's court?","Circumference.","2017-10-26 22:10:27"
+"22","N","How many mystery writers does it take to screw in a light bulb?","Two. One to screw it most of the way and a second one to give it a surprise twist at the end.","2017-10-26 22:10:27"
+"23","N","How many computer scientists does it take to screw in a light bulb?","None.  It's a hardware problem.","2017-10-26 22:10:27"
+"24","N","What's the difference between a bad golfer and a bad skydiver?","A bad golfer says whack DAMN.  A bad skydiver says DAMN whack.","2017-12-26 18:39:57"
+"25","N","Did you hear about the restaurant on the moon?","Good food, no atmosphere","2018-09-30 09:23:18"
+"26","N","Did you hear somebody stole my coffee cup?","I had to go down to the police station and look at mug shots","2018-09-30 09:40:41"
+"27","N"," What does a baby computer call its father","Da da","2019-02-14 22:11:27"
+*/

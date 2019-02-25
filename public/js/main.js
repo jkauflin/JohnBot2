@@ -31,11 +31,13 @@ var main = (function () {
     var isTouchDevice = false;
     var date;
 
+    /*
     var jokeQuestions = [];
     var jokeAnswers = [];
     var jokeStarted = false;
     var prevJoke = -1;
     var currJoke = 0;
+    */
 
     var userName = '';
     var getUserName = false;
@@ -44,34 +46,6 @@ var main = (function () {
 
     // Create our RiveScript interpreter.
     var brain = new RiveScript();
-
-    // Load our files from the brain/ folder.
-    brain.loadFile([
-        "js/brain/begin.rive",
-        "js/brain/admin.rive",
-        "js/brain/clients.rive",
-        "js/brain/eliza.rive",
-        "js/brain/myself.rive",
-        "js/brain/rpg.rive",
-//        "js/brain/javascript.rive"
-    ]).then(onReady).catch(onError);
-    
-    function onError(err, filename, lineno) {
-        console.log("err = "+err);
-    }
-
-    function onReady() {
-        // Now to sort the replies!
-        brain.sortReplies();
-    }
-
-    // You can register objects that can then be called
-    // using <call></call> syntax
-    /*
-    brain.setSubroutine('fancyJSObject', function (rs, args) {
-        // doing complex stuff here
-    });
-    */
 
     //=================================================================================================================
     // Variables cached from the DOM
@@ -94,7 +68,7 @@ var main = (function () {
         env = inEnv;
         //console.log("botEnv, BOT_WEB_URL = " + env.BOT_WEB_URL);
         //console.log("botEnv, UID = " + env.UID);
-        _cacheJokes();
+        //_cacheJokes();
         _connectToBot(env.wsUrl);
     }).fail(function () {
         console.log("Error getting environment variables");
@@ -115,6 +89,33 @@ var main = (function () {
         console.log(message);
         $logMessage.html(message);
     }
+
+    // Load our RiveScript files from the brain folder.
+    brain.loadFile([
+        "js/brain/begin.rive",
+        "js/brain/admin.rive",
+        "js/brain/JohnBot.rive",
+        "js/brain/clients.rive",
+        "js/brain/eliza.rive",
+        "js/brain/myself.rive",
+        "js/brain/javascript.rive"
+    ]).then(onReady).catch(onError);
+
+    function onReady() {
+        // Now to sort the replies!
+        brain.sortReplies();
+    }
+
+    function onError(err, filename, lineno) {
+        console.log("err = " + err);
+    }
+    // You can register objects that can then be called
+    // using <call></call> syntax
+    /*
+    brain.setSubroutine('fancyJSObject', function (rs, args) {
+        // doing complex stuff here
+    });
+    */
 
     // General function to send the botMessageStr to the server if Websocket is connected
     function sendCommand(botMessageStr) {
@@ -180,14 +181,8 @@ var main = (function () {
         speechText = speechText.toLowerCase();
         //console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
-        // Check the speech text for commands to send to the robot
+        // Check the speech text for commands to send to the robot ()
         checkRobotCommands(speechText);
-
-        // clever
-        // no i get it, that's very clever
-        // how's that working out for you
-        // what 
-        // being clever
 
         // after X period of time without a command (or verbal response?)
         // require a "wake up" phrase to accept commands again
@@ -232,7 +227,14 @@ var main = (function () {
             });
             */
             brain.reply("soandso", speechText, this).then(function (reply) {
+                // check if reply contains a robot command
+
                 sayAndAnimate(reply);
+
+                //if (response[0].robotCommand != null && response[0].robotCommand != '') {
+                //    checkRobotCommands(response[0].robotCommand);
+                //}
+
             }).catch(function (e) {
                 console.log(e);
             });
