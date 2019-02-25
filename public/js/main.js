@@ -41,7 +41,6 @@ var main = (function () {
 
     var userName = '';
     var getUserName = false;
-    var lastTextToSpeak = '';
     var confirmName = false;
 
     // Create our RiveScript interpreter.
@@ -181,12 +180,22 @@ var main = (function () {
         speechText = speechText.toLowerCase();
         //console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
+        brain.reply("soandso", speechText, this).then(function (reply) {
+            // check if reply contains a robot command
+
+            sayAndAnimate(reply);
+
+            //if (response[0].robotCommand != null && response[0].robotCommand != '') {
+            //    checkRobotCommands(response[0].robotCommand);
+            //}
+
+        }).catch(function (e) {
+            console.log(e);
+        });
+
+        /*
         // Check the speech text for commands to send to the robot ()
         checkRobotCommands(speechText);
-
-        // after X period of time without a command (or verbal response?)
-        // require a "wake up" phrase to accept commands again
-        // or if it start executing something like playing music
 
         // Check the speech text for other actions, or query response
         if (speechText == "what" || speechText.search("repeat that") >= 0 || speechText.search("say that again") >= 0 ||
@@ -219,27 +228,6 @@ var main = (function () {
             jokeStarted = false;
         } else {
 
-
-            //var reply = bot.reply(username, message);
-            /*
-            brain.reply(username, message).then(function (reply) {
-                +console.log("Bot> ", reply); +
-            });
-            */
-            brain.reply("soandso", speechText, this).then(function (reply) {
-                // check if reply contains a robot command
-
-                sayAndAnimate(reply);
-
-                //if (response[0].robotCommand != null && response[0].robotCommand != '') {
-                //    checkRobotCommands(response[0].robotCommand);
-                //}
-
-            }).catch(function (e) {
-                console.log(e);
-            });
-
-            /*
             $.getJSON(env.BOT_WEB_URL + "getBotResponsesProxy.php", "searchStr=" + util.replaceQuotes(speechText) + "&UID=" + env.UID, function (response) {
                 //console.log("response.length = " + response.length);
                 //console.log("response = " + JSON.stringify(response));
@@ -257,8 +245,9 @@ var main = (function () {
             }).catch(function (error) {
                 console.log("Error in getBotResponses getJSON, err = " + error);
             });
-            */
         }
+        */
+
 
     } // function handleTextFromSpeech(speechText) {
 
@@ -300,7 +289,7 @@ var main = (function () {
 
         // Send text to robot to animate speech (if connected)
         sendCommand('{"textToSpeak" : "' + textToSpeak + '"}');
-        lastTextToSpeak = textToSpeak;
+        //lastTextToSpeak = textToSpeak;
     }
 
     // Main activity loop
