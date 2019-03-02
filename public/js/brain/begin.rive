@@ -9,7 +9,8 @@
 ! var master = localuser
 
 // Bot Variables
-! var name     = Aiden
+//! var name     = Aiden
+! var name     = John bought
 ! var fullname = Aiden Rive
 ! var age      = 5
 ! var birthday = October 12
@@ -65,6 +66,8 @@
 ! sub what're   = what are
 ! sub what've   = what have
 ! sub what'll   = what will
+! sub what'd    = what did
+! sub how'd		= how did
 ! sub can't     = can not
 ! sub whos      = who is
 ! sub who's     = who is

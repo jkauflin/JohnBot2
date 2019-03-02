@@ -92,13 +92,15 @@ var main = (function () {
     // Load our RiveScript files from the brain folder.
     brain.loadFile([
         "js/brain/begin.rive",
-        "js/brain/admin.rive",
+//        "js/brain/admin.rive",
         "js/brain/JohnBot.rive",
-        "js/brain/clients.rive",
-        "js/brain/eliza.rive",
-        "js/brain/myself.rive",
+//        "js/brain/clients.rive",
+//        "js/brain/eliza.rive",
+//        "js/brain/myself.rive",
         "js/brain/javascript.rive"
     ]).then(onReady).catch(onError);
+
+//    brain.parse()
 
     function onReady() {
         // Now to sort the replies!
@@ -120,11 +122,9 @@ var main = (function () {
     function sendCommand(botMessageStr) {
         //console.log("in sendCommand, wsConnected = "+wsConnected);
         if (wsConnected) {
-            //console.log("in sendCommand, botMessageStr = "+botMessageStr);
+            console.log(">>> sendCommand, botMessage = "+botMessageStr);
             ws.send(botMessageStr);
         }
-
-        // figure out when not connected anymore (and set display)
     }
 
     // Try to establish a websocket connection with the robot
@@ -136,22 +136,25 @@ var main = (function () {
             wsConnected = true;
             //console.log('websocket is connected ...')
             $StatusDisplay.html("Connected");
+        }
 
-            // event emmited when receiving message from the server (messages from the robot)
-            ws.onmessage = function (messageEvent) {
-                var serverMessage = JSON.parse(messageEvent.data);
-                if (serverMessage.errorMessage != null) {
-                    logMessage(serverMessage.errorMessage);
-                }
+        // event emmited when receiving message from the server (messages from the robot)
+        ws.onmessage = function (messageEvent) {
+            var serverMessage = JSON.parse(messageEvent.data);
+            if (serverMessage.errorMessage != null) {
+                logMessage(serverMessage.errorMessage);
+            }
 
-                // add other bot event handling here
-                if (serverMessage.proxIn != null) {
-                    $("#proximityInches").html("Proximity inches: " + serverMessage.proxIn);
-                }
+            // add other bot event handling here
+            if (serverMessage.proxIn != null) {
+                $("#proximityInches").html("Proximity inches: " + serverMessage.proxIn);
+            }
+        } // on message (from server)
 
-            } // on message (from server)
-
-        } // Websocket open
+        ws.onclose = function () {
+            wsConnected = false;
+            $StatusDisplay.html("Not Connected");
+        } // on message (from server)
     }
 
     function _startInteraction() {
@@ -177,26 +180,28 @@ var main = (function () {
 
     // Respond to string recognized by speech to text (or from search input text box)
     function handleTextFromSpeech(speechText) {
-        speechText = speechText.toLowerCase();
-        //console.log(" in handleTextFromSpeech, speechText = " + speechText);
+        console.log(" in handleTextFromSpeech, speechText = " + speechText);
 
-        brain.reply("soandso", speechText, this).then(function (reply) {
-            // check if reply contains a robot command
+        // Call the RiveScript interpreter to get a reply
+        brain.reply("username", speechText, this).then(function (reply) {
+            console.log("brain reply = "+reply);
 
-            sayAndAnimate(reply);
+            // if (checking replies)
+            // sleep / wake up / doing something else logic
 
-            //if (response[0].robotCommand != null && response[0].robotCommand != '') {
-            //    checkRobotCommands(response[0].robotCommand);
-            //}
-
+            var commandFound = reply.search("botcommand");
+            if (commandFound >= 0) {
+                _executeBotCommands(reply.substr(commandFound + 11));
+                // Let's assume if it's a bot command, we don't want to speak as well
+                //textToSpeak = reply.substr(0,commandFound-1);
+            } else {
+                sayAndAnimate(reply);
+            }
         }).catch(function (e) {
             console.log(e);
         });
 
         /*
-        // Check the speech text for commands to send to the robot ()
-        checkRobotCommands(speechText);
-
         // Check the speech text for other actions, or query response
         if (speechText == "what" || speechText.search("repeat that") >= 0 || speechText.search("say that again") >= 0 ||
             speechText.search("what was that") >= 0 || speechText.search("you say") >= 0) {
@@ -238,7 +243,7 @@ var main = (function () {
                     if (response[0].score > 1) {
                         sayAndAnimate(response[0].verbalResponse);
                         if (response[0].robotCommand != null && response[0].robotCommand != '') {
-                            checkRobotCommands(response[0].robotCommand);
+                            _executeBotCommands(response[0].robotCommand);
                         }
                     }
                 }
@@ -251,18 +256,26 @@ var main = (function () {
 
     } // function handleTextFromSpeech(speechText) {
 
-    function checkRobotCommands(cmdStr) {
-        if (cmdStr.search("stop") >= 0) {
+    function _executeBotCommands(cmdStr) {
+        if (cmdStr == "stop") {
             sendCommand('{"stop":1}');
-        } else if (cmdStr == "walkAbout") {
+        } else if (cmdStr == "wakeup") {
+            console.log('*** WAKE UP ***');
+        } else if (cmdStr == "walkabout") {
             sendCommand('{"walkAbout":1}');
         } else if (cmdStr.search("rotate") >= 0) {
-            //_rotate(rotateDirection, rotateDuration, rotateDegrees, rotateSpeed);
-            sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + cmdStr.substr(7) + '}');
+            var tempDegrees = cmdStr.substr(7);
+            if (tempDegrees == null || tempDegrees == '') {
+                tempDegrees = "180";
+            } else if (tempDegrees == 'around') {
+                tempDegrees = "180";
+            }
+            sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + tempDegrees + '}');
         }
-    } // function checkRobotCommands(cmdStr) {
+    } // function _executeBotCommands(cmdStr) {
 
     // Respond to string recognized by speech to text (or from search input text box)
+    /*
     function _cacheJokes() {
         // Get the joke data and cache in an array
         $.getJSON(env.BOT_WEB_URL + "getBotDataProxy.php", "table=jokes" + "&UID=" + env.UID, function (response) {
@@ -281,6 +294,7 @@ var main = (function () {
             console.log("Error in getJSON for Jokes, err = " + error);
         });
     }
+    */
 
     function sayAndAnimate(textToSpeak) {
         // Ask the speech module to say the response text
