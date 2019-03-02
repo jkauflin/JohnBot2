@@ -54,7 +54,74 @@
 + (hey|oh|attention) john [*]
 - yes botcommand wakeup
 
+// If asked, start a joke, set the punchline, and set to go to joke topic for the response
++ [*] tell [*] (joke|another) [*]
+- What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
+- What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
+- How does Moses get his coffee <set punchline=He brews it>{topic=joke}
+- Where is engagement Ohio <set punchline=Between Dayton and Marion>{topic=joke}
+- What's a pirate's favorite letter <set punchline=You would think that, but his first love is the sea>{topic=joke}
+- Why does it take a pirate so long to learn the alphabet <set punchline=Because he spends years at sea>{topic=joke}
+- Do you know who an apple a day will keep away <set punchline=An apple a day will keep anyone away if you throw it hard enough>{topic=joke}
+- Two cannibals were eating a clown.  One turns to the other and says <set punchline=Does this taste funny to you>{topic=joke}
+- A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Why the long face>{topic=joke}
+- A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Man you look hammered>{topic=joke}
+- What do you do when attacked by a group of clowns <set punchline=You go for the juggler>{topic=joke}
+- Why does a chicken coop only have two doors <set punchline=Because if it had four it would be a chicken sedan>{topic=joke}
+- How do you make holy water <set punchline=You boil the hell out of it>{topic=joke}
+- Why does everyone want to hang out with the mushroom <set punchline=Because he was such a fun guy>{topic=joke}
+- What do ghosts drink at Halloween parties <set punchline=They drink booze>{topic=joke}
+- Why was six afraid of seven <set punchline=Because seven ate nine>{topic=joke}
+- Why didn't two want to go out with three <set punchline=Because he was a little odd>{topic=joke}
+- What do you call four Spaniards in quicksand <set punchline=Quatro sinko>{topic=joke}
+- What time is it when it's time to call the dentist <set punchline=Two thirty>{topic=joke}
+- What do you call a boomerang that doesn't come back <set punchline=A stick>{topic=joke}
+- Who was the roundest knight at King Arthur's court <set punchline=Circumference>{topic=joke}
+- How many mystery writers does it take to screw in a light bulb <set punchline=Two. One to screw it most of the way and a second one to give it a surprise twist at the end>{topic=joke}
+- How many programmers does it take to screw in a light bulb <set punchline=None.  It's a hardware problem>{topic=joke}
+- What's the difference between a bad golfer and a bad skydiver <set punchline=A bad golfer says whack DAMN.  A bad skydiver says DAMN whack>{topic=joke}
+- Did you hear about the restaurant on the moon <set punchline=Good food, no atmosphere>{topic=joke}
+- Did you hear somebody stole my coffee cup <set punchline=I had to go down to the police station and look at mug shots>{topic=joke}
+- What does a baby computer call its father <set punchline=Da da>{topic=joke}
+- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
+
++ [*] tell [*] pepper [*]
+- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
++ [*] tell [*] irish [*]
+- What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
++ [*] tell [*] moon [*]
+- Did you hear about the restaurant on the moon <set punchline=Good food, no atmosphere>{topic=joke}
++ [*] tell [*] (moses|coffee) [*]
+- How does Moses get his coffee <set punchline=He brews it>{topic=joke}
++ [*] tell [*] (engagement|ohio) [*]
+- Where is engagement Ohio <set punchline=Between Dayton and Marion>{topic=joke}
++ [*] tell [*] mushroom [*]
+- Why does everyone want to hang out with the mushroom <set punchline=Because he was such a fun guy>{topic=joke}
++ [*] tell [*] horse [*]
+- A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Why the long face>{topic=joke}
+- A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Man you look hammered>{topic=joke}
++ [*] tell [*] pirate [*]
+- What's a pirate's favorite letter <set punchline=You would think that, but his first love is the sea>{topic=joke}
++ [*] tell [*] dentist [*]
+- What time is it when it's time to call the dentist <set punchline=Two thirty>{topic=joke}
++ [*] tell [*] cannibal [*]
+- What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
+
+> topic joke
+  // On any response say the punchline and return to non-topic replies
+  + [*]
+  - <get punchline>{topic=random}
+< topic
+
++ [*] that [*] (funny|good)
+- isn't it though
+- yes I know that it is
+- right
+
 /*
++ what is my name
+* <get name> == undefined => You never told me your name.
+- Your name is <get name>, silly!
 
 +
 % look in previous reply
@@ -94,32 +161,7 @@ The previous 9 messages and responses are stored, so you can use the tags <input
 
                 //var textToSpeak = "I am not programmed to respond in this area.";
 
-"1","N","What's Irish and stays out all night?","Patio furniture.","2017-12-26 18:38:56"
-"2","N","What did they do to the cannibal who was late for dinner?","They gave him the cold shoulder.","2017-10-26 22:10:27"
-"3","N","How does Moses get his coffee?","He brews it.","2017-10-26 22:10:27"
-"4","N","Where is engagement Ohio?","Between Dayton and Marion.","2017-10-26 22:10:27"
-"5","N","What's a pirate's favorite letter?","You would think that, but his first love is the sea.","2017-10-26 22:10:27"
-"6","N","Why does it take a pirate so long to learn the alphabet?","Because he spends years at sea.","2017-10-26 22:10:27"
-"7","N","Do you know who an apple a day will keep away?","An apple a day will keep anyone away if you throw it hard enough.","2017-10-26 22:10:27"
-"8","N","Two cannibals were eating a clown.  One turns to the other and says?","Does this taste funny to you?","2017-10-26 22:10:27"
-"9","N","A horse walks into a bar and orders a beer.  The bartender looks up and says?","Why the long face?","2017-10-26 22:10:27"
-"10","N","What do you do when attacked by a group of clowns?","You go for the juggler.","2017-10-26 22:10:27"
-"11","N","Why does a chicken coop only have two doors?","Because if it had four it would be a chicken sedan.","2017-10-26 22:10:27"
-"12","N","How do you make holy water?","You boil the hell out of it.","2017-10-26 22:10:27"
-"13","N","Why does everyone want to hang out with the mushroom?","Because he was such a fun guy","2019-02-10 17:01:27"
-"14","N","What do ghosts drink at Halloween parties?","They drink booze.","2017-10-26 22:10:27"
-"15","N","Why was six afraid of seven?","Because seven ate nine.","2017-10-26 22:10:27"
-"16","N","Why didn't two want to go out with three?","Because he was a little odd.","2017-10-26 22:10:27"
-"17","N","What do you call four Spaniards in quicksand?","Quatro sinko.","2017-10-26 22:10:27"
-"19","N","What time is it when it's time to call the dentist?","Two thirty.","2017-10-26 22:10:27"
-"20","N","What do you call a boomerang that doesn't come back?","A stick.","2017-10-26 22:10:27"
-"21","N","Who was the roundest knight at King Arthur's court?","Circumference.","2017-10-26 22:10:27"
-"22","N","How many mystery writers does it take to screw in a light bulb?","Two. One to screw it most of the way and a second one to give it a surprise twist at the end.","2017-10-26 22:10:27"
-"23","N","How many computer scientists does it take to screw in a light bulb?","None.  It's a hardware problem.","2017-10-26 22:10:27"
-"24","N","What's the difference between a bad golfer and a bad skydiver?","A bad golfer says whack DAMN.  A bad skydiver says DAMN whack.","2017-12-26 18:39:57"
-"25","N","Did you hear about the restaurant on the moon?","Good food, no atmosphere","2018-09-30 09:23:18"
-"26","N","Did you hear somebody stole my coffee cup?","I had to go down to the police station and look at mug shots","2018-09-30 09:40:41"
-"27","N"," What does a baby computer call its father","Da da","2019-02-14 22:11:27"
+what does a nosy pepper do?  it gets jalapeno business
 */
 
 + [*] (fuck|fucker|shit|damn|shut up|bitch) [*]
