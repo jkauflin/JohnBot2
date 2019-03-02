@@ -55,7 +55,7 @@
 - yes botcommand wakeup
 
 // If asked, start a joke, set the punchline, and set to go to joke topic for the response
-+ [*] tell [*] (joke|another [*]) 
++ [*] tell [*] (joke|another [one]) 
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
 - What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
 - How does Moses get his coffee <set punchline=He brews it>{topic=joke}
@@ -85,26 +85,26 @@
 - What does a baby computer call its father <set punchline=he calls him dada>{topic=joke}
 - what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
 
-+ [*] tell [*] (joke|one) [*] pepper [*]
++ [*] tell [*] [joke|one] [*] pepper [joke] 
 - what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
-+ [*] tell [*] (joke|one) [*] irish [*]
++ [*] tell [*] [joke|one] [*] irish [joke]
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
-+ [*] tell [*] (joke|one) [*] moon [*]
++ [*] tell [*] [joke|one] [*] moon [joke]
 - Did you hear about the restaurant on the moon <set punchline=Great food, no atmosphere>{topic=joke}
-+ [*] tell [*] (joke|one) [*] (moses|coffee) [*]
++ [*] tell [*] [joke|one] [*] (moses|coffee) [joke]
 - How does Moses get his coffee <set punchline=He brews it>{topic=joke}
-+ [*] tell [*] (joke|one) [*] (engagement|ohio) [*]
++ [*] tell [*] [joke|one] [*] (engagement|ohio) [joke]
 - Where is engagement Ohio <set punchline=Between Dayton and Marion>{topic=joke}
-+ [*] tell [*] (joke|one) [*] mushroom [*]
++ [*] tell [*] [joke|one] [*] mushroom [joke]
 - Why does everyone want to hang out with the mushroom <set punchline=Because he was such a fun guy>{topic=joke}
-+ [*] tell [*] (joke|one) [*] horse [*]
++ [*] tell [*] [joke|one] [*] horse [joke]
 - A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Why the long face>{topic=joke}
 - A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Man you look hammered>{topic=joke}
-+ [*] tell [*] (joke|one) [*] pirate [*]
++ [*] tell [*] [joke|one] [*] pirate [joke]
 - What's a pirate's favorite letter <set punchline=You would think that, but his first love is the sea>{topic=joke}
-+ [*] tell [*] (joke|one) [*] dentist [*]
++ [*] tell [*] [joke|one] [*] dentist [joke]
 - What time is it when it's time to call the dentist <set punchline=Two thirty>{topic=joke}
-+ [*] tell [*] (joke|one) [*] cannibal [*]
++ [*] tell [*] [joke|one] [*] cannibal [joke]
 - What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
 
 > topic joke
@@ -122,10 +122,6 @@
 + what is my name
 * <get name> == undefined => You never told me your name.
 - Your name is <get name>, silly!
-
-+
-% look in previous reply
-- 
 
 * conditional
 
