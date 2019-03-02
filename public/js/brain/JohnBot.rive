@@ -55,7 +55,8 @@
 - yes botcommand wakeup
 
 // If asked, start a joke, set the punchline, and set to go to joke topic for the response
-+ [*] tell [*] (joke|another) [*]
++ [*] tell [*] (joke|another [*]) 
+/*
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
 - What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
 - How does Moses get his coffee <set punchline=He brews it>{topic=joke}
@@ -80,31 +81,32 @@
 - How many mystery writers does it take to screw in a light bulb <set punchline=Two. One to screw it most of the way and a second one to give it a surprise twist at the end>{topic=joke}
 - How many programmers does it take to screw in a light bulb <set punchline=None.  It's a hardware problem>{topic=joke}
 - What's the difference between a bad golfer and a bad skydiver <set punchline=A bad golfer says whack DAMN.  A bad skydiver says DAMN whack>{topic=joke}
-- Did you hear about the restaurant on the moon <set punchline=Good food, no atmosphere>{topic=joke}
+- Did you hear about the restaurant on the moon <set punchline=Great food, no atmosphere>{topic=joke}
 - Did you hear somebody stole my coffee cup <set punchline=I had to go down to the police station and look at mug shots>{topic=joke}
-- What does a baby computer call its father <set punchline=Da da>{topic=joke}
-- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
+*/
+- What does a baby computer call its father <set punchline=he calls him dada>{topic=joke}
+//- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
 
-+ [*] tell [*] pepper [*]
++ [*] tell [*] (joke|one) [*] pepper [*]
 - what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
-+ [*] tell [*] irish [*]
++ [*] tell [*] (joke|one) [*] irish [*]
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
-+ [*] tell [*] moon [*]
-- Did you hear about the restaurant on the moon <set punchline=Good food, no atmosphere>{topic=joke}
-+ [*] tell [*] (moses|coffee) [*]
++ [*] tell [*] (joke|one) [*] moon [*]
+- Did you hear about the restaurant on the moon <set punchline=Great food, no atmosphere>{topic=joke}
++ [*] tell [*] (joke|one) [*] (moses|coffee) [*]
 - How does Moses get his coffee <set punchline=He brews it>{topic=joke}
-+ [*] tell [*] (engagement|ohio) [*]
++ [*] tell [*] (joke|one) [*] (engagement|ohio) [*]
 - Where is engagement Ohio <set punchline=Between Dayton and Marion>{topic=joke}
-+ [*] tell [*] mushroom [*]
++ [*] tell [*] (joke|one) [*] mushroom [*]
 - Why does everyone want to hang out with the mushroom <set punchline=Because he was such a fun guy>{topic=joke}
-+ [*] tell [*] horse [*]
++ [*] tell [*] (joke|one) [*] horse [*]
 - A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Why the long face>{topic=joke}
 - A horse walks into a bar and orders a beer.  The bartender looks up and says <set punchline=Man you look hammered>{topic=joke}
-+ [*] tell [*] pirate [*]
++ [*] tell [*] (joke|one) [*] pirate [*]
 - What's a pirate's favorite letter <set punchline=You would think that, but his first love is the sea>{topic=joke}
-+ [*] tell [*] dentist [*]
++ [*] tell [*] (joke|one) [*] dentist [*]
 - What time is it when it's time to call the dentist <set punchline=Two thirty>{topic=joke}
-+ [*] tell [*] cannibal [*]
++ [*] tell [*] (joke|one) [*] cannibal [*]
 - What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
 
 > topic joke
