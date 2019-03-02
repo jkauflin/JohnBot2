@@ -56,7 +56,6 @@
 
 // If asked, start a joke, set the punchline, and set to go to joke topic for the response
 + [*] tell [*] (joke|another [*]) 
-/*
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
 - What did they do to the cannibal who was late for dinner <set punchline=They gave him the cold shoulder>{topic=joke}
 - How does Moses get his coffee <set punchline=He brews it>{topic=joke}
@@ -83,9 +82,8 @@
 - What's the difference between a bad golfer and a bad skydiver <set punchline=A bad golfer says whack DAMN.  A bad skydiver says DAMN whack>{topic=joke}
 - Did you hear about the restaurant on the moon <set punchline=Great food, no atmosphere>{topic=joke}
 - Did you hear somebody stole my coffee cup <set punchline=I had to go down to the police station and look at mug shots>{topic=joke}
-*/
 - What does a baby computer call its father <set punchline=he calls him dada>{topic=joke}
-//- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
+- what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
 
 + [*] tell [*] (joke|one) [*] pepper [*]
 - what does a nosy pepper do <set punchline=it gets jalapeno business>{topic=joke}
