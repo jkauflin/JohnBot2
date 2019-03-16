@@ -46,7 +46,8 @@
 - Did I stutter?
 
 + (who are you|what [*] your name [*])
-- I am the <bot name>.  Please to meet you.
+//- I am the <bot name>.  Please to meet you.
+- cheeky cheeky chezzits cheeky chezzits
 
 + ([*] (weird|strange|cool) name [*]|[*] get [*] name [*]|[*] named you [*])
 - It is the name God gave me
