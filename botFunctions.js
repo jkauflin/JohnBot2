@@ -191,7 +191,8 @@ board.on("ready", function () {
 
 
 function command(botMessage) {
-    console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+    //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+    
     if (!boardReady) {
         return;
     }
