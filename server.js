@@ -84,7 +84,7 @@ var dateTime = require('node-datetime');
 // WebSocket URL to give to the client browser to establish ws connection
 var wsUrl;
 // Create a web server
-var app = express();
+//var app = express();
 var webServer;
 // If running local server just use HTTP, else use HTTPS
 if (process.env.HOST == "localhost") {
@@ -100,11 +100,13 @@ if (process.env.HOST == "localhost") {
     // Key and certificate that have been signed by a CA root authority installed on server
     key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
     cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
-  }, app)
+  })
   .listen(process.env.WEB_PORT, function () {
-      console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
+      console.log("WS server Live at Port " + process.env.WEB_PORT + " - Let's rock!");
   });
 }
+
+//}, app)
 
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
@@ -193,9 +195,9 @@ webSocketServer.on('connection', function (ws) {
     botFunctions.animateSpeech(textToSpeak);
   }
   */
-
 }); // End of Connection to client
 
+/*
 app.use("*",function(req,res){
   console.log("Not in Public, URL = "+req.url);
   res.sendFile(path + "404.html");
@@ -206,3 +208,4 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
+*/
