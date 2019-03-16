@@ -10,7 +10,8 @@
 
 // Bot Variables
 //! var name     = Aiden
-! var name     = John bought
+//! var name     = John bought
+! var name     = Anthony bought
 ! var fullname = Aiden Rive
 ! var age      = 5
 ! var birthday = October 12
