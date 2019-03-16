@@ -49,6 +49,9 @@ Modification History
                 spoken
 2019-02-02 JJK  Ran this to turn off package-lock.json creation:
                   npm config set package-lock false
+2019-03-16 JJK  Separated the Chatbot part to another repository and have
+                this just be the server to handle web socket commands for
+                the robotic part (not the web browser part)
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -81,7 +84,6 @@ var dateTime = require('node-datetime');
 // WebSocket URL to give to the client browser to establish ws connection
 var wsUrl;
 // Create a web server
-var express = require('express');
 var app = express();
 var webServer;
 // If running local server just use HTTP, else use HTTPS
@@ -194,25 +196,6 @@ webSocketServer.on('connection', function (ws) {
 
 }); // End of Connection to client
 
-// When the web browser client requests a "/start" URL, send back the url to use to establish
-// the Websocket connection
-// Use /start as a trigger to start any robot functions, like a hello sequence
-/*
-app.get('/getWsUrl', function (req, res, next) {
-  res.send(wsUrl);
-})
-*/
-app.get('/dotenv.php', function (req, res, next) {
-  var env = {
-    "wsUrl": wsUrl,
-    "BOT_WEB_URL": process.env.BOT_WEB_URL,
-    "UID": process.env.UID
-  }
-  res.send(env);
-})
-
-app.use('/',express.static('public'));
-
 app.use("*",function(req,res){
   console.log("Not in Public, URL = "+req.url);
   res.sendFile(path + "404.html");
@@ -223,4 +206,3 @@ app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 })
-

@@ -19,8 +19,6 @@
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
     "dotenv": "latest",
-    "express": "latest",
-    "get-json": "latest",
     "johnny-five": "latest",
     "lodash": "latest",
     "merge": "1.2.1",
