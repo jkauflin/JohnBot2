@@ -31,6 +31,7 @@ Modification History
                 execute multiple async loop commands in order, so implemented
                 an execution controller and a command request array
 2019-02-16 JJK  Added stop and turn around on close proximity
+2019-03-29 JJK  
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -102,6 +103,17 @@ board.on("ready", function () {
     console.log("*** board ready ***");
     boardReady = true;
 
+    // Initialize the legs (do this first)
+    motor1 = new five.Motor(motorConfig.M1);
+    motor2 = new five.Motor(motorConfig.M2);
+    // Start the motor at maximum speed
+    //motor2.forward(200);
+    //motor1.forward(200);
+    //.reverse
+    //.stop
+    // parameter speed - 255 max
+
+    // Initialize the proximity sensor
     proximity = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY_PIN
@@ -138,16 +150,6 @@ board.on("ready", function () {
     // Create a animation for the head and arm
     headAndArm = new five.Servos([headServo, armServo]);
     speechAnimation = new five.Animation(headAndArm);
-
-    // Initialize the legs
-    motor1 = new five.Motor(motorConfig.M1);
-    motor2 = new five.Motor(motorConfig.M2);
-    // Start the motor at maximum speed
-    //motor2.forward(200);
-    //motor1.forward(200);
-    //.reverse
-    //.stop
-    // parameter speed - 255 max
 
     // Check for changes in the proximity sensor
     proximity.on("data", function () {
