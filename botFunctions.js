@@ -194,7 +194,7 @@ board.on("ready", function () {
 
 }); // board.on("ready", function() {
 
-
+// Handle commands from the web client
 function command(botMessage) {
     //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
     
