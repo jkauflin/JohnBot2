@@ -31,7 +31,7 @@ Modification History
                 execute multiple async loop commands in order, so implemented
                 an execution controller and a command request array
 2019-02-16 JJK  Added stop and turn around on close proximity
-2019-03-29 JJK  
+2019-03-29 JJK  Moved the motor initialize to the top
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
