@@ -162,7 +162,10 @@ board.on("ready", function () {
 
                 // If getting close to something, slow, stop, and turn around
                 if (prevProx >= 6 && currProx < 6) {
-                    console.log("*** Proximity - slow, rotate, and walkAbout (if on)");
+
+                    // only if moving???
+
+                    console.log("*** Proximity - slow, rotate, and walkAbout (if on) - currProx = "+currProx);
                     commands.length = 0;
                     commandParams.length = 0;
                     commands.push("_slowAndStop");
