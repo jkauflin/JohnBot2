@@ -91,6 +91,7 @@ var boardReady = false;
 var walkAbout = false;
 var commands = [];
 var commandParams = [];
+var rotateStart = Date.now();
 
 board.on("error", function () {
     //console.log("*** Error in Board ***");
@@ -157,14 +158,15 @@ board.on("ready", function () {
             // Send event message for change in proximity inches
             currProx = Math.round(this.in);
             if (currProx != prevProx) {
-                botEvent.emit("proxIn", currProx);
+
+                //botEvent.emit("proxIn", currProx);
                 //console.log("Proximity: " + currProx);
 
                 // If getting close to something, slow, stop, and turn around
                 if (prevProx >= 6 && currProx < 6) {
 
                     // only if moving???
-
+/*                     
                     console.log("*** Proximity - slow, rotate, and walkAbout (if on) - currProx = "+currProx);
                     commands.length = 0;
                     commandParams.length = 0;
@@ -180,6 +182,7 @@ board.on("ready", function () {
                     }
 
                     _executeCommands();
+ */                
                 }
 
                 prevProx = currProx;
@@ -345,15 +348,18 @@ function _walkAbout() {
 } // function _walkAbout() {
 
 function _rotate(direction, duration, degrees, speed) {
-    console.log("%%%%%%% starting rotate, degrees = " + degrees + ", speed = " + speed);
     // If direction is blank, stop
     if (direction == null) {
+        var rotationDurationMillis = Date.now() - rotateStart;
+        console.log("%%%%%%% STOPPING rotate, duration = " + rotationDurationMillis);
         //_allStop();
         motor1.stop();
         motor2.stop();
         rotating = false;
         _executeCommands();
     } else {
+        rotateStart = Date.now();
+
         var tempSpeed = motorSpeed;
         if (speed != null) {
             if (speed > 0) {
@@ -361,17 +367,19 @@ function _rotate(direction, duration, degrees, speed) {
             }
         }
 
+        var tempDegrees = 0;
         var tempDuration = 0;
         // If degrees are set, calculate duration from speed
         if (degrees != null) {
+            tempDegrees = degrees;
             if (degrees > 360) {
-                degrees = 360;
+                tempDegrees = 360;
             } else if (degrees < 0) {
-                degrees = 0;
+                tempDegrees = 0;
             }
 
             // Calculate duration given speed and degrees
-            tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * degrees
+            tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
         }
 
         // If duration or degress are set, then set a timeout of when to stop
@@ -383,6 +391,8 @@ function _rotate(direction, duration, degrees, speed) {
         if (tempDuration > 0) {
             setTimeout(_rotate, tempDuration);
         }
+
+        console.log("%%%%%%% starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed+", duration = "+tempDuration);
 
         if (direction == LEFT) {
             motor1.forward(tempSpeed);
