@@ -322,7 +322,7 @@ function _walkAbout() {
     walkAbout = true;
     console.log("starting _walkAbout");
 
-    var randomDuration = _getRandomInt(7, 11) * 1000;
+    var randomDuration = _getRandomInt(7, 14) * 1000;
     var randomSpeed = _getRandomInt(80, 180);
     var randomRotate = _getRandomInt(25, 100);
     var randomDirection = RIGHT;
@@ -379,7 +379,8 @@ function _rotate(direction, duration, degrees, speed) {
             }
 
             // Calculate duration given speed and degrees
-            tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
+            //tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
+            tempDuration = Math.round((1390.288 + (46811280000 - 1390.288) / (1 + Math.pow((tempSpeed / 0.271566), 2.790687))) * (tempDegrees / 360));
         }
 
         // If duration or degress are set, then set a timeout of when to stop
