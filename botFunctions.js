@@ -32,6 +32,9 @@ Modification History
                 an execution controller and a command request array
 2019-02-16 JJK  Added stop and turn around on close proximity
 2019-03-29 JJK  Moved the motor initialize to the top
+2019-04-07 JJK  Updated the rotate duration calculation
+2019-04-10 JJK  Adjustments to the rotate calculations (to get better)
+                Working on proximity slow and stop
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -154,7 +157,7 @@ board.on("ready", function () {
 
     // Check for changes in the proximity sensor
     proximity.on("data", function () {
-        if (this.in < 12.0) {
+        if (this.in < 10.0) {
             // Send event message for change in proximity inches
             currProx = Math.round(this.in);
             if (currProx != prevProx) {
@@ -162,27 +165,33 @@ board.on("ready", function () {
                 //botEvent.emit("proxIn", currProx);
                 //console.log("Proximity: " + currProx);
 
-                // If getting close to something, slow, stop, and turn around
-                if (prevProx >= 6 && currProx < 6) {
+                // If getting close to something, slow, stop, and turn around (if moving)
+                if (prevProx >= 6 && currProx < 6 && moving) {
+                    console.log("*** Proximity: " + currProx + ", prev = "+prevProx);
 
-                    // only if moving???
-/*                     
-                    console.log("*** Proximity - slow, rotate, and walkAbout (if on) - currProx = "+currProx);
-                    commands.length = 0;
-                    commandParams.length = 0;
-                    commands.push("_slowAndStop");
-                    commandParams.push([]);
-                    commands.push("_rotate");
-                    commandParams.push([RIGHT, 0, 180, 160]);
+                    // somehow "clear" out previous commands?
+                        commands.length = 0;
+                        commandParams.length = 0;
 
-                    // If walkAbout, add that to the command list to start again after turning around
-                    if (walkAbout) {
-                        commands.push("_walkAbout");
+                        // don't slow and stop - just stop for now
+                        //commands.push("_slowAndStop");
+
+                                    motor1.stop();
+                                    motor2.stop();
+                                    moving = false;
+
                         commandParams.push([]);
-                    }
+                        commands.push("_rotate");
+                        commandParams.push([RIGHT, 0, 180, 200]);
 
-                    _executeCommands();
- */                
+                        // If walkAbout, add that to the command list to start again after turning around
+                        /*
+                        if (walkAbout) {
+                            commands.push("_walkAbout");
+                            commandParams.push([]);
+                        }
+                        */
+                        _executeCommands();
                 }
 
                 prevProx = currProx;
@@ -393,7 +402,7 @@ function _rotate(direction, duration, degrees, speed) {
             setTimeout(_rotate, tempDuration);
         }
 
-        console.log("%%%%%%% starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed+", duration = "+tempDuration);
+        console.log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed+", duration = "+tempDuration);
 
         if (direction == LEFT) {
             motor1.forward(tempSpeed);
