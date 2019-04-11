@@ -157,16 +157,16 @@ board.on("ready", function () {
 
     // Check for changes in the proximity sensor
     proximity.on("data", function () {
-        if (this.in < 10.0) {
+        if (this.in < 11.0) {
             // Send event message for change in proximity inches
             currProx = Math.round(this.in);
             if (currProx != prevProx) {
 
-                //botEvent.emit("proxIn", currProx);
+                botEvent.emit("proxIn", currProx);
                 //console.log("Proximity: " + currProx);
 
                 // If getting close to something, slow, stop, and turn around (if moving)
-                if (prevProx >= 6 && currProx < 6 && moving) {
+                if (prevProx >= 7 && currProx < 7 && moving) {
                     console.log("*** Proximity: " + currProx + ", prev = "+prevProx);
 
                     // somehow "clear" out previous commands?
@@ -175,22 +175,24 @@ board.on("ready", function () {
 
                         // don't slow and stop - just stop for now
                         //commands.push("_slowAndStop");
+                        //commandParams.push([]);
 
                                     motor1.stop();
                                     motor2.stop();
                                     moving = false;
+                        prevProx = 20;
 
-                        commandParams.push([]);
-                        commands.push("_rotate");
-                        commandParams.push([RIGHT, 0, 180, 200]);
+                        if (moveDirection == FORWARD) {
+                            commands.push("_rotate");
+                            commandParams.push([RIGHT, 0, 180, 200]);
+                        }
 
                         // If walkAbout, add that to the command list to start again after turning around
-                        /*
                         if (walkAbout) {
                             commands.push("_walkAbout");
                             commandParams.push([]);
                         }
-                        */
+
                         _executeCommands();
                 }
 
@@ -332,8 +334,8 @@ function _walkAbout() {
     console.log("starting _walkAbout");
 
     var randomDuration = _getRandomInt(7, 14) * 1000;
-    var randomSpeed = _getRandomInt(80, 180);
-    var randomRotate = _getRandomInt(25, 100);
+    var randomSpeed = _getRandomInt(120, 220);
+    var randomRotate = _getRandomInt(25, 120);
     var randomDirection = RIGHT;
     if (_getRandomInt(0, 1)) {
         randomDirection = RIGHT;
@@ -358,7 +360,7 @@ function _walkAbout() {
 
 function _rotate(direction, duration, degrees, speed) {
     // If direction is blank, stop
-    if (direction == null) {
+    if (direction == undefined || direction == null) {
         var rotationDurationMillis = Date.now() - rotateStart;
         console.log("%%%%%%% STOPPING rotate, duration = " + rotationDurationMillis);
         //_allStop();
@@ -378,6 +380,7 @@ function _rotate(direction, duration, degrees, speed) {
 
         var tempDegrees = 0;
         var tempDuration = 0;
+
         // If degrees are set, calculate duration from speed
         if (degrees != null) {
             tempDegrees = degrees;
@@ -389,7 +392,25 @@ function _rotate(direction, duration, degrees, speed) {
 
             // Calculate duration given speed and degrees
             //tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
-            tempDuration = Math.round((1390.288 + (46811280000 - 1390.288) / (1 + Math.pow((tempSpeed / 0.271566), 2.790687))) * (tempDegrees / 360));
+            tempDuration = Math.round((1390.288 + (46811280000 - 1390.288) / 
+                            (1 + Math.pow((tempSpeed / 0.271566), 2.790687))) * (tempDegrees / 360));
+
+            var speedPercent = tempSpeed / 255.0;
+            var extraDuration = -90;
+            /*
+            if (speedPercent < 0.3) {
+                extraDuration = Math.round(-(380.0 * (1-speedPercent)));
+            } else if (speedPercent < .5) {
+                extraDuration = Math.round(380.0 * speedPercent);
+            } else {
+                extraDuration = Math.round(-(180.0 * speedPercent));
+            }
+            */
+            if (speedPercent > 0.35 && speedPercent < 0.6) {
+                extraDuration = 270;
+            }
+
+            tempDuration += extraDuration;
         }
 
         // If duration or degress are set, then set a timeout of when to stop
@@ -402,7 +423,8 @@ function _rotate(direction, duration, degrees, speed) {
             setTimeout(_rotate, tempDuration);
         }
 
-        console.log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed+", duration = "+tempDuration);
+        console.log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", duration = " + tempDuration +
+            ", extra = "+extraDuration);
 
         if (direction == LEFT) {
             motor1.forward(tempSpeed);
