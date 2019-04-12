@@ -40,7 +40,8 @@ Modification History
 2019-04-10 JJK  Adjustments to the rotate calculations (to get better)
                 Working on proximity slow and stop
 2019-04-12 JJK  Checking servo sweep and position functions (for improved
-                object awareness with the proximity sensor)
+                object awareness with the proximity sensor)\
+                Adjusting proximity actions
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -62,6 +63,7 @@ const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
 const headStartPos = 90;
 const armStartPos = 145;
+const TURN_AROUND = [RIGHT, 0, 180, 200];
 
 // create EventEmitter object
 var botEvent = new EventEmitter();
@@ -176,13 +178,13 @@ board.on("ready", function () {
         currProx = Math.round(this.in);
         if (currProx != prevProx) {
             botEvent.emit("proxIn", currProx);
-            //console.log("Proximity: " + currProx);
+            //log("Proximity: " + currProx);
             prevProx = currProx;
         }
 
         // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
         if (this.in < 6.0 && moving && moveDirection == FORWARD) {
-            console.log("))) Close Proximity: " + currProx);
+            log("))) Close Proximity (MOVING): " + currProx);
             // Clear out any previous commands
             commands.length = 0;
             commandParams.length = 0;
@@ -190,7 +192,7 @@ board.on("ready", function () {
             commands.push("_stopWalking");
             commandParams.push([]);
             commands.push("_rotate");
-            commandParams.push([RIGHT, 0, 180, 200]);
+            commandParams.push(TURN_AROUND);
 
             // If walkAbout, add that to the command list to start again after turning around
             if (walkAbout) {
@@ -211,7 +213,7 @@ board.on("ready", function () {
 
 // Handle commands from the web client
 function command(botMessage) {
-    //console.log(dateTime.create().format('H:M:S.N') + ", botMessage = " + JSON.stringify(botMessage));
+    //log("botMessage = " + JSON.stringify(botMessage));
     
     if (!boardReady) {
         return;
@@ -224,7 +226,7 @@ function command(botMessage) {
     if (botMessage.armPosition != null) {
         armServo.to(botMessage.armPosition);
         currArmPos = botMessage.armPosition;
-        //console.log(">>> armServo, currArmPos = "+ currArmPos +", pos = " + armServo.position);
+        //log(">>> armServo, currArmPos = "+ currArmPos +", pos = " + armServo.position);
     }
     if (botMessage.headPosition != null) {
         headServo.to(botMessage.headPosition);
@@ -299,42 +301,13 @@ function command(botMessage) {
 } // function control(botMessage) {
 
 function _stopWalking() {
-    console.log(dateTime.create().format('H:M:S.N') + ", _stopWalking");
+    log("_stopWalking");
     motor1.stop();
     motor2.stop();
     moving = false;
     clearTimeout(_rotate);
     rotating = false;
     _executeCommands();
-}
-    
-function _slowAndStop() {
-        console.log("$$$$$ in slow and Stop, motorSpeed = " + motorSpeed + ", moving = " + moving);
-        if (rotating) {
-            motor1.stop();
-            motor2.stop();
-            rotating = false;
-            clearTimeout(_rotate);
-        }
-        if (moving) {
-            if (motorSpeed < 70) {
-                // When slow enough, just stop
-                motor1.stop();
-                motor2.stop();
-                moving = false;
-            } else {
-                // Reduce speed by a % and wait a small period of milliseconds before checking again
-                motorSpeed = motorSpeed - Math.round(motorSpeed * 0.1);
-                motor1.forward(motorSpeed);
-                motor2.forward(motorSpeed);
-                setTimeout(_slowAndStop, 100);
-            }
-        }
-
-    // Once it's stopped we're done, so send back to execute more commands
-    if (!moving) {
-        _executeCommands();
-    }
 }
 
 function _walkAbout() {
@@ -343,7 +316,7 @@ function _walkAbout() {
 
     // *** maybe stop after a maximum time?
     walkAbout = true;
-    console.log("starting _walkAbout");
+    log("starting _walkAbout");
 
     var randomDuration = _getRandomInt(7, 14) * 1000;
     var randomSpeed = _getRandomInt(120, 220);
@@ -355,7 +328,7 @@ function _walkAbout() {
         randomDirection = LEFT;
     }
 
-    console.log("_walkAbout, randomSpeed = " + randomSpeed);
+    log("_walkAbout, randomSpeed = " + randomSpeed);
     motor2.forward(randomSpeed);
     motor1.forward(randomSpeed);
     moving = true;
@@ -371,10 +344,12 @@ function _walkAbout() {
 } // function _walkAbout() {
 
 function _rotate(direction, duration, degrees, speed) {
+    log("IN_VALS starting rotate, degrees = " + degrees + ", speed = " + dpeed + ", duration = " + duration +
+        ", extra = " + extraDuration);
     // If direction is blank, stop
     if (direction == undefined || direction == null) {
         var rotationDurationMillis = Date.now() - rotateStart;
-        console.log("%%%%%%% STOPPING rotate, duration = " + rotationDurationMillis);
+        log("%%%%%%% STOPPING rotate, duration = " + rotationDurationMillis);
         //_allStop();
         motor1.stop();
         motor2.stop();
@@ -430,13 +405,13 @@ function _rotate(direction, duration, degrees, speed) {
             tempDuration = duration;
         }
 
+        log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration +
+            ", extra = " + extraDuration);
+
         // recursively call with blank direction to stop after a period of time
         if (tempDuration > 0) {
             setTimeout(_rotate, tempDuration);
         }
-
-        console.log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", duration = " + tempDuration +
-            ", extra = "+extraDuration);
 
         if (direction == LEFT) {
             motor1.forward(tempSpeed);
@@ -515,6 +490,10 @@ function _allStop() {
     clearTimeout(_rotate);
 }
 
+function log(outStr) {
+    console.log(dateTime.create().format('H:M:S.N') + ", " + outStr);
+}
+
 //=============================================================================================
 // Execution controller for multiple commands
 // Commands and parameters are pushed into arrays, and after every command completes it
@@ -529,7 +508,7 @@ function _executeCommands() {
     var command = commands.shift();
     var params = commandParams.shift();
 
-    console.log(dateTime.create().format('H:M:S.N') + ", _executeCommands, command = " + command);
+    log("_executeCommands, command = " + command);
 
     // Execute the specified command with the parameters
     if (command == "_stopWalking") {
