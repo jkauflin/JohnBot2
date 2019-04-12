@@ -176,12 +176,13 @@ board.on("ready", function () {
         currProx = Math.round(this.in);
         if (currProx != prevProx) {
             botEvent.emit("proxIn", currProx);
-            console.log("Proximity: " + currProx);
+            //console.log("Proximity: " + currProx);
             prevProx = currProx;
         }
 
         // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
         if (this.in < 6.0 && moving && moveDirection == FORWARD) {
+            console.log("))) Close Proximity: " + currProx);
             // Clear out any previous commands
             commands.length = 0;
             commandParams.length = 0;
@@ -223,7 +224,7 @@ function command(botMessage) {
     if (botMessage.armPosition != null) {
         armServo.to(botMessage.armPosition);
         currArmPos = botMessage.armPosition;
-        console.log(">>> armServo, currArmPos = "+ currArmPos +", pos = " + armServo.position())
+        //console.log(">>> armServo, currArmPos = "+ currArmPos +", pos = " + armServo.position);
     }
     if (botMessage.headPosition != null) {
         headServo.to(botMessage.headPosition);
@@ -417,7 +418,7 @@ function _rotate(direction, duration, degrees, speed) {
                 extraDuration = Math.round(-(180.0 * speedPercent));
             }
             */
-            if (speedPercent > 0.35 && speedPercent < 0.6) {
+            if (speedPercent > 0.35 && speedPercent < 0.8) {
                 extraDuration = 270;
             }
 
