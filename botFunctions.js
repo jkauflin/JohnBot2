@@ -40,8 +40,8 @@ Modification History
 2019-04-10 JJK  Adjustments to the rotate calculations (to get better)
                 Working on proximity slow and stop
 2019-04-12 JJK  Checking servo sweep and position functions (for improved
-                object awareness with the proximity sensor)\
-                Adjusting proximity actions
+                object awareness with the proximity sensor)
+                Adjusting proximity actions - got walk around working better
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -63,7 +63,12 @@ const HEAD_SERVO = 10;
 const PROXIMITY_PIN = 7;
 const headStartPos = 90;
 const armStartPos = 145;
+const FORWARD = 'F';
+const BACKWARD = 'R';
+const RIGHT = 'R';
+const LEFT = 'L';
 const TURN_AROUND = [RIGHT, 0, 180, 200];
+
 
 // create EventEmitter object
 var botEvent = new EventEmitter();
@@ -88,10 +93,6 @@ var speechAnimation;
 var speaking = false;
 var currArmPos = 90;
 
-const FORWARD = 'F';
-const BACKWARD = 'R';
-const RIGHT = 'R';
-const LEFT = 'L';
 
 var moveDirection = FORWARD;
 var moving = false;
@@ -183,7 +184,7 @@ board.on("ready", function () {
         }
 
         // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
-        if (this.in < 6.0 && moving && moveDirection == FORWARD) {
+        if (this.in < 10.0 && moving && moveDirection == FORWARD) {
             log("))) Close Proximity (MOVING): " + currProx);
             // Clear out any previous commands
             commands.length = 0;
@@ -319,8 +320,8 @@ function _walkAbout() {
     log("starting _walkAbout");
 
     var randomDuration = _getRandomInt(7, 14) * 1000;
-    var randomSpeed = _getRandomInt(120, 220);
-    var randomRotate = _getRandomInt(35, 120);
+    var randomSpeed = _getRandomInt(150, 210);
+    var randomRotate = _getRandomInt(55, 200);
     var randomDirection = RIGHT;
     if (_getRandomInt(0, 1)) {
         randomDirection = RIGHT;
@@ -344,8 +345,6 @@ function _walkAbout() {
 } // function _walkAbout() {
 
 function _rotate(direction, duration, degrees, speed) {
-    log("IN_VALS starting rotate, degrees = " + degrees + ", speed = " + dpeed + ", duration = " + duration +
-        ", extra = " + extraDuration);
     // If direction is blank, stop
     if (direction == undefined || direction == null) {
         var rotationDurationMillis = Date.now() - rotateStart;
@@ -356,6 +355,8 @@ function _rotate(direction, duration, degrees, speed) {
         rotating = false;
         _executeCommands();
     } else {
+        log("!!! Starting rotate, degrees = " + degrees + ", speed = " + speed + ", duration = " + duration);
+
         rotateStart = Date.now();
 
         var tempSpeed = motorSpeed;
@@ -379,12 +380,11 @@ function _rotate(direction, duration, degrees, speed) {
 
             // Calculate duration given speed and degrees
             //tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
-            tempDuration = Math.round((1390.288 + (46811280000 - 1390.288) / 
-                            (1 + Math.pow((tempSpeed / 0.271566), 2.790687))) * (tempDegrees / 360));
-
+            tempDuration = Math.round((777.5644 + (12661510000 - 777.5644) /
+                            (1 + Math.pow((tempSpeed / 0.6116105), 3.096302))) * (tempDegrees / 180));
+            /*
             var speedPercent = tempSpeed / 255.0;
             var extraDuration = -90;
-            /*
             if (speedPercent < 0.3) {
                 extraDuration = Math.round(-(380.0 * (1-speedPercent)));
             } else if (speedPercent < .5) {
@@ -392,12 +392,12 @@ function _rotate(direction, duration, degrees, speed) {
             } else {
                 extraDuration = Math.round(-(180.0 * speedPercent));
             }
-            */
             if (speedPercent > 0.35 && speedPercent < 0.8) {
                 extraDuration = 270;
             }
 
             tempDuration += extraDuration;
+            */
         }
 
         // If duration or degress are set, then set a timeout of when to stop
@@ -405,11 +405,9 @@ function _rotate(direction, duration, degrees, speed) {
             tempDuration = duration;
         }
 
-        log("$$$ starting rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration +
-            ", extra = " + extraDuration);
-
         // recursively call with blank direction to stop after a period of time
         if (tempDuration > 0) {
+            log("***** SetTimeout rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration);
             setTimeout(_rotate, tempDuration);
         }
 
@@ -486,7 +484,7 @@ function _allStop() {
     commandParams.length = 0;
     // Clear the function calls
     clearTimeout(_executeCommands);
-    clearTimeout(_slowAndStop);
+    clearTimeout(_stopWalking);
     clearTimeout(_rotate);
 }
 
