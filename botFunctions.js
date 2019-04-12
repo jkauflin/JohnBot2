@@ -1,8 +1,12 @@
 /*==============================================================================
-(C) Copyright 2017 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS module to handle robot functions.  Communicates with
              the Arduino Mega
+
+Current philosophy is to push commands to command array, and then call 
+_executeCommands after completing a command completes
+
 -----------------------------------------------------------------------------
 Modification History
 2017-12-31 JJK  Loaded ConfigurableFirmata on the Arduino Mega.
@@ -35,6 +39,8 @@ Modification History
 2019-04-07 JJK  Updated the rotate duration calculation
 2019-04-10 JJK  Adjustments to the rotate calculations (to get better)
                 Working on proximity slow and stop
+2019-04-12 JJK  Checking servo sweep and position functions (for improved
+                object awareness with the proximity sensor)
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -151,54 +157,48 @@ board.on("ready", function () {
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
+    /*
+    armServo.position()
+    servo.sweep({
+        range: [45, 135],
+        interval: 1000,
+        step: 10
+    });
+    servo.stop();
+    */
+
     // Create a animation for the head and arm
     headAndArm = new five.Servos([headServo, armServo]);
     speechAnimation = new five.Animation(headAndArm);
 
     // Check for changes in the proximity sensor
     proximity.on("data", function () {
-        if (this.in < 11.0) {
-            // Send event message for change in proximity inches
-            currProx = Math.round(this.in);
-            if (currProx != prevProx) {
+        currProx = Math.round(this.in);
+        if (currProx != prevProx) {
+            botEvent.emit("proxIn", currProx);
+            console.log("Proximity: " + currProx);
+            prevProx = currProx;
+        }
 
-                botEvent.emit("proxIn", currProx);
-                //console.log("Proximity: " + currProx);
+        // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
+        if (this.in < 6.0 && moving && moveDirection == FORWARD) {
+            // Clear out any previous commands
+            commands.length = 0;
+            commandParams.length = 0;
+            // Stop and turn around
+            commands.push("_stopWalking");
+            commandParams.push([]);
+            commands.push("_rotate");
+            commandParams.push([RIGHT, 0, 180, 200]);
 
-                // If getting close to something, slow, stop, and turn around (if moving)
-                if (prevProx >= 7 && currProx < 7 && moving) {
-                    console.log("*** Proximity: " + currProx + ", prev = "+prevProx);
+            // If walkAbout, add that to the command list to start again after turning around
+            if (walkAbout) {
+                commands.push("_walkAbout");
+                commandParams.push([]);
+            }
 
-                    // somehow "clear" out previous commands?
-                        commands.length = 0;
-                        commandParams.length = 0;
-
-                        // don't slow and stop - just stop for now
-                        //commands.push("_slowAndStop");
-                        //commandParams.push([]);
-
-                                    motor1.stop();
-                                    motor2.stop();
-                                    moving = false;
-                        prevProx = 20;
-
-                        if (moveDirection == FORWARD) {
-                            commands.push("_rotate");
-                            commandParams.push([RIGHT, 0, 180, 200]);
-                        }
-
-                        // If walkAbout, add that to the command list to start again after turning around
-                        if (walkAbout) {
-                            commands.push("_walkAbout");
-                            commandParams.push([]);
-                        }
-
-                        _executeCommands();
-                }
-
-                prevProx = currProx;
-            } // if (currProx != prevProx) {
-        } // if (this.in < 12.0) {
+            _executeCommands();
+        }
     }); // proximity.on("data", function () {
     /*
     proximity.on("change", function() {
@@ -223,6 +223,7 @@ function command(botMessage) {
     if (botMessage.armPosition != null) {
         armServo.to(botMessage.armPosition);
         currArmPos = botMessage.armPosition;
+        console.log(">>> armServo, currArmPos = "+ currArmPos +", pos = " + armServo.position())
     }
     if (botMessage.headPosition != null) {
         headServo.to(botMessage.headPosition);
@@ -296,28 +297,38 @@ function command(botMessage) {
 
 } // function control(botMessage) {
 
+function _stopWalking() {
+    console.log(dateTime.create().format('H:M:S.N') + ", _stopWalking");
+    motor1.stop();
+    motor2.stop();
+    moving = false;
+    clearTimeout(_rotate);
+    rotating = false;
+    _executeCommands();
+}
+    
 function _slowAndStop() {
-    console.log("$$$$$ in slow and Stop, motorSpeed = " + motorSpeed + ", moving = " + moving);
-    if (rotating) {
-        motor1.stop();
-        motor2.stop();
-        rotating = false;
-        clearTimeout(_rotate);
-    }
-    if (moving) {
-        if (motorSpeed < 70) {
-            // When slow enough, just stop
+        console.log("$$$$$ in slow and Stop, motorSpeed = " + motorSpeed + ", moving = " + moving);
+        if (rotating) {
             motor1.stop();
             motor2.stop();
-            moving = false;
-        } else {
-            // Reduce speed by a % and wait a small period of milliseconds before checking again
-            motorSpeed = motorSpeed - Math.round(motorSpeed * 0.1);
-            motor1.forward(motorSpeed);
-            motor2.forward(motorSpeed);
-            setTimeout(_slowAndStop, 100);
+            rotating = false;
+            clearTimeout(_rotate);
         }
-    }
+        if (moving) {
+            if (motorSpeed < 70) {
+                // When slow enough, just stop
+                motor1.stop();
+                motor2.stop();
+                moving = false;
+            } else {
+                // Reduce speed by a % and wait a small period of milliseconds before checking again
+                motorSpeed = motorSpeed - Math.round(motorSpeed * 0.1);
+                motor1.forward(motorSpeed);
+                motor2.forward(motorSpeed);
+                setTimeout(_slowAndStop, 100);
+            }
+        }
 
     // Once it's stopped we're done, so send back to execute more commands
     if (!moving) {
@@ -335,7 +346,7 @@ function _walkAbout() {
 
     var randomDuration = _getRandomInt(7, 14) * 1000;
     var randomSpeed = _getRandomInt(120, 220);
-    var randomRotate = _getRandomInt(25, 120);
+    var randomRotate = _getRandomInt(35, 120);
     var randomDirection = RIGHT;
     if (_getRandomInt(0, 1)) {
         randomDirection = RIGHT;
@@ -520,8 +531,8 @@ function _executeCommands() {
     console.log(dateTime.create().format('H:M:S.N') + ", _executeCommands, command = " + command);
 
     // Execute the specified command with the parameters
-    if (command == "_slowAndStop") {
-        _slowAndStop();
+    if (command == "_stopWalking") {
+        _stopWalking();
     } else if (command == "_rotate") {
         _rotate(params[0], params[1], params[2], params[3]);
     } else if (command == "_walkAbout") {
