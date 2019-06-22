@@ -42,6 +42,8 @@ Modification History
 2019-04-12 JJK  Checking servo sweep and position functions (for improved
                 object awareness with the proximity sensor)
                 Adjusting proximity actions - got walk around working better
+2019-06-22 JJK  Getting servo sweep with proximity sensor working (not that
+                Amy has glued it together)
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -60,8 +62,10 @@ const LEFT_EYE = 45;
 const RIGHT_EYE = 44;
 const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
+const PROXIMITY_SERVO = 11;
 const PROXIMITY_PIN = 7;
 const headStartPos = 90;
+const proximityStartPos = 90;
 const armStartPos = 145;
 const FORWARD = 'F';
 const BACKWARD = 'R';
@@ -160,8 +164,19 @@ board.on("ready", function () {
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
+    proximityServo = new five.Servo({
+        id: "ProximityServo",         // User defined id
+        pin: PROXIMITY_SERVO,         // Which pin is it attached to?
+        type: "standard",       // Default: "standard". Use "continuous" for continuous rotation servos
+        range: [10, 170],        // Default: 0-180
+        fps: 100,               // Used to calculate rate of movement between positions
+        invert: false,          // Invert all specified positions
+        startAt: proximityStartPos,   // Immediately move to a degree
+        //center: true,         // overrides startAt if true and moves the servo to the center of the range
+    });
+
     /*
-    armServo.position()
+    armServo.position
     servo.sweep({
         range: [45, 135],
         interval: 1000,
@@ -179,12 +194,27 @@ board.on("ready", function () {
         currProx = Math.round(this.in);
         if (currProx != prevProx) {
             botEvent.emit("proxIn", currProx);
-            //log("Proximity: " + currProx);
+            log("Proximity: " + currProx);
             prevProx = currProx;
+
+            proximityServo.sweep({
+                range: [60, 120],
+                interval: 2000,
+                step: 10
+            });
+
+            if (this.in < 9.0) {
+                proximityServo.stop();
+                log("Proximity POS: " + proximityServo.position);
+
+            }
+
+                    
         }
 
         // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
-        if (this.in < 10.0 && moving && moveDirection == FORWARD) {
+        //if (this.in < 10.0 && moving && moveDirection == FORWARD) {
+        if (this.in < 9.0 && moving && moveDirection == FORWARD) {
             log("))) Close Proximity (MOVING): " + currProx);
             // Clear out any previous commands
             commands.length = 0;
