@@ -42,8 +42,9 @@ Modification History
 2019-04-12 JJK  Checking servo sweep and position functions (for improved
                 object awareness with the proximity sensor)
                 Adjusting proximity actions - got walk around working better
-2019-06-22 JJK  Getting servo sweep with proximity sensor working (not that
-                Amy has glued it together)
+2019-06-23 JJK  Getting servo sweep with proximity sensor working (now that
+                Amy has glued it together), and modified the walk around
+                to turn the right direction away from the proximity alert
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -64,9 +65,9 @@ const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
 const PROXIMITY_SERVO = 11;
 const PROXIMITY_PIN = 7;
-const headStartPos = 90;
-const proximityStartPos = 90;
-const armStartPos = 145;
+//const headStartPos = 90;
+//const proximityStartPos = 90;
+//const armStartPos = 145;
 const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
@@ -90,13 +91,14 @@ var motorSpeed = 100;
 var headServo;
 var armServo;
 var headAndArm;
-var proximity;
+var proximityServo;
+var proximitySensor;
+var proximityAlert = false;
+var proximityServoPos = 0;
+var proximityOffsetDegrees = 0;
 var currProx = 0;
 var prevProx = 0;
 var speechAnimation;
-var speaking = false;
-var currArmPos = 90;
-
 
 var moveDirection = FORWARD;
 var moving = false;
@@ -131,7 +133,7 @@ board.on("ready", function () {
     // parameter speed - 255 max
 
     // Initialize the proximity sensor
-    proximity = new five.Proximity({
+    proximitySensor = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY_PIN
     });
@@ -149,7 +151,7 @@ board.on("ready", function () {
         range: [10, 170],        // Default: 0-180
         fps: 100,               // Used to calculate rate of movement between positions
         invert: false,          // Invert all specified positions
-        startAt: headStartPos,  // Immediately move to a degree
+        startAt: 90,            // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
@@ -160,29 +162,27 @@ board.on("ready", function () {
         range: [10, 170],        // Default: 0-180
         fps: 100,               // Used to calculate rate of movement between positions
         invert: false,          // Invert all specified positions
-        startAt: armStartPos,   // Immediately move to a degree
+        startAt: 145,           // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
     proximityServo = new five.Servo({
-        id: "ProximityServo",         // User defined id
-        pin: PROXIMITY_SERVO,         // Which pin is it attached to?
+        id: "ProximityServo",   // User defined id
+        pin: PROXIMITY_SERVO,   // Which pin is it attached to?
         type: "standard",       // Default: "standard". Use "continuous" for continuous rotation servos
-        range: [10, 170],        // Default: 0-180
+        range: [10, 170],       // Default: 0-180
         fps: 100,               // Used to calculate rate of movement between positions
         invert: false,          // Invert all specified positions
-        startAt: proximityStartPos,   // Immediately move to a degree
+        startAt: 90,            // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
     /*
-    armServo.position
-    servo.sweep({
-        range: [45, 135],
-        interval: 1000,
+    proximityServo.sweep({
+        range: [40, 140],
+        interval: 1500,
         step: 10
     });
-    servo.stop();
     */
 
     // Create a animation for the head and arm
@@ -190,57 +190,69 @@ board.on("ready", function () {
     speechAnimation = new five.Animation(headAndArm);
 
     // Check for changes in the proximity sensor
-    proximity.on("data", function () {
+    proximitySensor.on("data", function () {
         currProx = Math.round(this.in);
-        if (currProx != prevProx) {
-            botEvent.emit("proxIn", currProx);
-            log("Proximity: " + currProx);
-            prevProx = currProx;
-
-            proximityServo.sweep({
-                range: [60, 120],
-                interval: 2000,
-                step: 10
-            });
-
-            if (this.in < 9.0) {
-                proximityServo.stop();
-                log("Proximity POS: " + proximityServo.position);
-
-            }
-
+        // Ignore sensor values over a Max
+        if (currProx < 40) {
+            if (currProx != prevProx) {
+                botEvent.emit("proxIn", currProx);
+                if (currProx < 9) {
+                    proximityAlert = true;
+                    proximityServoPos = Math.round(proximityServo.position);
+                    proximityOffsetDegrees = 90 - proximityServoPos;
+                    log("ProximityAlert: " + currProx + ", Proximity POS: " + proximityServoPos + ", offset = " + proximityOffsetDegrees);
+                } else {
+                    proximityAlert = false;
+                }
                     
-        }
-
-        // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
-        //if (this.in < 10.0 && moving && moveDirection == FORWARD) {
-        if (this.in < 9.0 && moving && moveDirection == FORWARD) {
-            log("))) Close Proximity (MOVING): " + currProx);
-            // Clear out any previous commands
-            commands.length = 0;
-            commandParams.length = 0;
-            // Stop and turn around
-            commands.push("_stopWalking");
-            commandParams.push([]);
-            commands.push("_rotate");
-            commandParams.push(TURN_AROUND);
-
-            // If walkAbout, add that to the command list to start again after turning around
-            if (walkAbout) {
-                commands.push("_walkAbout");
-                commandParams.push([]);
+                prevProx = currProx;
             }
 
-            _executeCommands();
-        }
+            // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
+            if (proximityAlert && moving && moveDirection == FORWARD) {
+                log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
+                // Clear out any previous commands
+                commands.length = 0;
+                commandParams.length = 0;
+                // Stop and turn away from the proximity alert
+                commands.push("_stopWalking");
+                commandParams.push([]);
+
+                // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
+                var rotateDir = RIGHT;
+                if (proximityOffsetDegrees < 0) {
+                    rotateDir = LEFT;
+                }
+                var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
+                commands.push("_rotate");
+                commandParams.push([rotateDir, 0, rotateDegrees, 200]);
+
+                // If walkAbout, add that to the command list to start again after turning around
+                if (walkAbout) {
+                    commands.push("_walkAbout");
+                    commandParams.push([]);
+                }
+
+                _executeCommands();
+            }
+
+        } // if (currProx < 40) {
+
     }); // proximity.on("data", function () {
-    /*
-    proximity.on("change", function() {
-      console.log("The obstruction has moved.");
-    });
-    */
 
 }); // board.on("ready", function() {
+
+function _startWalking() {
+    moving = true;
+
+    proximityServo.sweep({
+        range: [40, 140],
+        interval: 1500,
+        step: 10
+    });
+
+}
+
 
 // Handle commands from the web client
 function command(botMessage) {
@@ -278,7 +290,9 @@ function command(botMessage) {
                 motor1.forward(motorSpeed);
                 motor2.forward(motorSpeed);
             }
-            moving = true;
+            //moving = true;
+            _startWalking();
+
         } else {
             motor1.stop();
             motor2.stop();
@@ -335,6 +349,7 @@ function _stopWalking() {
     log("_stopWalking");
     motor1.stop();
     motor2.stop();
+    proximityServo.stop();
     moving = false;
     clearTimeout(_rotate);
     rotating = false;
@@ -362,7 +377,8 @@ function _walkAbout() {
     log("_walkAbout, randomSpeed = " + randomSpeed);
     motor2.forward(randomSpeed);
     motor1.forward(randomSpeed);
-    moving = true;
+    //moving = true;
+    _startWalking();
 
     // After a random duration at this speed in this direction, rotate and start again
     commands.push("_rotate");
@@ -508,6 +524,7 @@ function _allStop() {
     moving = false;
     rotating = false;
     _doneSpeaking();
+    proximityServo.stop();
     walkAbout = false;
     // Clear out the command queue
     commands.length = 0;
