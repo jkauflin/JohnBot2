@@ -45,6 +45,13 @@ Modification History
 2019-06-23 JJK  Getting servo sweep with proximity sensor working (now that
                 Amy has glued it together), and modified the walk around
                 to turn the right direction away from the proximity alert
+
+                walk faster
+                walk slower
+                walk about
+                walk left
+                walk right
+                default 150
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -65,29 +72,22 @@ const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
 const PROXIMITY_SERVO = 11;
 const PROXIMITY_PIN = 7;
-//const headStartPos = 90;
-//const proximityStartPos = 90;
-//const armStartPos = 145;
 const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
 const LEFT = 'L';
 const TURN_AROUND = [RIGHT, 0, 180, 200];
 
-
 // create EventEmitter object
 var botEvent = new EventEmitter();
 
-// Event Namespace
-//var RoboEvents = {};
 var eyes;
 var leftEyeLed;
 var rightEyeLed;
 var motorConfig = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
 var motor1;
 var motor2;
-//var motorSpeed = 100;
-var motorSpeed = 100;
+var motorSpeed = 150;
 var headServo;
 var armServo;
 var headAndArm;
@@ -125,12 +125,6 @@ board.on("ready", function () {
     // Initialize the legs (do this first)
     motor1 = new five.Motor(motorConfig.M1);
     motor2 = new five.Motor(motorConfig.M2);
-    // Start the motor at maximum speed
-    //motor2.forward(200);
-    //motor1.forward(200);
-    //.reverse
-    //.stop
-    // parameter speed - 255 max
 
     // Initialize the proximity sensor
     proximitySensor = new five.Proximity({
@@ -217,6 +211,8 @@ board.on("ready", function () {
                 // Stop and turn away from the proximity alert
                 commands.push("_stopWalking");
                 commandParams.push([]);
+
+                // somehow check if it is in a corner???
 
                 // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
                 var rotateDir = RIGHT;
