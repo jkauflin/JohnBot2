@@ -52,6 +52,8 @@ Modification History
                 walk left
                 walk right
                 default 150
+                d
+                
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
