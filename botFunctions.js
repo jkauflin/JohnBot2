@@ -45,15 +45,6 @@ Modification History
 2019-06-23 JJK  Getting servo sweep with proximity sensor working (now that
                 Amy has glued it together), and modified the walk around
                 to turn the right direction away from the proximity alert
-
-                walk faster
-                walk slower
-                walk about
-                walk left
-                walk right
-                default 150
-                d
-                
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -108,6 +99,7 @@ var rotateDirection = RIGHT;
 var rotating = false;
 var eyesOn = false;
 var boardReady = false;
+var walking = false;
 var walkAbout = false;
 var commands = [];
 var commandParams = [];
@@ -231,6 +223,11 @@ board.on("ready", function () {
                     commandParams.push([]);
                 }
 
+                if (walking) {
+                    commands.push("_walk");
+                    commandParams.push([null, null, motorSpeed]);
+                }
+
                 _executeCommands();
             }
 
@@ -298,14 +295,22 @@ function command(botMessage) {
         }
     }
 
-    if (botMessage.walkAbout != null) {
+    if (botMessage.walk != null) {
         _allStop();
         commands.length = 0;
         commandParams.length = 0;
-        commands.push("_walkAbout");
-        commandParams.push([]);
+
+        if (botMessage.walkCommand == "around" || botMessage.walkCommand == "about") {
+            commands.push("_walkAbout");
+            commandParams.push([]);
+        } else if (botMessage.walkCommand == "forward") {
+            commands.push("_walk");
+            commandParams.push([null, null, motorSpeed]);
+        }
+
         _executeCommands();
     }
+    //+ (walk(around | about | faster | slower | left | right | forward | backward))
 
     if (botMessage.rotate != null) {
         if (botMessage.rotate) {
@@ -352,6 +357,17 @@ function _stopWalking() {
     clearTimeout(_rotate);
     rotating = false;
     _executeCommands();
+}
+
+function _walk(direction, duration, speed) {
+    var tempSpeed = motorSpeed;
+    if (speed != null) {
+        tempSpeed = speed;
+    }
+    log("_walk, speed = " + tempSpeed);
+    motor2.forward(tempSpeed);
+    motor1.forward(tempSpeed);
+    _startWalking();
 }
 
 function _walkAbout() {
@@ -524,6 +540,7 @@ function _allStop() {
     _doneSpeaking();
     proximityServo.stop();
     walkAbout = false;
+    walking = false;
     // Clear out the command queue
     commands.length = 0;
     commandParams.length = 0;
