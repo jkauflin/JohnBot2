@@ -248,10 +248,9 @@ function _startWalking() {
 
 }
 
-
 // Handle commands from the web client
 function command(botMessage) {
-    //log("botMessage = " + JSON.stringify(botMessage));
+    log("botMessage = " + JSON.stringify(botMessage));
     
     if (!boardReady) {
         return;
@@ -295,6 +294,7 @@ function command(botMessage) {
         }
     }
 
+    //+ (walk(around | about | faster | slower | left | right | forward | backward))
     if (botMessage.walk != null) {
         _allStop();
         commands.length = 0;
@@ -310,7 +310,6 @@ function command(botMessage) {
 
         _executeCommands();
     }
-    //+ (walk(around | about | faster | slower | left | right | forward | backward))
 
     if (botMessage.rotate != null) {
         if (botMessage.rotate) {
@@ -368,6 +367,8 @@ function _walk(direction, duration, speed) {
     motor2.forward(tempSpeed);
     motor1.forward(tempSpeed);
     _startWalking();
+
+    // *** add a MAX time for walking - add a stop onto the command array???
 }
 
 function _walkAbout() {
