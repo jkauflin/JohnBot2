@@ -215,7 +215,7 @@ board.on("ready", function () {
                 }
                 var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
                 commands.push("_rotate");
-                commandParams.push([rotateDir, 0, rotateDegrees, 200]);
+                commandParams.push([rotateDir, 0, rotateDegrees, 170]);
 
                 // If walkAbout, add that to the command list to start again after turning around
                 if (walkAbout) {
@@ -359,11 +359,12 @@ function _stopWalking() {
 }
 
 function _walk(direction, duration, speed) {
+    walking = true;
     var tempSpeed = motorSpeed;
     if (speed != null) {
         tempSpeed = speed;
     }
-    log("_walk, speed = " + tempSpeed);
+    log("in _walk, speed = " + tempSpeed);
     motor2.forward(tempSpeed);
     motor1.forward(tempSpeed);
     _startWalking();
@@ -576,6 +577,8 @@ function _executeCommands() {
         _stopWalking();
     } else if (command == "_rotate") {
         _rotate(params[0], params[1], params[2], params[3]);
+    } else if (command == "_walk") {
+        _walk(params[0], params[1], params[2]);
     } else if (command == "_walkAbout") {
         _walkAbout();
     }
