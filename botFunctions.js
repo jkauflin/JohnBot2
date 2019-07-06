@@ -84,6 +84,8 @@ var motorSpeed = 150;
 var headServo;
 var armServo;
 var headAndArm;
+var headStartPos = 90;
+var armStartPos = 145;
 var proximityServo;
 var proximitySensor;
 var proximityAlert = false;
@@ -139,7 +141,7 @@ board.on("ready", function () {
         range: [10, 170],        // Default: 0-180
         fps: 100,               // Used to calculate rate of movement between positions
         invert: false,          // Invert all specified positions
-        startAt: 90,            // Immediately move to a degree
+        startAt: headStartPos,  // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
@@ -150,9 +152,12 @@ board.on("ready", function () {
         range: [10, 170],        // Default: 0-180
         fps: 100,               // Used to calculate rate of movement between positions
         invert: false,          // Invert all specified positions
-        startAt: 145,           // Immediately move to a degree
+        startAt: armStartPos,   // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
+
+
+    // can you do a health check on a component like a servo and "re-start" it if not reacting?
 
     proximityServo = new five.Servo({
         id: "ProximityServo",   // User defined id
@@ -250,7 +255,7 @@ function _startWalking() {
 
 // Handle commands from the web client
 function command(botMessage) {
-    log("botMessage = " + JSON.stringify(botMessage));
+    //log("botMessage = " + JSON.stringify(botMessage));
     
     if (!boardReady) {
         return;
@@ -560,6 +565,12 @@ function log(outStr) {
 // Execution controller for multiple commands
 // Commands and parameters are pushed into arrays, and after every command completes it
 // calls this function to see if there is another command to execute
+
+/*
+is there any better way to do this - back to main activity loop?
+maybe use more async submits - execute after X time (use the standard JS activity queues to queue work)
+*/
+
 //=============================================================================================
 function _executeCommands() {
     if (commands.length < 1) {
@@ -572,16 +583,25 @@ function _executeCommands() {
 
     log("_executeCommands, command = " + command);
 
+    var tempDuration = 2000;
+
     // Execute the specified command with the parameters
     if (command == "_stopWalking") {
         _stopWalking();
     } else if (command == "_rotate") {
-        _rotate(params[0], params[1], params[2], params[3]);
+        //_rotate(params[0], params[1], params[2], params[3]);
+        setTimeout(_rotate, tempDuration, params[0], params[1], params[2], params[3]);
     } else if (command == "_walk") {
-        _walk(params[0], params[1], params[2]);
+        //_walk(params[0], params[1], params[2]);
+        setTimeout(_walk, tempDuration, params[0], params[1], params[2]);
     } else if (command == "_walkAbout") {
-        _walkAbout();
+        //_walkAbout();
+        setTimeout(_walkAbout, tempDuration);
     }
+
+
+// make the first parameter a "delay before start?"
+// and do all calls as set
 
 } // function _executeCommands() {
 
