@@ -45,9 +45,15 @@ Modification History
 2019-06-23 JJK  Getting servo sweep with proximity sensor working (now that
                 Amy has glued it together), and modified the walk around
                 to turn the right direction away from the proximity alert
+2019-07-06 JJK  Cleaning up command execution and state to give more 
+                encapsulation and independance (so they can be more complex)
+
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
+// EventEmitter object (to send events outside of this module)
+var botEvent = new EventEmitter();
+
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
 // be sure to shut the REPL off!
 var five = require("johnny-five");
@@ -58,7 +64,7 @@ var board = new five.Board({
 //var dt = dateTime.create();
 //var formatted = dt.format('Y-m-d H:M:S');
 
-// Constants for pin numbers
+// Constants for pin numbers and commands
 const LEFT_EYE = 45;
 const RIGHT_EYE = 44;
 const ARM_SERVO = 9;
@@ -69,18 +75,17 @@ const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
 const LEFT = 'L';
-const TURN_AROUND = [RIGHT, 0, 180, 200];
+const DEFAULT_MOTOR_SPEED = 150;
+//const TURN_AROUND = [RIGHT, 0, 180, 200];
 
-// create EventEmitter object
-var botEvent = new EventEmitter();
-
+// Variables for controlling robot components
 var eyes;
 var leftEyeLed;
 var rightEyeLed;
 var motorConfig = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V2;
 var motor1;
 var motor2;
-var motorSpeed = 150;
+var motorSpeed = DEFAULT_MOTOR_SPEED;
 var headServo;
 var armServo;
 var headAndArm;
@@ -88,24 +93,28 @@ var headStartPos = 90;
 var armStartPos = 145;
 var proximityServo;
 var proximitySensor;
-var proximityAlert = false;
 var proximityServoPos = 0;
 var proximityOffsetDegrees = 0;
 var currProx = 0;
 var prevProx = 0;
 var speechAnimation;
 
-var moveDirection = FORWARD;
-var moving = false;
-var rotateDirection = RIGHT;
-var rotating = false;
-var eyesOn = false;
+// State variables
 var boardReady = false;
-var walking = false;
-var walkAbout = false;
+var moving = false;
+var proximityAlert = false;
+var eyesOn = false;
+var moveDirection = FORWARD;
+var rotateDirection = RIGHT;
+
+// Mode variables
+var walkMode = false;
+var walkAboutMode = false;
+
+// Command execution variables
 var commands = [];
 var commandParams = [];
-var rotateStart = Date.now();
+var commandStartMs = Date.now();
 
 board.on("error", function () {
     //console.log("*** Error in Board ***");
@@ -188,7 +197,9 @@ board.on("ready", function () {
         // Ignore sensor values over a Max
         if (currProx < 40) {
             if (currProx != prevProx) {
+                // If the Proximity inches changes, send an event with current value
                 botEvent.emit("proxIn", currProx);
+                // If close to something, set the proximity alert State and save the position
                 if (currProx < 9) {
                     proximityAlert = true;
                     proximityServoPos = Math.round(proximityServo.position);
@@ -220,19 +231,8 @@ board.on("ready", function () {
                 }
                 var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
                 commands.push("_rotate");
-                commandParams.push([rotateDir, 0, rotateDegrees, 170]);
-
-                // If walkAbout, add that to the command list to start again after turning around
-                if (walkAbout) {
-                    commands.push("_walkAbout");
-                    commandParams.push([]);
-                }
-
-                if (walking) {
-                    commands.push("_walk");
-                    commandParams.push([null, null, motorSpeed]);
-                }
-
+                // delay for 2000ms before starting rotate
+                commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
                 _executeCommands();
             }
 
@@ -241,17 +241,6 @@ board.on("ready", function () {
     }); // proximity.on("data", function () {
 
 }); // board.on("ready", function() {
-
-function _startWalking() {
-    moving = true;
-
-    proximityServo.sweep({
-        range: [40, 140],
-        interval: 1500,
-        step: 10
-    });
-
-}
 
 // Handle commands from the web client
 function command(botMessage) {
@@ -302,17 +291,11 @@ function command(botMessage) {
     //+ (walk(around | about | faster | slower | left | right | forward | backward))
     if (botMessage.walk != null) {
         _allStop();
-        commands.length = 0;
-        commandParams.length = 0;
-
         if (botMessage.walkCommand == "around" || botMessage.walkCommand == "about") {
-            commands.push("_walkAbout");
-            commandParams.push([]);
+            walkAboutMode = true;
         } else if (botMessage.walkCommand == "forward") {
-            commands.push("_walk");
-            commandParams.push([null, null, motorSpeed]);
+            walkMode = true;
         }
-
         _executeCommands();
     }
 
@@ -325,12 +308,14 @@ function command(botMessage) {
 
             //_rotate(direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed);
             commands.push("_rotate");
-            commandParams.push([direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed]);
+            commandParams.push([0, direction, botMessage.rotateDuration, botMessage.rotateDegrees, botMessage.rotateSpeed]);
             _executeCommands();
 
         } else {
             // Call with null parameters to STOP
-            _rotate();
+            //_rotate();
+            //_stopWalking() - queue command????????????????????????????
+            // push command to stop
         }
     }
 
@@ -352,6 +337,21 @@ function command(botMessage) {
 
 } // function control(botMessage) {
 
+
+// >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
+function _startWalking(speed) {
+    log("_startWalking");
+    motor2.forward(speed);
+    motor1.forward(speed);
+    moving = true;
+    proximityServo.sweep({
+        range: [40, 140],
+        interval: 1500,
+        step: 10
+    });
+    _executeCommands();
+}
+
 function _stopWalking() {
     log("_stopWalking");
     motor1.stop();
@@ -359,22 +359,25 @@ function _stopWalking() {
     proximityServo.stop();
     moving = false;
     clearTimeout(_rotate);
-    rotating = false;
     _executeCommands();
 }
 
 function _walk(direction, duration, speed) {
-    walking = true;
-    var tempSpeed = motorSpeed;
+    var tempSpeed = motorSpeed;  // Default to current motor speed
     if (speed != null) {
         tempSpeed = speed;
     }
+    var tempDuration = 7000;  // Default to a MAX duration for walking
+    if (duration != null) {
+        tempDuration = duration;
+    }
     log("in _walk, speed = " + tempSpeed);
-    motor2.forward(tempSpeed);
-    motor1.forward(tempSpeed);
-    _startWalking();
 
-    // *** add a MAX time for walking - add a stop onto the command array???
+    commands.push("_startWalking");
+    commandParams.push([0, null, null, tempSpeed]);
+    commands.push("_stopWalking");
+    commandParams.push([tempDuration]);
+    _executeCommands();
 }
 
 function _walkAbout() {
@@ -382,7 +385,6 @@ function _walkAbout() {
     // how far in one direction - speed * duration
 
     // *** maybe stop after a maximum time?
-    walkAbout = true;
     log("starting _walkAbout");
 
     var randomDuration = _getRandomInt(7, 14) * 1000;
@@ -396,10 +398,7 @@ function _walkAbout() {
     }
 
     log("_walkAbout, randomSpeed = " + randomSpeed);
-    motor2.forward(randomSpeed);
-    motor1.forward(randomSpeed);
-    //moving = true;
-    _startWalking();
+    _startWalking(randomSpeed);
 
     // After a random duration at this speed in this direction, rotate and start again
     commands.push("_rotate");
@@ -411,82 +410,84 @@ function _walkAbout() {
 
 } // function _walkAbout() {
 
+
 function _rotate(direction, duration, degrees, speed) {
     // If direction is blank, stop
+    /*
     if (direction == undefined || direction == null) {
-        var rotationDurationMillis = Date.now() - rotateStart;
-        log("%%%%%%% STOPPING rotate, duration = " + rotationDurationMillis);
+        var commandDurationMs = Date.now() - commandStartMs;
+        log("%%%%%%% STOPPING rotate, duration = " + commandDurationMs);
         //_allStop();
         motor1.stop();
         motor2.stop();
-        rotating = false;
         _executeCommands();
     } else {
-        log("!!! Starting rotate, degrees = " + degrees + ", speed = " + speed + ", duration = " + duration);
-
-        rotateStart = Date.now();
-
-        var tempSpeed = motorSpeed;
-        if (speed != null) {
-            if (speed > 0) {
-                tempSpeed = speed;
-            }
+    */
+    log("!!! Starting rotate, degrees = " + degrees + ", speed = " + speed + ", duration = " + duration);
+    commandStartMs = Date.now();
+    var tempSpeed = motorSpeed;
+    if (speed != null) {
+        if (speed > 0) {
+            tempSpeed = speed;
         }
-
-        var tempDegrees = 0;
-        var tempDuration = 0;
-
-        // If degrees are set, calculate duration from speed
-        if (degrees != null) {
-            tempDegrees = degrees;
-            if (degrees > 360) {
-                tempDegrees = 360;
-            } else if (degrees < 0) {
-                tempDegrees = 0;
-            }
-
-            // Calculate duration given speed and degrees
-            //tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
-            tempDuration = Math.round((777.5644 + (12661510000 - 777.5644) /
-                            (1 + Math.pow((tempSpeed / 0.6116105), 3.096302))) * (tempDegrees / 180));
-            /*
-            var speedPercent = tempSpeed / 255.0;
-            var extraDuration = -90;
-            if (speedPercent < 0.3) {
-                extraDuration = Math.round(-(380.0 * (1-speedPercent)));
-            } else if (speedPercent < .5) {
-                extraDuration = Math.round(380.0 * speedPercent);
-            } else {
-                extraDuration = Math.round(-(180.0 * speedPercent));
-            }
-            if (speedPercent > 0.35 && speedPercent < 0.8) {
-                extraDuration = 270;
-            }
-
-            tempDuration += extraDuration;
-            */
-        }
-
-        // If duration or degress are set, then set a timeout of when to stop
-        if (duration != null && tempDuration == 0) {
-            tempDuration = duration;
-        }
-
-        // recursively call with blank direction to stop after a period of time
-        if (tempDuration > 0) {
-            log("***** SetTimeout rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration);
-            setTimeout(_rotate, tempDuration);
-        }
-
-        if (direction == LEFT) {
-            motor1.forward(tempSpeed);
-            motor2.reverse(tempSpeed);
-        } else {
-            motor2.forward(tempSpeed);
-            motor1.reverse(tempSpeed);
-        }
-        rotating = true;
     }
+
+    var tempDegrees = 0;
+    var tempDuration = 0;
+
+    // If degrees are set, calculate duration from speed
+    if (degrees != null) {
+        tempDegrees = degrees;
+        if (degrees > 360) {
+            tempDegrees = 360;
+        } else if (degrees < 0) {
+            tempDegrees = 0;
+        }
+
+        // Calculate duration given speed and degrees
+        //tempDuration = (242521.3 * Math.pow(tempSpeed, -2.113871)) * tempDegrees;
+        tempDuration = Math.round((777.5644 + (12661510000 - 777.5644) /
+            (1 + Math.pow((tempSpeed / 0.6116105), 3.096302))) * (tempDegrees / 180));
+        /*
+        var speedPercent = tempSpeed / 255.0;
+        var extraDuration = -90;
+        if (speedPercent < 0.3) {
+            extraDuration = Math.round(-(380.0 * (1-speedPercent)));
+        } else if (speedPercent < .5) {
+            extraDuration = Math.round(380.0 * speedPercent);
+        } else {
+            extraDuration = Math.round(-(180.0 * speedPercent));
+        }
+        if (speedPercent > 0.35 && speedPercent < 0.8) {
+            extraDuration = 270;
+        }
+
+        tempDuration += extraDuration;
+        */
+    }
+
+    // If duration or degress are set, then set a timeout of when to stop
+    if (duration != null && tempDuration == 0) {
+        tempDuration = duration;
+    }
+
+    // recursively call with blank direction to stop after a period of time
+    if (tempDuration > 0) {
+        log("***** SetTimeout rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration);
+        //setTimeout(_rotate, tempDuration);
+        commands.push("_stopWalking");
+        commandParams.push([tempDuration]);
+    }
+
+    if (direction == LEFT) {
+        motor1.forward(tempSpeed);
+        motor2.reverse(tempSpeed);
+    } else {
+        motor2.forward(tempSpeed);
+        motor1.reverse(tempSpeed);
+    }
+
+    _executeCommands();
 
 } // function _rotate() {
 
@@ -540,14 +541,15 @@ function _animateSpeech(textToSpeak) {
 }
 
 function _allStop() {
+    // Stop all components
     motor1.stop();
     motor2.stop();
     moving = false;
-    rotating = false;
     _doneSpeaking();
     proximityServo.stop();
-    walkAbout = false;
-    walking = false;
+    // Clear out Modes
+    walkAboutMode = false;
+    walkMode = false;
     // Clear out the command queue
     commands.length = 0;
     commandParams.length = 0;
@@ -564,17 +566,20 @@ function log(outStr) {
 //=============================================================================================
 // Execution controller for multiple commands
 // Commands and parameters are pushed into arrays, and after every command completes it
-// calls this function to see if there is another command to execute
-
-/*
-is there any better way to do this - back to main activity loop?
-maybe use more async submits - execute after X time (use the standard JS activity queues to queue work)
-*/
-
+// should call this function to see if there is another command to execute
 //=============================================================================================
 function _executeCommands() {
     if (commands.length < 1) {
-        return;
+        // If no other commands to execute, check Mode to determine action to start
+        if (walkAboutMode) {
+            commands.push("_walkAbout");
+            commandParams.push([2000]);
+        } else if (walkMode) {
+            commands.push("_walk");
+            commandParams.push([2000, null, null, motorSpeed]);
+        } else {
+            return;
+        }
     }
 
     // Pop the command and parameters off the beginning of the arrays
@@ -583,26 +588,28 @@ function _executeCommands() {
 
     log("_executeCommands, command = " + command);
 
-    var tempDuration = 2000;
+    var delayMs = 0;
+    if (params[0] != null) {
+        delayMs = params[0];
+    }
+
+    // 1st Parameter (params[0]) should be delay time before executing command
 
     // Execute the specified command with the parameters
     if (command == "_stopWalking") {
-        _stopWalking();
+        setTimeout(_stopWalking, delayMs);
+    } else if (command == "_startWalking") {
+        setTimeout(_startWalking, delayMs);
     } else if (command == "_rotate") {
         //_rotate(params[0], params[1], params[2], params[3]);
-        setTimeout(_rotate, tempDuration, params[0], params[1], params[2], params[3]);
+        setTimeout(_rotate, delayMs, params[1], params[2], params[3]);
     } else if (command == "_walk") {
         //_walk(params[0], params[1], params[2]);
-        setTimeout(_walk, tempDuration, params[0], params[1], params[2]);
+        setTimeout(_walk, delayMs, params[1], params[2]);
     } else if (command == "_walkAbout") {
         //_walkAbout();
-        setTimeout(_walkAbout, tempDuration);
+        setTimeout(_walkAbout, delayMs);
     }
-
-
-// make the first parameter a "delay before start?"
-// and do all calls as set
-
 } // function _executeCommands() {
 
 function _getRandomInt(min, max) {
