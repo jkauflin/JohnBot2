@@ -375,6 +375,7 @@ function _walk(direction, duration, speed) {
 
     commands.push("_startWalking");
     commandParams.push([0, null, null, tempSpeed]);
+    // *** need to somehow set the Mode off at the end of duration??????????????????
     commands.push("_stopWalking");
     commandParams.push([tempDuration]);
     _executeCommands();
@@ -556,7 +557,10 @@ function _allStop() {
     // Clear the function calls
     clearTimeout(_executeCommands);
     clearTimeout(_stopWalking);
+    clearTimeout(_startWalking);
     clearTimeout(_rotate);
+    clearTimeout(_walk);
+    clearTimeout(_walkAbout);
 }
 
 function log(outStr) {
@@ -586,7 +590,7 @@ function _executeCommands() {
     var command = commands.shift();
     var params = commandParams.shift();
 
-    log("_executeCommands, command = " + command);
+    log("_executeCommands, command = " + command + ", commands.length = " + commands.length);
 
     var delayMs = 0;
     if (params[0] != null) {
