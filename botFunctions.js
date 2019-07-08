@@ -47,7 +47,9 @@ Modification History
                 to turn the right direction away from the proximity alert
 2019-07-06 JJK  Cleaning up command execution and state to give more 
                 encapsulation and independance (so they can be more complex)
-
+2019-07-07 JJK  Did not work well trying to put everything through the 
+                command queue, so I'm trying some more direct calls like
+                I was doing
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -101,6 +103,9 @@ var speechAnimation;
 
 // State variables
 var boardReady = false;
+var currState = "";  // moving
+var currMode = "";  // walk, walkAbout
+
 var moving = false;
 var proximityAlert = false;
 var eyesOn = false;
@@ -292,11 +297,14 @@ function command(botMessage) {
     if (botMessage.walk != null) {
         _allStop();
         if (botMessage.walkCommand == "around" || botMessage.walkCommand == "about") {
-            walkAboutMode = true;
+            currMode = "walkAbout";
+            //walkAboutMode = true;
         } else if (botMessage.walkCommand == "forward") {
-            walkMode = true;
+            currMode = "walkForward";
+            //walkMode = true;
         }
-        _executeCommands();
+        _startWalking()
+        //_executeCommands();
     }
 
     if (botMessage.rotate != null) {
@@ -339,17 +347,22 @@ function command(botMessage) {
 
 
 // >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
-function _startWalking(speed) {
+function _startWalking(inSpeed) {
     log("_startWalking");
-    motor2.forward(speed);
-    motor1.forward(speed);
-    moving = true;
+    var tempSpeed = DEFAULT_MOTOR_SPEED;
+    if (inSpeed != null) {
+        tempSpeed = inSpeed;
+    }
+    motor2.forward(tempSpeed);
+    motor1.forward(tempSpeed);
+    currState = "moving";
+    //moving = true;
     proximityServo.sweep({
-        range: [40, 140],
-        interval: 1500,
+        range: [30, 150],
+        interval: 1400,
         step: 10
     });
-    _executeCommands();
+    //_executeCommands();
 }
 
 function _stopWalking() {
@@ -362,6 +375,7 @@ function _stopWalking() {
     _executeCommands();
 }
 
+/*
 function _walk(direction, duration, speed) {
     var tempSpeed = motorSpeed;  // Default to current motor speed
     if (speed != null) {
@@ -380,6 +394,7 @@ function _walk(direction, duration, speed) {
     commandParams.push([tempDuration]);
     _executeCommands();
 }
+*/
 
 function _walkAbout() {
     // *** at some point add logic to specify the size of a circle to stay in
