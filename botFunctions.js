@@ -564,8 +564,10 @@ function _allStop() {
     _doneSpeaking();
     proximityServo.stop();
     // Clear out Modes
-    walkAboutMode = false;
-    walkMode = false;
+    currMode = "";
+    currState = "";
+    //walkAboutMode = false;
+    //walkMode = false;
     // Clear out the command queue
     commands.length = 0;
     commandParams.length = 0;
