@@ -218,14 +218,17 @@ board.on("ready", function () {
             }
 
             // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
-            if (proximityAlert && moving && moveDirection == FORWARD) {
+            if (proximityAlert && currState == "moving") {
                 log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
+
+                _stopWalking();
+
                 // Clear out any previous commands
                 commands.length = 0;
                 commandParams.length = 0;
                 // Stop and turn away from the proximity alert
-                commands.push("_stopWalking");
-                commandParams.push([]);
+                //commands.push("_stopWalking");
+                //commandParams.push([]);
 
                 // somehow check if it is in a corner???
 
@@ -235,10 +238,14 @@ board.on("ready", function () {
                     rotateDir = LEFT;
                 }
                 var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
-                commands.push("_rotate");
+                
+                //commands.push("_rotate");
                 // delay for 2000ms before starting rotate
-                commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
-                _executeCommands();
+                //commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
+                //_executeCommands();
+
+                _rotate(rotateDir, 0, rotateDegrees, 170);
+
             }
 
         } // if (currProx < 40) {
@@ -303,7 +310,7 @@ function command(botMessage) {
             currMode = "walkForward";
             //walkMode = true;
         }
-        _startWalking()
+        _walk();
         //_executeCommands();
     }
 
@@ -375,26 +382,23 @@ function _stopWalking() {
     _executeCommands();
 }
 
-/*
 function _walk(direction, duration, speed) {
     var tempSpeed = motorSpeed;  // Default to current motor speed
     if (speed != null) {
         tempSpeed = speed;
     }
-    var tempDuration = 7000;  // Default to a MAX duration for walking
+    var tempDuration = 5000;  // Default to a MAX duration for walking
     if (duration != null) {
         tempDuration = duration;
     }
     log("in _walk, speed = " + tempSpeed);
 
-    commands.push("_startWalking");
-    commandParams.push([0, null, null, tempSpeed]);
-    // *** need to somehow set the Mode off at the end of duration??????????????????
+    _startWalking(tempSpeed);
     commands.push("_stopWalking");
     commandParams.push([tempDuration]);
     _executeCommands();
 }
-*/
+
 
 function _walkAbout() {
     // *** at some point add logic to specify the size of a circle to stay in
@@ -490,9 +494,9 @@ function _rotate(direction, duration, degrees, speed) {
     // recursively call with blank direction to stop after a period of time
     if (tempDuration > 0) {
         log("***** SetTimeout rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration);
-        //setTimeout(_rotate, tempDuration);
-        commands.push("_stopWalking");
-        commandParams.push([tempDuration]);
+        setTimeout(_stopWalking, tempDuration);
+        //commands.push("_stopWalking");
+        //commandParams.push([tempDuration]);
     }
 
     if (direction == LEFT) {
@@ -503,7 +507,7 @@ function _rotate(direction, duration, degrees, speed) {
         motor1.reverse(tempSpeed);
     }
 
-    _executeCommands();
+    //_executeCommands();
 
 } // function _rotate() {
 
@@ -590,8 +594,18 @@ function log(outStr) {
 // should call this function to see if there is another command to execute
 //=============================================================================================
 function _executeCommands() {
+    log("_executeCommands, commands.length = " + commands.length);
+
     if (commands.length < 1) {
         // If no other commands to execute, check Mode to determine action to start
+        /*
+        if (currMode.substr(0,4) == "walk") {
+            //_walk();
+            commands.push("_walk");
+            commandParams.push([1000, null, null, motorSpeed]);
+        }
+        */
+        /*
         if (walkAboutMode) {
             commands.push("_walkAbout");
             commandParams.push([2000]);
@@ -601,36 +615,40 @@ function _executeCommands() {
         } else {
             return;
         }
+        */
+    } 
+
+    if (commands.length > 0) {
+        // Pop the command and parameters off the beginning of the arrays
+        var command = commands.shift();
+        var params = commandParams.shift();
+
+        log("_executeCommands, command = " + command + ", commands.length = " + commands.length);
+
+        var delayMs = 0;
+        if (params[0] != null) {
+            delayMs = params[0];
+        }
+
+        // 1st Parameter (params[0]) should be delay time before executing command
+
+        // Execute the specified command with the parameters
+        if (command == "_stopWalking") {
+            setTimeout(_stopWalking, delayMs);
+        } else if (command == "_startWalking") {
+            setTimeout(_startWalking, delayMs);
+        } else if (command == "_rotate") {
+            //_rotate(params[0], params[1], params[2], params[3]);
+            setTimeout(_rotate, delayMs, params[1], params[2], params[3]);
+        } else if (command == "_walk") {
+            //_walk(params[0], params[1], params[2]);
+            setTimeout(_walk, delayMs, params[1], params[2]);
+        } else if (command == "_walkAbout") {
+            //_walkAbout();
+            setTimeout(_walkAbout, delayMs);
+        }
     }
 
-    // Pop the command and parameters off the beginning of the arrays
-    var command = commands.shift();
-    var params = commandParams.shift();
-
-    log("_executeCommands, command = " + command + ", commands.length = " + commands.length);
-
-    var delayMs = 0;
-    if (params[0] != null) {
-        delayMs = params[0];
-    }
-
-    // 1st Parameter (params[0]) should be delay time before executing command
-
-    // Execute the specified command with the parameters
-    if (command == "_stopWalking") {
-        setTimeout(_stopWalking, delayMs);
-    } else if (command == "_startWalking") {
-        setTimeout(_startWalking, delayMs);
-    } else if (command == "_rotate") {
-        //_rotate(params[0], params[1], params[2], params[3]);
-        setTimeout(_rotate, delayMs, params[1], params[2], params[3]);
-    } else if (command == "_walk") {
-        //_walk(params[0], params[1], params[2]);
-        setTimeout(_walk, delayMs, params[1], params[2]);
-    } else if (command == "_walkAbout") {
-        //_walkAbout();
-        setTimeout(_walkAbout, delayMs);
-    }
 } // function _executeCommands() {
 
 function _getRandomInt(min, max) {
