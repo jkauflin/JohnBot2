@@ -377,9 +377,12 @@ function _stopWalking() {
     motor1.stop();
     motor2.stop();
     proximityServo.stop();
-    moving = false;
-    clearTimeout(_rotate);
-    _executeCommands();
+    currState = "";
+
+    // if next command is walk - restart walking
+    
+    //clearTimeout(_rotate);
+    //_executeCommands();
 }
 
 function _walk(direction, duration, speed) {
