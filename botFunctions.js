@@ -372,13 +372,16 @@ function _startWalking(inSpeed) {
     //_executeCommands();
 }
 
-function _stopWalking() {
-    log("_stopWalking");
+function _stopWalking(checkRestart) {
+    log("_stopWalking, checkRestart = " + checkRestart);
     motor1.stop();
     motor2.stop();
     proximityServo.stop();
     currState = "";
 
+    if (checkRestart) {
+        log("Check restart");
+    }
     // if next command is walk - restart walking
     
     //clearTimeout(_rotate);
@@ -390,16 +393,20 @@ function _walk(direction, duration, speed) {
     if (speed != null) {
         tempSpeed = speed;
     }
+    /*
     var tempDuration = 5000;  // Default to a MAX duration for walking
     if (duration != null) {
         tempDuration = duration;
     }
+    */
     log("in _walk, speed = " + tempSpeed);
 
     _startWalking(tempSpeed);
+    /*
     commands.push("_stopWalking");
     commandParams.push([tempDuration]);
     _executeCommands();
+    */
 }
 
 
