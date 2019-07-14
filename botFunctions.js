@@ -221,16 +221,22 @@ board.on("ready", function () {
             if (proximityAlert && currState == "moving") {
                 log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
 
-                _stopWalking();
+                _stopWalking();  // without checking restart
 
                 // Clear out any previous commands
-                commands.length = 0;
-                commandParams.length = 0;
+                //commands.length = 0;
+                //commandParams.length = 0;
+
                 // Stop and turn away from the proximity alert
                 //commands.push("_stopWalking");
                 //commandParams.push([]);
 
                 // somehow check if it is in a corner???
+                // 7/14/2019 - close into to something, or have another proximity quickly
+                //      turn more - like all the way around?  stop first and pause more?  go slower?  
+                //      backup a bit?
+
+                // ************** ALSO, find a way to check the health of the prox sensor, and re-start if needed *************
 
                 // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
                 var rotateDir = RIGHT;
@@ -365,7 +371,7 @@ function _startWalking(inSpeed) {
     currState = "moving";
     //moving = true;
     proximityServo.sweep({
-        range: [30, 150],
+        range: [35, 145],
         interval: 1400,
         step: 10
     });
@@ -381,6 +387,11 @@ function _stopWalking(checkRestart) {
 
     if (checkRestart) {
         log("Check restart");
+        if (currMode.substr(0, 4) == "walk") {
+            _walk();
+            //commands.push("_walk");
+            //commandParams.push([1000, null, null, motorSpeed]);
+        }
     }
     // if next command is walk - restart walking
     
@@ -501,10 +512,11 @@ function _rotate(direction, duration, degrees, speed) {
         tempDuration = duration;
     }
 
-    // recursively call with blank direction to stop after a period of time
+    // Set a timeout to stop rotating after a period of time (and check to restart a mode)
     if (tempDuration > 0) {
         log("***** SetTimeout rotate, degrees = " + tempDegrees + ", speed = " + tempSpeed + ", tempDuration = " + tempDuration);
-        setTimeout(_stopWalking, tempDuration);
+        var checkRestart = true;
+        setTimeout(_stopWalking, tempDuration, checkRestart);
         //commands.push("_stopWalking");
         //commandParams.push([tempDuration]);
     }
