@@ -81,7 +81,7 @@ const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
 const LEFT = 'L';
-const DEFAULT_MOTOR_SPEED = 150;
+const DEFAULT_MOTOR_SPEED = 170;
 //const TURN_AROUND = [RIGHT, 0, 180, 200];
 
 // Variables for controlling robot components
@@ -227,10 +227,10 @@ board.on("ready", function () {
 
                 _stopWalking();  // without checking restart
 
-                var tempDuration = 2000;
+                var tempDuration = 1000;
                 if (currProx < 5) {
                     _backup();
-                    tempDuration += 2000;
+                    tempDuration += 1000;
                 }
 
                 // Clear out any previous commands
@@ -385,6 +385,7 @@ function _startWalking(inSpeed) {
         startAt: 90,            // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
+    log("$$$$ after re-creating the proximityServo object, pos = " + Math.round(proximityServo.position));
 
     var tempSpeed = DEFAULT_MOTOR_SPEED;
     if (inSpeed != null) {
@@ -395,8 +396,8 @@ function _startWalking(inSpeed) {
     currState = "moving";
     //moving = true;
     proximityServo.sweep({
-        range: [35, 145],
-        interval: 1400,
+        range: [40, 140],
+        interval: 1500,
         step: 10
     });
     //_executeCommands();
@@ -404,12 +405,12 @@ function _startWalking(inSpeed) {
 
 function _backup(inDuration) {
     log("_backup");
-    var tempDuration = 2000;
+    var tempDuration = 500;
     if (inDuration != null) {
         tempDuration = inDuration;
     }
-    motor2.forward(DEFAULT_MOTOR_SPEED);
-    motor1.forward(DEFAULT_MOTOR_SPEED);
+    motor2.reverse(DEFAULT_MOTOR_SPEED);
+    motor1.reverse(DEFAULT_MOTOR_SPEED);
     setTimeout(_stopWalking, tempDuration);
 }
 
