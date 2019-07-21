@@ -50,6 +50,10 @@ Modification History
 2019-07-07 JJK  Did not work well trying to put everything through the 
                 command queue, so I'm trying some more direct calls like
                 I was doing
+2019-07-21 JJK  Working better with direct calls.  Added a backup for close
+                proximities.  Working on checking the health of the proximity
+                sensor
+
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -223,6 +227,12 @@ board.on("ready", function () {
 
                 _stopWalking();  // without checking restart
 
+                var tempDuration = 2000;
+                if (currProx < 5) {
+                    _backup();
+                    tempDuration += 2000;
+                }
+
                 // Clear out any previous commands
                 //commands.length = 0;
                 //commandParams.length = 0;
@@ -250,7 +260,8 @@ board.on("ready", function () {
                 //commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
                 //_executeCommands();
 
-                _rotate(rotateDir, 0, rotateDegrees, 170);
+                //_rotate(rotateDir, 0, rotateDegrees, 170);
+                setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
 
             }
 
@@ -362,6 +373,19 @@ function command(botMessage) {
 // >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
 function _startWalking(inSpeed) {
     log("_startWalking");
+
+    // *** see if it works to re-create the object before starting the sweep ***
+    proximityServo = new five.Servo({
+        id: "ProximityServo",   // User defined id
+        pin: PROXIMITY_SERVO,   // Which pin is it attached to?
+        type: "standard",       // Default: "standard". Use "continuous" for continuous rotation servos
+        range: [10, 170],       // Default: 0-180
+        fps: 100,               // Used to calculate rate of movement between positions
+        invert: false,          // Invert all specified positions
+        startAt: 90,            // Immediately move to a degree
+        //center: true,         // overrides startAt if true and moves the servo to the center of the range
+    });
+
     var tempSpeed = DEFAULT_MOTOR_SPEED;
     if (inSpeed != null) {
         tempSpeed = inSpeed;
@@ -376,6 +400,17 @@ function _startWalking(inSpeed) {
         step: 10
     });
     //_executeCommands();
+}
+
+function _backup(inDuration) {
+    log("_backup");
+    var tempDuration = 2000;
+    if (inDuration != null) {
+        tempDuration = inDuration;
+    }
+    motor2.forward(DEFAULT_MOTOR_SPEED);
+    motor1.forward(DEFAULT_MOTOR_SPEED);
+    setTimeout(_stopWalking, tempDuration);
 }
 
 function _stopWalking(checkRestart) {
