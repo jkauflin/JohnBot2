@@ -53,7 +53,7 @@ Modification History
 2019-07-21 JJK  Working better with direct calls.  Added a backup for close
                 proximities.  Working on checking the health of the proximity
                 sensor
-
+2019-09-22 JJK  Checking functions
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');

@@ -52,6 +52,7 @@ Modification History
 2019-03-16 JJK  Separated the Chatbot part to another repository and have
                 this just be the server to handle web socket commands for
                 the robotic part (not the web browser part)
+2019-09-22 JJK  Checking functions
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -188,6 +189,7 @@ webSocketServer.on('connection', function (ws) {
   // When initiating speech from the robot, send to browser client to speak
   // and to robot to animate
   //?????
+  // Hey, I've hit a wall - someone help me
   /*
   function sayAndAnimate(textToSpeak) {
     _wsSend({ "textToSpeak": textToSpeak });
@@ -197,15 +199,3 @@ webSocketServer.on('connection', function (ws) {
   */
 }); // End of Connection to client
 
-/*
-app.use("*",function(req,res){
-  console.log("Not in Public, URL = "+req.url);
-  res.sendFile(path + "404.html");
-});
- 
-// jjk new
-app.use(function (err, req, res, next) {
-  console.error(err.stack)
-  res.status(500).send('Something broke!')
-})
-*/
