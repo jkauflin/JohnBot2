@@ -54,7 +54,8 @@ Modification History
                 proximities.  Working on checking the health of the proximity
                 sensor
 2019-09-22 JJK  Checking functions
-2019-10-03 JJK  Getting 2nd distance sensor working
+2019-10-03 JJK  Getting 2nd distance sensor working, and adding a piezo 
+                speaker
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -109,6 +110,7 @@ var currProx2 = 0;
 var prevProx = 0;
 var prevProx2 = 0;
 var speechAnimation;
+var piezo;
 
 // State variables
 var boardReady = false;
@@ -155,6 +157,37 @@ board.on("ready", function () {
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
+
+    piezo = new five.Piezo(3);
+    // Plays a song
+    /*
+    piezo.play({
+        // song is composed by an array of pairs of notes and beats
+        // The first argument is the note (null means "no note")
+        // The second argument is the length of time (beat) of the note (or non-note)
+        song: [
+            ["C4", 1 / 4],
+            ["D4", 1 / 4],
+            ["F4", 1 / 4],
+            ["D4", 1 / 4],
+            ["A4", 1 / 4],
+            [null, 1 / 4],
+            ["A4", 1],
+            ["G4", 1],
+            [null, 1 / 2],
+            ["C4", 1 / 4],
+            ["D4", 1 / 4],
+            ["F4", 1 / 4],
+            ["D4", 1 / 4],
+            ["G4", 1 / 4],
+            [null, 1 / 4],
+            ["G4", 1],
+            ["F4", 1],
+            [null, 1 / 2]
+        ],
+        tempo: 100
+    });
+    */
 
     // Create an Led on pin 13
     leftEyeLed = new five.Led(LEFT_EYE);
@@ -224,8 +257,10 @@ board.on("ready", function () {
                     proximityServoPos = Math.round(proximityServo.position);
                     proximityOffsetDegrees = 90 - proximityServoPos;
                     log("ProximityAlert: " + currProx + ", Proximity POS: " + proximityServoPos + ", offset = " + proximityOffsetDegrees);
+                    piezo.frequency(700, 5000);
                 } else {
                     proximityAlert = false;
+                    piezo.off();
                 }
                     
                 prevProx = currProx;
@@ -294,8 +329,10 @@ board.on("ready", function () {
                     //proximityServoPos = Math.round(proximityServo.position);
                     //proximityOffsetDegrees = 90 - proximityServoPos;
                     log("ProximityAlert2: " + currProx2);
+                    piezo.frequency(300, 5000);
                 } else {
                     proximityAlert = false;
+                    piezo.off();
                 }
 
                 prevProx2 = currProx2;
