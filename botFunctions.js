@@ -54,6 +54,7 @@ Modification History
                 proximities.  Working on checking the health of the proximity
                 sensor
 2019-09-22 JJK  Checking functions
+2019-10-03 JJK  Getting 2nd distance sensor working
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -77,6 +78,7 @@ const ARM_SERVO = 9;
 const HEAD_SERVO = 10;
 const PROXIMITY_SERVO = 11;
 const PROXIMITY_PIN = 7;
+const PROXIMITY2_PIN = 6;
 const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
@@ -99,10 +101,13 @@ var headStartPos = 90;
 var armStartPos = 145;
 var proximityServo;
 var proximitySensor;
+var proximitySensor2;
 var proximityServoPos = 0;
 var proximityOffsetDegrees = 0;
 var currProx = 0;
+var currProx2 = 0;
 var prevProx = 0;
+var prevProx2 = 0;
 var speechAnimation;
 
 // State variables
@@ -144,6 +149,11 @@ board.on("ready", function () {
     proximitySensor = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY_PIN
+    });
+
+    proximitySensor2 = new five.Proximity({
+        controller: "HCSR04",
+        pin: PROXIMITY2_PIN
     });
 
     // Create an Led on pin 13
@@ -222,6 +232,7 @@ board.on("ready", function () {
             }
 
             // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
+            /*
             if (proximityAlert && currState == "moving") {
                 log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
 
@@ -262,12 +273,38 @@ board.on("ready", function () {
 
                 //_rotate(rotateDir, 0, rotateDegrees, 170);
                 setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
+            }
+            */
 
+        } // if (currProx < 40) {
+
+    }); // proximity.on("data", function () {
+
+    // Check for changes in the proximity sensor
+    proximitySensor2.on("data", function () {
+        currProx2 = Math.round(this.in);
+        // Ignore sensor values over a Max
+        if (currProx2 < 40) {
+            if (currProx2 != prevProx2) {
+                // If the Proximity inches changes, send an event with current value
+                //botEvent.emit("proxIn", currProx);
+                // If close to something, set the proximity alert State and save the position
+                if (currProx2 < 9) {
+                    proximityAlert = true;
+                    //proximityServoPos = Math.round(proximityServo.position);
+                    //proximityOffsetDegrees = 90 - proximityServoPos;
+                    log("ProximityAlert2: " + currProx2);
+                } else {
+                    proximityAlert = false;
+                }
+
+                prevProx2 = currProx2;
             }
 
         } // if (currProx < 40) {
 
     }); // proximity.on("data", function () {
+
 
 }); // board.on("ready", function() {
 
