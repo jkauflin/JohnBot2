@@ -471,7 +471,7 @@ function _startWalking(inSpeed) {
     //moving = true;
     proximityServo.sweep({
         range: [40, 140],
-        interval: 1500,
+        interval: 1600,
         step: 10
     });
     //_executeCommands();
