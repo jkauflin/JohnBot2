@@ -2,11 +2,8 @@
 (C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS module to handle robot functions.  Communicates with
-             the Arduino Mega
-
-Current philosophy is to push commands to command array, and then call 
-_executeCommands after completing a command completes
-
+             the Arduino Mega, and accepts commands from connected web
+             application
 -----------------------------------------------------------------------------
 Modification History
 2017-12-31 JJK  Loaded ConfigurableFirmata on the Arduino Mega.
@@ -53,7 +50,7 @@ Modification History
 2019-07-21 JJK  Working better with direct calls.  Added a backup for close
                 proximities.  Working on checking the health of the proximity
                 sensor
-2019-09-22 JJK  Checking functions
+2019-09-22 JJK  Checking functions (updated to johnny-five 1.3.1)
 2019-10-03 JJK  Getting 2nd distance sensor working, and adding a piezo 
                 speaker
 =============================================================================*/
@@ -152,7 +149,6 @@ board.on("ready", function () {
         controller: "HCSR04",
         pin: PROXIMITY_PIN
     });
-
     proximitySensor2 = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
@@ -247,7 +243,7 @@ board.on("ready", function () {
     proximitySensor.on("data", function () {
         currProx = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx < 40) {
+        if (currProx < 30) {
             if (currProx != prevProx) {
                 // If the Proximity inches changes, send an event with current value
                 botEvent.emit("proxIn", currProx);
@@ -265,6 +261,8 @@ board.on("ready", function () {
                     
                 prevProx = currProx;
             }
+
+            _handleProximityAlert();
 
             // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
             /*
@@ -319,15 +317,14 @@ board.on("ready", function () {
     proximitySensor2.on("data", function () {
         currProx2 = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx2 < 40) {
+        if (currProx2 < 30) {
             if (currProx2 != prevProx2) {
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
                 // If close to something, set the proximity alert State and save the position
-                if (currProx2 < 9) {
+                if (currProx2 < 8) {
                     proximityAlert = true;
-                    //proximityServoPos = Math.round(proximityServo.position);
-                    //proximityOffsetDegrees = 90 - proximityServoPos;
+                    proximityOffsetDegrees = 90;
                     log("ProximityAlert2: " + currProx2);
                     piezo.frequency(300, 5000);
                 } else {
@@ -338,12 +335,58 @@ board.on("ready", function () {
                 prevProx2 = currProx2;
             }
 
-        } // if (currProx < 40) {
+            _handleProximityAlert();
+
+        } // if (currProx < 30) {
 
     }); // proximity.on("data", function () {
 
 
 }); // board.on("ready", function() {
+
+function _handleProximityAlert() {
+    if (proximityAlert && currState == "moving") {
+        log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
+
+        _stopWalking();  // without checking restart
+
+        var tempDuration = 1000;
+        if (currProx < 5) {
+            _backup();
+            tempDuration += 1000;
+        }
+
+        // Clear out any previous commands
+        //commands.length = 0;
+        //commandParams.length = 0;
+
+        // Stop and turn away from the proximity alert
+        //commands.push("_stopWalking");
+        //commandParams.push([]);
+
+        // somehow check if it is in a corner???
+        // 7/14/2019 - close into to something, or have another proximity quickly
+        //      turn more - like all the way around?  stop first and pause more?  go slower?  
+        //      backup a bit?
+
+        // ************** ALSO, find a way to check the health of the prox sensor, and re-start if needed *************
+
+        // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
+        var rotateDir = RIGHT;
+        if (proximityOffsetDegrees < 0) {
+            rotateDir = LEFT;
+        }
+        var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
+
+        //commands.push("_rotate");
+        // delay for 2000ms before starting rotate
+        //commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
+        //_executeCommands();
+
+        //_rotate(rotateDir, 0, rotateDegrees, 170);
+        setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
+    }
+}
 
 // Handle commands from the web client
 function command(botMessage) {
@@ -447,6 +490,16 @@ function command(botMessage) {
 // >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
 function _startWalking(inSpeed) {
     log("_startWalking");
+
+    // *** see if re-created these helps to keep them healthy
+    proximitySensor = new five.Proximity({
+        controller: "HCSR04",
+        pin: PROXIMITY_PIN
+    });
+    proximitySensor2 = new five.Proximity({
+        controller: "HCSR04",
+        pin: PROXIMITY2_PIN
+    });
 
     // *** see if it works to re-create the object before starting the sweep ***
     proximityServo = new five.Servo({
