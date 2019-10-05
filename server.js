@@ -93,8 +93,6 @@ if (process.env.HOST == "localhost") {
         .listen(process.env.HTTP_PORT, function () {
             console.log("HTTP WS server Live at Port " + process.env.WEB_PORT + " - Let's rock!");
         });
-
-
 } else {
     wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
     webServer = new https.createServer({
@@ -112,7 +110,7 @@ if (process.env.HOST == "localhost") {
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
-//var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 
 //=================================================================================================
 // Create a WebSocket server and implement a heartbeat check
