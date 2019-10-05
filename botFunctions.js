@@ -140,6 +140,13 @@ board.on("ready", function () {
     console.log("*** board ready ***");
     boardReady = true;
 
+    // If the board is exiting, turn all the relays off
+    this.on("exit", function () {
+        log("EXIT - All Stop");
+        _allStop();
+    });
+
+
     // Initialize the legs (do this first)
     motor1 = new five.Motor(motorConfig.M1);
     motor2 = new five.Motor(motorConfig.M2);
@@ -341,6 +348,10 @@ board.on("ready", function () {
 
     }); // proximity.on("data", function () {
 
+
+    //currMode = "walkAbout";
+    //_walk();
+    
 
 }); // board.on("ready", function() {
 
@@ -770,7 +781,7 @@ function _allStop() {
 }
 
 function log(outStr) {
-    console.log(dateTime.create().format('H:M:S.N') + ", " + outStr);
+    console.log(dateTime.create().format('H:M:S.N') + " " + outStr);
 }
 
 //=============================================================================================

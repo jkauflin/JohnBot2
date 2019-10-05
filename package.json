@@ -25,6 +25,7 @@
     "node-datetime": "latest",
     "nodemon": "latest",
     "sound-player": "latest",
-    "ws": "latest"
+    "ws": "latest",
+    "express": "latest"
   }
 }

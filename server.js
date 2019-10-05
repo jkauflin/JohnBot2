@@ -85,15 +85,19 @@ var dateTime = require('node-datetime');
 // WebSocket URL to give to the client browser to establish ws connection
 var wsUrl;
 // Create a web server
-//var app = express();
+var express = require('express');
+var app = express();
+var httpServer;
+httpServer = new http.createServer(app)
+    .listen(process.env.HTTP_PORT, function () {
+        console.log("Live at Port " + process.env.HTTP_PORT + " - Let's rock!");
+    });
+
 var webServer;
+
 // If running local server just use HTTP, else use HTTPS
 if (process.env.HOST == "localhost") {
   wsUrl = "ws://" + process.env.HOST + ":" + process.env.WEB_PORT;
-  webServer = new http.createServer(app)
-    .listen(process.env.WEB_PORT, function () {
-      console.log("Live at Port " + process.env.WEB_PORT + " - Let's rock!");
-  });
 } else {
   wsUrl = "wss://" + process.env.HOST + ":" + process.env.WEB_PORT;
   //wsUrl = "wss://" + os.hostname + ":" + process.env.WEB_PORT;
