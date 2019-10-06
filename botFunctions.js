@@ -111,7 +111,7 @@ var piezo;
 
 // State variables
 var boardReady = false;
-var currState = "";  // moving
+var currState = "stopped";  // moving
 var currMode = "";  // walk, walkAbout
 
 var moving = false;
@@ -127,7 +127,7 @@ var walkAboutMode = false;
 // Command execution variables
 var commands = [];
 var commandParams = [];
-var commandStartMs = Date.now();
+//var commandStartMs = Date.now();
 
 board.on("error", function () {
     //console.log("*** Error in Board ***");
@@ -140,12 +140,11 @@ board.on("ready", function () {
     console.log("*** board ready ***");
     boardReady = true;
 
-    // If the board is exiting, turn all the relays off
+    // If the board is exiting, turn everything off
     this.on("exit", function () {
         log("EXIT - All Stop");
         _allStop();
     });
-
 
     // Initialize the legs (do this first)
     motor1 = new five.Motor(motorConfig.M1);
@@ -250,10 +249,11 @@ board.on("ready", function () {
     proximitySensor.on("data", function () {
         currProx = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx < 30) {
+        if (currProx < 40) {
             if (currProx != prevProx) {
                 // If the Proximity inches changes, send an event with current value
-                botEvent.emit("proxIn", currProx);
+                //botEvent.emit("proxIn", currProx);
+
                 // If close to something, set the proximity alert State and save the position
                 if (currProx < 9) {
                     proximityAlert = true;
@@ -261,6 +261,7 @@ board.on("ready", function () {
                     proximityOffsetDegrees = 90 - proximityServoPos;
                     log("ProximityAlert: " + currProx + ", Proximity POS: " + proximityServoPos + ", offset = " + proximityOffsetDegrees);
                     piezo.frequency(700, 5000);
+                    _handleProximityAlert();
                 } else {
                     proximityAlert = false;
                     piezo.off();
@@ -268,63 +269,14 @@ board.on("ready", function () {
                     
                 prevProx = currProx;
             }
-
-            _handleProximityAlert();
-
-            // If something in the way when walking forward, stop and turn around (maybe backup a bit???)
-            /*
-            if (proximityAlert && currState == "moving") {
-                log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
-
-                _stopWalking();  // without checking restart
-
-                var tempDuration = 1000;
-                if (currProx < 5) {
-                    _backup();
-                    tempDuration += 1000;
-                }
-
-                // Clear out any previous commands
-                //commands.length = 0;
-                //commandParams.length = 0;
-
-                // Stop and turn away from the proximity alert
-                //commands.push("_stopWalking");
-                //commandParams.push([]);
-
-                // somehow check if it is in a corner???
-                // 7/14/2019 - close into to something, or have another proximity quickly
-                //      turn more - like all the way around?  stop first and pause more?  go slower?  
-                //      backup a bit?
-
-                // ************** ALSO, find a way to check the health of the prox sensor, and re-start if needed *************
-
-                // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
-                var rotateDir = RIGHT;
-                if (proximityOffsetDegrees < 0) {
-                    rotateDir = LEFT;
-                }
-                var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
-                
-                //commands.push("_rotate");
-                // delay for 2000ms before starting rotate
-                //commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
-                //_executeCommands();
-
-                //_rotate(rotateDir, 0, rotateDegrees, 170);
-                setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
-            }
-            */
-
         } // if (currProx < 40) {
-
     }); // proximity.on("data", function () {
 
     // Check for changes in the proximity sensor
     proximitySensor2.on("data", function () {
         currProx2 = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx2 < 30) {
+        if (currProx2 < 40) {
             if (currProx2 != prevProx2) {
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
@@ -334,6 +286,7 @@ board.on("ready", function () {
                     proximityOffsetDegrees = 90;
                     log("ProximityAlert2: " + currProx2);
                     piezo.frequency(300, 5000);
+                    _handleProximityAlert();
                 } else {
                     proximityAlert = false;
                     piezo.off();
@@ -341,17 +294,8 @@ board.on("ready", function () {
 
                 prevProx2 = currProx2;
             }
-
-            _handleProximityAlert();
-
         } // if (currProx < 30) {
-
     }); // proximity.on("data", function () {
-
-
-    //currMode = "walkAbout";
-    //_walk();
-    
 
 }); // board.on("ready", function() {
 
@@ -361,19 +305,13 @@ function _handleProximityAlert() {
 
         _stopWalking();  // without checking restart
 
+        /* 2019-10-06 Try turning off back for now ****************************************************
         var tempDuration = 1000;
         if (currProx < 5) {
             _backup();
             tempDuration += 1000;
         }
-
-        // Clear out any previous commands
-        //commands.length = 0;
-        //commandParams.length = 0;
-
-        // Stop and turn away from the proximity alert
-        //commands.push("_stopWalking");
-        //commandParams.push([]);
+        */
 
         // somehow check if it is in a corner???
         // 7/14/2019 - close into to something, or have another proximity quickly
@@ -388,13 +326,6 @@ function _handleProximityAlert() {
             rotateDir = LEFT;
         }
         var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
-
-        //commands.push("_rotate");
-        // delay for 2000ms before starting rotate
-        //commandParams.push([2000, rotateDir, 0, rotateDegrees, 170]);
-        //_executeCommands();
-
-        //_rotate(rotateDir, 0, rotateDegrees, 170);
         setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
     }
 }
@@ -503,6 +434,7 @@ function _startWalking(inSpeed) {
     log("_startWalking");
 
     // *** see if re-created these helps to keep them healthy
+    /*
     proximitySensor = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY_PIN
@@ -511,6 +443,7 @@ function _startWalking(inSpeed) {
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
+    */
 
     // *** see if it works to re-create the object before starting the sweep ***
     proximityServo = new five.Servo({
@@ -557,7 +490,7 @@ function _stopWalking(checkRestart) {
     motor1.stop();
     motor2.stop();
     proximityServo.stop();
-    currState = "";
+    currState = "stopped";
 
     if (checkRestart) {
         log("Check restart");
@@ -578,20 +511,9 @@ function _walk(direction, duration, speed) {
     if (speed != null) {
         tempSpeed = speed;
     }
-    /*
-    var tempDuration = 5000;  // Default to a MAX duration for walking
-    if (duration != null) {
-        tempDuration = duration;
-    }
-    */
     log("in _walk, speed = " + tempSpeed);
 
     _startWalking(tempSpeed);
-    /*
-    commands.push("_stopWalking");
-    commandParams.push([tempDuration]);
-    _executeCommands();
-    */
 }
 
 
@@ -639,7 +561,7 @@ function _rotate(direction, duration, degrees, speed) {
     } else {
     */
     log("!!! Starting rotate, degrees = " + degrees + ", speed = " + speed + ", duration = " + duration);
-    commandStartMs = Date.now();
+    //commandStartMs = Date.now();
     var tempSpeed = motorSpeed;
     if (speed != null) {
         if (speed > 0) {
@@ -703,8 +625,6 @@ function _rotate(direction, duration, degrees, speed) {
         motor1.reverse(tempSpeed);
     }
 
-    //_executeCommands();
-
 } // function _rotate() {
 
 function _doneSpeaking() {
@@ -765,19 +685,21 @@ function _allStop() {
     proximityServo.stop();
     // Clear out Modes
     currMode = "";
-    currState = "";
+    currState = "stopped";
     //walkAboutMode = false;
     //walkMode = false;
     // Clear out the command queue
     commands.length = 0;
     commandParams.length = 0;
     // Clear the function calls
+    /*
     clearTimeout(_executeCommands);
     clearTimeout(_stopWalking);
     clearTimeout(_startWalking);
     clearTimeout(_rotate);
     clearTimeout(_walk);
     clearTimeout(_walkAbout);
+    */
 }
 
 function log(outStr) {
