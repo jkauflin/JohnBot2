@@ -249,19 +249,20 @@ board.on("ready", function () {
     proximitySensor.on("data", function () {
         currProx = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx < 40) {
+        //if (currProx < 20) {
             if (currProx != prevProx) {
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
+                //log("Proximity: " + currProx);
 
                 // If close to something, set the proximity alert State and save the position
-                if (currProx < 9) {
+                if (currProx < 8 && currProx > 0) {
                     proximityAlert = true;
                     proximityServoPos = Math.round(proximityServo.position);
                     proximityOffsetDegrees = 90 - proximityServoPos;
                     log("ProximityAlert: " + currProx + ", Proximity POS: " + proximityServoPos + ", offset = " + proximityOffsetDegrees);
                     piezo.frequency(700, 5000);
-                    _handleProximityAlert();
+                    _handleProximityAlert(currProx);
                 } else {
                     proximityAlert = false;
                     piezo.off();
@@ -269,24 +270,26 @@ board.on("ready", function () {
                     
                 prevProx = currProx;
             }
-        } // if (currProx < 40) {
+        //} // if (currProx < 40) {
     }); // proximity.on("data", function () {
 
     // Check for changes in the proximity sensor
     proximitySensor2.on("data", function () {
         currProx2 = Math.round(this.in);
         // Ignore sensor values over a Max
-        if (currProx2 < 40) {
+        //if (currProx2 < 20) {
             if (currProx2 != prevProx2) {
+                //log("Proximity2: " + currProx2);
+
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
                 // If close to something, set the proximity alert State and save the position
-                if (currProx2 < 8) {
+                if (currProx2 < 8 && currProx2 > 0) {
                     proximityAlert = true;
                     proximityOffsetDegrees = 90;
                     log("ProximityAlert2: " + currProx2);
                     piezo.frequency(300, 5000);
-                    _handleProximityAlert();
+                    _handleProximityAlert(currProx2);
                 } else {
                     proximityAlert = false;
                     piezo.off();
@@ -294,19 +297,19 @@ board.on("ready", function () {
 
                 prevProx2 = currProx2;
             }
-        } // if (currProx < 30) {
+        //} // if (currProx < 40) {
     }); // proximity.on("data", function () {
-
+   
 }); // board.on("ready", function() {
 
-function _handleProximityAlert() {
+function _handleProximityAlert(inProx) {
     if (proximityAlert && currState == "moving") {
-        log(">>> Close Proximity (MOVING): " + currProx + ", Proximity POS: " + proximityServoPos);
+        log(">>> Close Proximity (MOVING): " + inProx + ", Proximity POS: " + proximityServoPos);
 
         _stopWalking();  // without checking restart
 
-        /* 2019-10-06 Try turning off back for now ****************************************************
         var tempDuration = 1000;
+        /* 2019-10-06 Try turning off back for now ****************************************************
         if (currProx < 5) {
             _backup();
             tempDuration += 1000;
