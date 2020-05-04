@@ -53,6 +53,8 @@ Modification History
                 this just be the server to handle web socket commands for
                 the robotic part (not the web browser part)
 2019-09-22 JJK  Checking functions
+2020-05-04 JJK  Got the HTTPS/WSS/SSL working again on a new Pi device
+                (updated notes on creating certificates)
 =============================================================================*/
 
 // General handler for any uncaught exceptions
