@@ -24,19 +24,19 @@ var picoConfig = {
 // With full options
 var SoundPlayer = require("sound-player");
 var options = {
-    filename: "../dreams.mp3",
-//    filename: "lookdave.wav",
-    gain: 10,
+    //filename: "dreams.mp3",
+    filename: "lookdave.wav",
+    gain: 5,
     debug: true,
     player: "mpg321", // "afplay" "aplay" "mpg123" "mpg321"
 //    player: "aplay", // "afplay" "aplay" "mpg123" "mpg321"
-    device: "default"   //
+    device: "sysdefault:CARD=Device"   // sysdefault:CARD=Device   or default
 }
  
 // 5/20/2018 - this works
 var player = new SoundPlayer(options)
 // 12/2/2018 - still works
-//player.play();
+player.play();
  
 //player.stop
 //player.pause

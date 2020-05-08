@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019,2020 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS module to handle robot functions.  Communicates with
              the Arduino Mega, and accepts commands from connected web
@@ -53,6 +53,10 @@ Modification History
 2019-09-22 JJK  Checking functions (updated to johnny-five 1.3.1)
 2019-10-03 JJK  Getting 2nd distance sensor working, and adding a piezo 
                 speaker
+2020-05-04 JJK  Trying to get the JohnBot working on a full Pi rather than
+                a Pi Zero (to see if the sensors work better)
+2020-05-08 JJK  Re-checking distance sensors, cntrl-c, and all stop functions
+                Fixed bug in proximityAlert for 2 sensors
 =============================================================================*/
 var dateTime = require('node-datetime');
 const EventEmitter = require('events');
@@ -102,6 +106,8 @@ var proximitySensor;
 var proximitySensor2;
 var proximityServoPos = 0;
 var proximityOffsetDegrees = 0;
+var proximityAlert = false;
+var proximityAlert2 = false;
 var currProx = 0;
 var currProx2 = 0;
 var prevProx = 0;
@@ -115,7 +121,6 @@ var currState = "stopped";  // moving
 var currMode = "";  // walk, walkAbout
 
 var moving = false;
-var proximityAlert = false;
 var eyesOn = false;
 var moveDirection = FORWARD;
 var rotateDirection = RIGHT;
@@ -144,23 +149,34 @@ board.on("ready", function () {
     this.on("exit", function () {
         log("EXIT - All Stop");
         _allStop();
+        process.exit(1);
+    });
+    // Handle a termination signal
+    process.on('SIGTERM', function () {
+        log('on SIGTERM');
+        _allStop();
+        process.exit(1);
     });
 
+
     // Initialize the legs (do this first)
-    motor1 = new five.Motor(motorConfig.M1);
-    motor2 = new five.Motor(motorConfig.M2);
+    //motor1 = new five.Motor(motorConfig.M1);
+    //motor2 = new five.Motor(motorConfig.M2);
 
     // Initialize the proximity sensor
     proximitySensor = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY_PIN
     });
+    
     proximitySensor2 = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
+    
 
     piezo = new five.Piezo(3);
+
     // Plays a song
     /*
     piezo.play({
@@ -192,6 +208,7 @@ board.on("ready", function () {
     */
 
     // Create an Led on pin 13
+    /*
     leftEyeLed = new five.Led(LEFT_EYE);
     rightEyeLed = new five.Led(RIGHT_EYE);
     eyes = new five.Leds([leftEyeLed, rightEyeLed]);
@@ -218,6 +235,7 @@ board.on("ready", function () {
         startAt: armStartPos,   // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
+    */
 
 
     // can you do a health check on a component like a servo and "re-start" it if not reacting?
@@ -233,7 +251,7 @@ board.on("ready", function () {
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
 
-    /*
+    /* Don't start sweep unless you are moving - tie it to startWalking
     proximityServo.sweep({
         range: [40, 140],
         interval: 1500,
@@ -242,71 +260,83 @@ board.on("ready", function () {
     */
 
     // Create a animation for the head and arm
-    headAndArm = new five.Servos([headServo, armServo]);
-    speechAnimation = new five.Animation(headAndArm);
+    //headAndArm = new five.Servos([headServo, armServo]);
+    //speechAnimation = new five.Animation(headAndArm);
 
     // Check for changes in the proximity sensor
     proximitySensor.on("data", function () {
         currProx = Math.round(this.in);
+        //log("Proximity: " + currProx);
+
+        // Before starting any movement - check the proximityAlert??????????????
+
         // Ignore sensor values over a Max
-        //if (currProx < 20) {
+        if (currProx < 30) {
             if (currProx != prevProx) {
+                //log("Proximity: " + currProx);
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
-                //log("Proximity: " + currProx);
 
                 // If close to something, set the proximity alert State and save the position
-                if (currProx < 8 && currProx > 0) {
+                if (currProx < 10 && currProx > 0) {
                     proximityAlert = true;
-                    proximityServoPos = Math.round(proximityServo.position);
-                    proximityOffsetDegrees = 90 - proximityServoPos;
+                    //proximityServoPos = Math.round(proximityServo.position);
+                    //proximityOffsetDegrees = 90 - proximityServoPos;
                     log("ProximityAlert: " + currProx + ", Proximity POS: " + proximityServoPos + ", offset = " + proximityOffsetDegrees);
                     piezo.frequency(700, 5000);
-                    _handleProximityAlert(currProx);
+                    //_handleProximityAlert(currProx);
                 } else {
                     proximityAlert = false;
-                    piezo.off();
+                    //log("------------ ProximityAlert OFF, currProx = " + currProx)
+                    if (!proximityAlert && !proximityAlert2) {
+                        piezo.off();
+                    }
                 }
                     
                 prevProx = currProx;
             }
-        //} // if (currProx < 40) {
+        } // if (currProx < 30) {
     }); // proximity.on("data", function () {
 
     // Check for changes in the proximity sensor
     proximitySensor2.on("data", function () {
         currProx2 = Math.round(this.in);
+        //log("Proximity2: " + currProx2);
+
         // Ignore sensor values over a Max
-        //if (currProx2 < 20) {
+        if (currProx2 < 30) {
             if (currProx2 != prevProx2) {
                 //log("Proximity2: " + currProx2);
 
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx);
                 // If close to something, set the proximity alert State and save the position
-                if (currProx2 < 8 && currProx2 > 0) {
-                    proximityAlert = true;
+                if (currProx2 < 10 && currProx2 > 0) {
+                    proximityAlert2 = true;
                     proximityOffsetDegrees = 90;
                     log("ProximityAlert2: " + currProx2);
                     piezo.frequency(300, 5000);
-                    _handleProximityAlert(currProx2);
+                    //_handleProximityAlert(currProx2);
                 } else {
-                    proximityAlert = false;
-                    piezo.off();
+                    proximityAlert2 = false;
+                    //log("------------ ProximityAlert2 OFF, currProx2 = " + currProx2)
+                    if (!proximityAlert && !proximityAlert2) {
+                        piezo.off();
+                    }
                 }
 
                 prevProx2 = currProx2;
             }
-        //} // if (currProx < 40) {
-    }); // proximity.on("data", function () {
-   
+        }
+    });
+
 }); // board.on("ready", function() {
 
 function _handleProximityAlert(inProx) {
-    if (proximityAlert && currState == "moving") {
+    if ((proximityAlert || proximityAlert2) && currState == "moving") {
         log(">>> Close Proximity (MOVING): " + inProx + ", Proximity POS: " + proximityServoPos);
 
-        _stopWalking();  // without checking restart
+        //_stopWalking();  // without checking restart
 
         var tempDuration = 1000;
         /* 2019-10-06 Try turning off back for now ****************************************************
@@ -324,12 +354,14 @@ function _handleProximityAlert(inProx) {
         // ************** ALSO, find a way to check the health of the prox sensor, and re-start if needed *************
 
         // Rotate away from the proximity alert direction (using proximity offset to calculate the best direction)
+        /*
         var rotateDir = RIGHT;
         if (proximityOffsetDegrees < 0) {
             rotateDir = LEFT;
         }
         var rotateDegrees = 45 + Math.round(proximityOffsetDegrees);
         setTimeout(_rotate, tempDuration, 0, rotateDegrees, 170);
+        */
     }
 }
 
@@ -434,7 +466,13 @@ function command(botMessage) {
 
 // >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
 function _startWalking(inSpeed) {
-    log("_startWalking");
+    if (proximityAlert || proximityAlert2) {
+        log("*** ProximityAlert - CANNOT start walking");
+    } else {
+        // ok 
+        log("_startWalking");
+    }
+
 
     // *** see if re-created these helps to keep them healthy
     /*
@@ -449,6 +487,7 @@ function _startWalking(inSpeed) {
     */
 
     // *** see if it works to re-create the object before starting the sweep ***
+    /*
     proximityServo = new five.Servo({
         id: "ProximityServo",   // User defined id
         pin: PROXIMITY_SERVO,   // Which pin is it attached to?
@@ -460,7 +499,8 @@ function _startWalking(inSpeed) {
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
     log("$$$$ after re-creating the proximityServo object, pos = " + Math.round(proximityServo.position));
-
+    */
+   
     var tempSpeed = DEFAULT_MOTOR_SPEED;
     if (inSpeed != null) {
         tempSpeed = inSpeed;
@@ -681,6 +721,7 @@ function _animateSpeech(textToSpeak) {
 
 function _allStop() {
     // Stop all components
+    /*
     motor1.stop();
     motor2.stop();
     moving = false;
@@ -689,6 +730,8 @@ function _allStop() {
     // Clear out Modes
     currMode = "";
     currState = "stopped";
+    */
+   
     //walkAboutMode = false;
     //walkMode = false;
     // Clear out the command queue

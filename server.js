@@ -62,8 +62,7 @@ process.on('uncaughtException', function (e) {
     console.log("UncaughtException, error = " + e);
     console.error(e.stack);
     // Stop the process
-    // 2017-12-29 JJK - Don't stop for now, just log the error
-    //process.exit(1);
+    process.exit(1);
 });
 
 // Read environment variables from the .env file
@@ -172,7 +171,7 @@ webSocketServer.on('connection', function (ws) {
 
     // Handle messages from the client browser
     ws.on('message', function (botMessageStr) {
-        //console.log(dateTime.create().format('H:M:S.N') + ", botMessageStr = "+botMessageStr);
+        console.log(dateTime.create().format('H:M:S.N') + ", botMessageStr = "+botMessageStr);
         // Use JSON.parse to turn the string into a JSON object
         var botMessage = JSON.parse(botMessageStr);
         // Send the message object to the botFunctions module
