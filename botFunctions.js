@@ -160,8 +160,8 @@ board.on("ready", function () {
 
 
     // Initialize the legs (do this first)
-    //motor1 = new five.Motor(motorConfig.M1);
-    //motor2 = new five.Motor(motorConfig.M2);
+    motor1 = new five.Motor(motorConfig.M1);
+    motor2 = new five.Motor(motorConfig.M2);
 
     // Initialize the proximity sensor
     proximitySensor = new five.Proximity({
@@ -208,7 +208,6 @@ board.on("ready", function () {
     */
 
     // Create an Led on pin 13
-    /*
     leftEyeLed = new five.Led(LEFT_EYE);
     rightEyeLed = new five.Led(RIGHT_EYE);
     eyes = new five.Leds([leftEyeLed, rightEyeLed]);
@@ -235,8 +234,6 @@ board.on("ready", function () {
         startAt: armStartPos,   // Immediately move to a degree
         //center: true,         // overrides startAt if true and moves the servo to the center of the range
     });
-    */
-
 
     // can you do a health check on a component like a servo and "re-start" it if not reacting?
 
@@ -260,8 +257,8 @@ board.on("ready", function () {
     */
 
     // Create a animation for the head and arm
-    //headAndArm = new five.Servos([headServo, armServo]);
-    //speechAnimation = new five.Animation(headAndArm);
+    headAndArm = new five.Servos([headServo, armServo]);
+    speechAnimation = new five.Animation(headAndArm);
 
     // Check for changes in the proximity sensor
     proximitySensor.on("data", function () {
@@ -367,7 +364,7 @@ function _handleProximityAlert(inProx) {
 
 // Handle commands from the web client
 function command(botMessage) {
-    //log("botMessage = " + JSON.stringify(botMessage));
+    log("in botFunctions, botMessage = " + JSON.stringify(botMessage));
     
     if (!boardReady) {
         return;
@@ -721,7 +718,6 @@ function _animateSpeech(textToSpeak) {
 
 function _allStop() {
     // Stop all components
-    /*
     motor1.stop();
     motor2.stop();
     moving = false;
@@ -730,7 +726,6 @@ function _allStop() {
     // Clear out Modes
     currMode = "";
     currState = "stopped";
-    */
    
     //walkAboutMode = false;
     //walkMode = false;

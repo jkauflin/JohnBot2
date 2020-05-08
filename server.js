@@ -171,7 +171,7 @@ webSocketServer.on('connection', function (ws) {
 
     // Handle messages from the client browser
     ws.on('message', function (botMessageStr) {
-        console.log(dateTime.create().format('H:M:S.N') + ", botMessageStr = "+botMessageStr);
+        //console.log(dateTime.create().format('H:M:S.N') + ", botMessageStr = "+botMessageStr);
         // Use JSON.parse to turn the string into a JSON object
         var botMessage = JSON.parse(botMessageStr);
         // Send the message object to the botFunctions module
