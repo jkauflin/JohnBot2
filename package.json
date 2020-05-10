@@ -1,11 +1,11 @@
 {
   "name": "johnbot2",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "2nd version of hobby robotics project",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "forever server.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
     "lodash": "^4.17.15",
     "merge": "1.2.1",
     "node-datetime": "latest",
-    "nodemon": "latest",
+    "forever": "latest",
     "sound-player": "latest",
     "ws": "latest"
   }

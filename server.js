@@ -111,7 +111,7 @@ if (process.env.HOST == "localhost") {
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
-var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 
 //=================================================================================================
 // Create a WebSocket server and implement a heartbeat check
