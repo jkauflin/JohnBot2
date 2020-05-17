@@ -58,10 +58,10 @@ Modification History
 =============================================================================*/
 
 // General handler for any uncaught exceptions
-process.on('uncaughtException', function (e) {
-    console.log("UncaughtException, error = " + e);
-    console.error(e.stack);
-    // Stop the process
+process.on('uncaughtException', function (err) {
+    console.log("UncaughtException, error = " + err);
+    console.error(err.stack);
+    // Exit the process (so that Forever will re-start and reset the board)
     process.exit(1);
 });
 
