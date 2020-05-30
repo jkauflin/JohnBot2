@@ -63,6 +63,7 @@ Modification History
                 Working on moving, walking, and rotate
 2020-05-17 JJK  Turning off the head and arm servos for now (power problems)
                 Working on moving logical
+2020-05-30 JJK  Working on distance sensor accuracy by adding smoothing
 =============================================================================*/
 var dateTime = require('node-datetime');
 
@@ -89,7 +90,8 @@ const PROXIMITY_SERVO = 11;
 const PROXIMITY1_PIN = 7;
 const PROXIMITY2_PIN = 6;
 const PROXIMITY_MAX = 20;
-const PROXIMITY_CLOSE_MAX = 11;
+//const PROXIMITY_CLOSE_MAX = 8;
+const PROXIMITY_CLOSE_MAX = 6;
 const FORWARD = 'F';
 const BACKWARD = 'R';
 const RIGHT = 'R';
@@ -120,6 +122,28 @@ var prevProx2 = 0;
 var speechAnimation;
 var piezo;
 
+var numReadings = 10; // Total number of readings to average
+var readingsA1 = []; // Array of readings
+var indexA1 = 0; // the index of the current reading
+var totalA1 = 0; // the running total
+var averageA1 = 0.0;
+// initialize all the readings to 0:
+for (var i = 0; i < numReadings; i++) {
+    readingsA1[i] = 0;
+}
+var arrayFull1 = false;
+
+var readingsA2 = []; // Array of readings
+var indexA2 = 0; // the index of the current reading
+var totalA2 = 0; // the running total
+var averageA2 = 0.0;
+// initialize all the readings to 0:
+for (var i = 0; i < numReadings; i++) {
+    readingsA2[i] = 0;
+}
+var arrayFull2 = false;
+
+
 // State variables
 var boardReady = false;
 var currState = "stopped";  // moving
@@ -139,7 +163,7 @@ var walkAboutMode = false;
 board.on("error", function (err) {
     log("*** Error in Board, err = "+err);
     boardReady = false;
-    botEvent.emit("error", "*** Error in Board, err = "+err);
+    //botEvent.emit("error", "*** Error in Board, err = "+err);
     // Exit the process (so that Forever will re-start and reset the board)
     process.exit(1);
 }); // board.on("error", function() {
@@ -191,6 +215,8 @@ function createComponents() {
     leftEyeLed = new five.Led(LEFT_EYE);
     rightEyeLed = new five.Led(RIGHT_EYE);
     eyes = new five.Leds([leftEyeLed, rightEyeLed]);
+    eyes.on();
+    eyes.off();
 
     // Initialize the Head and Arm servos
     /*
@@ -220,6 +246,8 @@ function createComponents() {
     headAndArm = new five.Servos([headServo, armServo]);
     speechAnimation = new five.Animation(headAndArm);
 
+    */
+
     proximityServo = new five.Servo({
         id: "ProximityServo",       // User defined id
         pin: PROXIMITY_SERVO,       // Which pin is it attached to?
@@ -230,7 +258,6 @@ function createComponents() {
         //startAt: 90,              // Immediately move to a degree
         center: true                // overrides startAt if true and moves the servo to the center of the range
     });
-    */
 
     // Set up a handler for the proximity sensor data
     _proximitySensors();
@@ -244,11 +271,32 @@ function _proximitySensors() {
 
         // Ignore sensor values over a Max (to reduce the number of times you check it)
         if (this.in > 1 && this.in < PROXIMITY_MAX) {
+
+            // Remove the previous value at this array position from the total
+            totalA1 = totalA1 - readingsA1[indexA1];
+            // Add the new value to the array position
+            readingsA1[indexA1] = this.in;
+            // add the reading to the total:
+            totalA1 = totalA1 + readingsA1[indexA1];
+            // advance to the next position in the array: 
+            indexA1 = indexA1 + 1;
+            // if we're at the end of the array...
+            if (indexA1 >= numReadings) {
+                // ...wrap around to the beginning:
+                indexA1 = 0;
+                arrayFull1 = true;
+            }
+            // calculate the average when the array is full
+            if (arrayFull1) {
+                averageA1 = totalA1 / numReadings;
+            }
+
             // Round to integer inch values
-            currProx1 = Math.round(this.in);
+            //currProx1 = Math.round(this.in);
+            currProx1 = Math.round(averageA1);
 
             if (currProx1 != prevProx1) {
-                //log("Proximity currProx1 = " + currProx1);
+                //log("Proximity currProx1 = " + currProx1 + ", averageA1 = " + averageA1);
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx1);
 
@@ -258,6 +306,7 @@ function _proximitySensors() {
                     //proximityOffsetDegrees = 90 - Math.round(proximityServo.position);
                     proximityOffsetDegrees = 90;
                     //log("ProximityAlert1: " + currProx1 + ", Proximity POS: " + Math.round(proximityServo.position) + ", offset = " + proximityOffsetDegrees);
+                    log("*** ProximityAlert1: " + currProx1);
                     //piezo.frequency(700, 5000);
                     _handleCloseProximityAlert(currProx1, proximityOffsetDegrees);
                 } else {
@@ -279,16 +328,37 @@ function _proximitySensors() {
 
         // Ignore sensor values over a Max (to reduce the number of times you check it)
         if (this.in > 1 && this.in < PROXIMITY_MAX) {
-            currProx2 = Math.round(this.in);
+
+            // Remove the previous value at this array position from the total
+            totalA2 = totalA2 - readingsA2[indexA2];
+            // Add the new value to the array position
+            readingsA2[indexA2] = this.in;
+            // add the reading to the total:
+            totalA2 = totalA2 + readingsA2[indexA2];
+            // advance to the next position in the array: 
+            indexA2 = indexA2 + 1;
+            // if we're at the end of the array...
+            if (indexA2 >= numReadings) {
+                // ...wrap around to the beginning:
+                indexA2 = 0;
+                arrayFull2 = true;
+            }
+            // calculate the average when the array is full
+            if (arrayFull2) {
+                averageA2 = totalA2 / numReadings;
+            }
+
+            //currProx2 = Math.round(this.in);
+            currProx2 = Math.round(averageA2);
 
             if (currProx2 != prevProx2) {
-                //log("Proximity currProx2 = " + currProx2);
+                //log("Proximity currProx2 = " + currProx2 + ", averageA2 = " + averageA2);
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx2);
                 // If close to something, set the proximity alert State and save the position
                 if (currProx2 < PROXIMITY_CLOSE_MAX) {
                     proximityAlert2 = true;
-                    //log("ProximityAlert2: " + currProx2);
+                    log("*** ProximityAlert2: " + currProx2);
                     //piezo.frequency(300, 5000);
                     _handleCloseProximityAlert(currProx2,90);
                 } else {
@@ -430,28 +500,26 @@ function _animateSpeech(textToSpeak) {
 
 // >>>>>>>>>>>>> commands need to be loosely-coupled, encapsulated, independant - just setting State
 function _startWalking(inSpeed) {
-    if (proximityAlert1 || proximityAlert2) {
-        log("*** ProximityAlert - CANNOT start walking");
-    } else {
+    //if (proximityAlert1 || proximityAlert2) {
+    //    log("*** ProximityAlert - CANNOT start walking");
+    //} else {
         // ok 
         log("_startWalking");
-    }
+        var tempSpeed = DEFAULT_MOTOR_SPEED;
+        if (inSpeed != null) {
+            tempSpeed = inSpeed;
+        }
+        motor2.forward(tempSpeed);
+        motor1.forward(tempSpeed);
+        //currState = "moving";
+        moving = true;
 
-    var tempSpeed = DEFAULT_MOTOR_SPEED;
-    if (inSpeed != null) {
-        tempSpeed = inSpeed;
-    }
-    motor2.forward(tempSpeed);
-    motor1.forward(tempSpeed);
-    //currState = "moving";
-    moving = true;
-    /*
-    proximityServo.sweep({
-        range: [40, 140],
-        interval: 1600,
-        step: 10
-    });
-    */
+        proximityServo.sweep({
+            range: [40, 140],
+            interval: 1600,
+            step: 10
+        });
+    //}
 }
 
 function _backup(inDuration) {
@@ -469,10 +537,34 @@ function _stopWalking(checkRestart) {
     log("_stopWalking, checkRestart = " + checkRestart);
     motor1.stop();
     motor2.stop();
-    //proximityServo.stop();
+    proximityServo.stop();
     //currState = "stopped";
     moving = false;
 
+    currProx1 = 0;
+    currProx2 = 0;
+    prevProx1 = 0;
+    prevProx2 = 0;
+    proximityAlert1 = false;
+    proximityAlert2 = false;
+
+    indexA1 = 0;
+    totalA1 = 0;
+    averageA1 = 0.0;
+    for (var i = 0; i < numReadings; i++) {
+        readingsA1[i] = 0;
+    }
+    arrayFull1 = false;
+
+    indexA2 = 0;
+    totalA2 = 0;
+    averageA2 = 0.0;
+    for (var i = 0; i < numReadings; i++) {
+        readingsA2[i] = 0;
+    }
+    arrayFull2 = false;
+
+    /*
     if (checkRestart) {
         log("Check restart");
         if (currMode.substr(0, 4) == "walk") {
@@ -481,6 +573,7 @@ function _stopWalking(checkRestart) {
             //commandParams.push([1000, null, null, motorSpeed]);
         }
     }
+    */
     // if next command is walk - restart walking
 
     //clearTimeout(_rotate);
@@ -615,6 +708,7 @@ function command(botMessage) {
     log("in command, botMessage = " + JSON.stringify(botMessage));
 
     if (botMessage.restart != null) {
+        _allStop();
         process.exit(1);
     }
 
@@ -623,6 +717,9 @@ function command(botMessage) {
     }
 
     if (botMessage.stop != null) {
+        motor1.stop();
+        motor2.stop();
+
         _allStop();
     }
 
@@ -683,8 +780,8 @@ function command(botMessage) {
             currMode = "walkForward";
             //walkMode = true;
         }
-        _walk();
         */
+        _walk();
     }
 
     if (botMessage.rotate != null) {
@@ -712,10 +809,10 @@ function command(botMessage) {
 
 function _allStop() {
     log("ALL STOP");
-    // Stop all components
-    _doneSpeaking();
     // Stop all motion
     _stopWalking();
+    // Stop all components
+    _doneSpeaking();
 
 
 
