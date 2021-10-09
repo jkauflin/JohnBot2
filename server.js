@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017,2018,2019 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019,2021 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
              communications to the Arduino Mega robot
@@ -53,8 +53,13 @@ Modification History
                 this just be the server to handle web socket commands for
                 the robotic part (not the web browser part)
 2019-09-22 JJK  Checking functions
+<<<<<<< HEAD
+2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
+                chatbot and reworking the loops for sensors
+=======
 2020-05-04 JJK  Got the HTTPS/WSS/SSL working again on a new Pi device
                 (updated notes on creating certificates)
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -74,6 +79,7 @@ require('dotenv').config();
 //SSL_PRIVATE_KEY_FILE_LOC=
 //SSL_PUBLIC_CERT_FILE_LOC=
 
+/*
 const os = require('os');
 //console.log("os.hostname = " + os.hostname);
 const http = require('http');
@@ -107,15 +113,23 @@ if (process.env.HOST == "localhost") {
 }
 
 //}, app)
+*/
 
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
+<<<<<<< HEAD
+
+var botFunctions = require('./botFunctions.js');
+=======
 var botFunctions = require('./botFunctions.js');
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
+
 
 //=================================================================================================
 // Create a WebSocket server and implement a heartbeat check
 //=================================================================================================
+/*
 const ws = require('ws');
 
 const webSocketServer = new ws.Server({ server: webServer, perMessageDeflate: false});
@@ -186,9 +200,11 @@ webSocketServer.on('connection', function (ws) {
     botFunctions.botEvent.on("proxIn", function (proxIn) {
         _wsSend({ "proxIn": proxIn });
     });
-
+   
   // When initiating speech from the robot, send to browser client to speak
   // and to robot to animate
   //?????
   // Hey, I've hit a wall - someone help me
+
 }); // End of Connection to client
+*/

@@ -1,11 +1,11 @@
 {
   "name": "johnbot2",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "2nd version of hobby robotics project",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "forever server.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -19,12 +19,7 @@
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
     "dotenv": "latest",
-    "johnny-five": "^1.4.0",
-    "lodash": "^4.17.15",
-    "merge": "1.2.1",
-    "node-datetime": "latest",
-    "forever": "latest",
-    "sound-player": "latest",
-    "ws": "latest"
+    "johnny-five": "latest",
+    "node-datetime": "latest"
   }
 }

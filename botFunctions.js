@@ -53,6 +53,10 @@ Modification History
 2019-09-22 JJK  Checking functions (updated to johnny-five 1.3.1)
 2019-10-03 JJK  Getting 2nd distance sensor working, and adding a piezo 
                 speaker
+<<<<<<< HEAD
+2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
+                chatbot and reworking the loops for sensors
+=======
 2020-05-04 JJK  Trying to get the JohnBot working on a full Pi rather than
                 a Pi Zero (to see if the sensors work better)
 2020-05-09 JJK  Re-checking distance sensors, cntrl-c, and all stop functions
@@ -64,6 +68,7 @@ Modification History
 2020-05-17 JJK  Turning off the head and arm servos for now (power problems)
                 Working on moving logical
 2020-05-30 JJK  Working on distance sensor accuracy by adding smoothing
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 =============================================================================*/
 var dateTime = require('node-datetime');
 
@@ -198,20 +203,62 @@ function createComponents() {
     motor2 = new five.Motor(motorConfig.M2);
 
     // Initialize the proximity sensor
+<<<<<<< HEAD
+    const proximitySensor = new five.Proximity({
+=======
     proximitySensor1 = new five.Proximity({
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
         controller: "HCSR04",
         pin: PROXIMITY1_PIN
     });
+<<<<<<< HEAD
+    const proximitySensor2 = new five.Proximity({
+=======
 
     proximitySensor2 = new five.Proximity({
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
 
+<<<<<<< HEAD
+    //piezo = new five.Piezo(3);
+    // Plays a song
+    /*
+    piezo.play({
+        // song is composed by an array of pairs of notes and beats
+        // The first argument is the note (null means "no note")
+        // The second argument is the length of time (beat) of the note (or non-note)
+        song: [
+            ["C4", 1 / 4],
+            ["D4", 1 / 4],
+            ["F4", 1 / 4],
+            ["D4", 1 / 4],
+            ["A4", 1 / 4],
+            [null, 1 / 4],
+            ["A4", 1],
+            ["G4", 1],
+            [null, 1 / 2],
+            ["C4", 1 / 4],
+            ["D4", 1 / 4],
+            ["F4", 1 / 4],
+            ["D4", 1 / 4],
+            ["G4", 1 / 4],
+            [null, 1 / 4],
+            ["G4", 1],
+            ["F4", 1],
+            [null, 1 / 2]
+        ],
+        tempo: 100
+    });
+    */
+=======
     piezo = new five.Piezo(3);
     //_playSong();
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 
     // Create an Led on pin 13
+    /*
     leftEyeLed = new five.Led(LEFT_EYE);
     rightEyeLed = new five.Led(RIGHT_EYE);
     eyes = new five.Leds([leftEyeLed, rightEyeLed]);
@@ -258,11 +305,35 @@ function createComponents() {
         //startAt: 90,              // Immediately move to a degree
         center: true                // overrides startAt if true and moves the servo to the center of the range
     });
+    */
 
     // Set up a handler for the proximity sensor data
     _proximitySensors();
 }
 
+<<<<<<< HEAD
+    // Create a animation for the head and arm
+    /*
+    headAndArm = new five.Servos([headServo, armServo]);
+    speechAnimation = new five.Animation(headAndArm);
+    */
+
+    proximitySensor.on("change", () => {
+        const {centimeters, inches} = proximity;
+        console.log("Proximity: ");
+        console.log("  cm  : ", centimeters);
+        console.log("  in  : ", inches);
+        console.log("-----------------");
+    });
+
+    // Check for changes in the proximity sensor
+    /*
+    proximitySensor.on("data", function () {
+        currProx = Math.round(this.in);
+        // Ignore sensor values over a Max
+        if (currProx < 40) {
+            if (currProx != prevProx) {
+=======
 function _proximitySensors() {
     var proximityOffsetDegrees = 0;
 
@@ -297,6 +368,7 @@ function _proximitySensors() {
 
             if (currProx1 != prevProx1) {
                 //log("Proximity currProx1 = " + currProx1 + ", averageA1 = " + averageA1);
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx1);
 
@@ -371,10 +443,18 @@ function _proximitySensors() {
 
                 prevProx2 = currProx2;
             }
+<<<<<<< HEAD
+        } // if (currProx < 30) {
+    }); // proximity.on("data", function () {
+    */
+   
+}); // board.on("ready", function() {
+=======
         } // if (currProx2 < PROXIMITY_MAX) {
     });
 
 } // function _proximitySensors() {
+>>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 
 function _handleCloseProximityAlert(inProx, proximityOffsetDegrees) {
     if ((proximityAlert1 || proximityAlert2) && moving == true) {
