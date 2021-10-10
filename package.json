@@ -19,6 +19,7 @@
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
     "dotenv": "latest",
+    "serialport": "latest",
     "johnny-five": "latest",
     "node-datetime": "latest"
   }

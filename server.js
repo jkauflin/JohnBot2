@@ -53,13 +53,8 @@ Modification History
                 this just be the server to handle web socket commands for
                 the robotic part (not the web browser part)
 2019-09-22 JJK  Checking functions
-<<<<<<< HEAD
 2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
                 chatbot and reworking the loops for sensors
-=======
-2020-05-04 JJK  Got the HTTPS/WSS/SSL working again on a new Pi device
-                (updated notes on creating certificates)
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -118,12 +113,8 @@ if (process.env.HOST == "localhost") {
 //var dataFunctions = require('./dataFunctions.js');
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
-<<<<<<< HEAD
 
 var botFunctions = require('./botFunctions.js');
-=======
-var botFunctions = require('./botFunctions.js');
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 
 
 //=================================================================================================

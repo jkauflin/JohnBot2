@@ -53,10 +53,6 @@ Modification History
 2019-09-22 JJK  Checking functions (updated to johnny-five 1.3.1)
 2019-10-03 JJK  Getting 2nd distance sensor working, and adding a piezo 
                 speaker
-<<<<<<< HEAD
-2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
-                chatbot and reworking the loops for sensors
-=======
 2020-05-04 JJK  Trying to get the JohnBot working on a full Pi rather than
                 a Pi Zero (to see if the sensors work better)
 2020-05-09 JJK  Re-checking distance sensors, cntrl-c, and all stop functions
@@ -68,7 +64,8 @@ Modification History
 2020-05-17 JJK  Turning off the head and arm servos for now (power problems)
                 Working on moving logical
 2020-05-30 JJK  Working on distance sensor accuracy by adding smoothing
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
+2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
+                chatbot and reworking the loops for sensors
 =============================================================================*/
 var dateTime = require('node-datetime');
 
@@ -194,34 +191,33 @@ board.on("ready", function () {
     // Initialize components connected to the arduino board
     createComponents();
 
+    proximitySensor.on("change", () => {
+        const { centimeters, inches } = proximity;
+        console.log("Proximity: ");
+        console.log("  cm  : ", centimeters);
+        console.log("  in  : ", inches);
+        console.log("-----------------");
+    });
+
+
 }); // board.on("ready", function() {
 
 
 function createComponents() {
     // Initialize the legs (do this first)
-    motor1 = new five.Motor(motorConfig.M1);
-    motor2 = new five.Motor(motorConfig.M2);
+    //motor1 = new five.Motor(motorConfig.M1);
+    //motor2 = new five.Motor(motorConfig.M2);
 
     // Initialize the proximity sensor
-<<<<<<< HEAD
     const proximitySensor = new five.Proximity({
-=======
-    proximitySensor1 = new five.Proximity({
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
         controller: "HCSR04",
         pin: PROXIMITY1_PIN
     });
-<<<<<<< HEAD
     const proximitySensor2 = new five.Proximity({
-=======
-
-    proximitySensor2 = new five.Proximity({
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
 
-<<<<<<< HEAD
     //piezo = new five.Piezo(3);
     // Plays a song
     /*
@@ -252,10 +248,6 @@ function createComponents() {
         tempo: 100
     });
     */
-=======
-    piezo = new five.Piezo(3);
-    //_playSong();
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
 
     // Create an Led on pin 13
     /*
@@ -266,7 +258,6 @@ function createComponents() {
     eyes.off();
 
     // Initialize the Head and Arm servos
-    /*
     headServo = new five.Servo({
         id: "HeadServo",            // User defined id
         pin: HEAD_SERVO,            // Which pin is it attached to?
@@ -293,8 +284,6 @@ function createComponents() {
     headAndArm = new five.Servos([headServo, armServo]);
     speechAnimation = new five.Animation(headAndArm);
 
-    */
-
     proximityServo = new five.Servo({
         id: "ProximityServo",       // User defined id
         pin: PROXIMITY_SERVO,       // Which pin is it attached to?
@@ -308,23 +297,14 @@ function createComponents() {
     */
 
     // Set up a handler for the proximity sensor data
-    _proximitySensors();
+    //_proximitySensors();
 }
 
-<<<<<<< HEAD
     // Create a animation for the head and arm
     /*
     headAndArm = new five.Servos([headServo, armServo]);
     speechAnimation = new five.Animation(headAndArm);
     */
-
-    proximitySensor.on("change", () => {
-        const {centimeters, inches} = proximity;
-        console.log("Proximity: ");
-        console.log("  cm  : ", centimeters);
-        console.log("  in  : ", inches);
-        console.log("-----------------");
-    });
 
     // Check for changes in the proximity sensor
     /*
@@ -333,42 +313,6 @@ function createComponents() {
         // Ignore sensor values over a Max
         if (currProx < 40) {
             if (currProx != prevProx) {
-=======
-function _proximitySensors() {
-    var proximityOffsetDegrees = 0;
-
-    // Check for changes in the proximity sensor
-    proximitySensor1.on("data", function () {
-
-        // Ignore sensor values over a Max (to reduce the number of times you check it)
-        if (this.in > 1 && this.in < PROXIMITY_MAX) {
-
-            // Remove the previous value at this array position from the total
-            totalA1 = totalA1 - readingsA1[indexA1];
-            // Add the new value to the array position
-            readingsA1[indexA1] = this.in;
-            // add the reading to the total:
-            totalA1 = totalA1 + readingsA1[indexA1];
-            // advance to the next position in the array: 
-            indexA1 = indexA1 + 1;
-            // if we're at the end of the array...
-            if (indexA1 >= numReadings) {
-                // ...wrap around to the beginning:
-                indexA1 = 0;
-                arrayFull1 = true;
-            }
-            // calculate the average when the array is full
-            if (arrayFull1) {
-                averageA1 = totalA1 / numReadings;
-            }
-
-            // Round to integer inch values
-            //currProx1 = Math.round(this.in);
-            currProx1 = Math.round(averageA1);
-
-            if (currProx1 != prevProx1) {
-                //log("Proximity currProx1 = " + currProx1 + ", averageA1 = " + averageA1);
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
                 // If the Proximity inches changes, send an event with current value
                 //botEvent.emit("proxIn", currProx1);
 
@@ -443,18 +387,11 @@ function _proximitySensors() {
 
                 prevProx2 = currProx2;
             }
-<<<<<<< HEAD
         } // if (currProx < 30) {
     }); // proximity.on("data", function () {
     */
    
-}); // board.on("ready", function() {
-=======
-        } // if (currProx2 < PROXIMITY_MAX) {
-    });
-
-} // function _proximitySensors() {
->>>>>>> 3b8991279ab9627449dffca6f86f032852e0833d
+//}); // board.on("ready", function() {
 
 function _handleCloseProximityAlert(inProx, proximityOffsetDegrees) {
     if ((proximityAlert1 || proximityAlert2) && moving == true) {
