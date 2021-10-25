@@ -115,7 +115,7 @@ if (process.env.HOST == "localhost") {
 //var audioFunctions = require('./audioFunctions.js');
 
 console.log("BEFORE botFunctions");
-//var botFunctions = require('./botFunctions.js');
+var botFunctions = require('./botFunctions.js');
 
 
 //=================================================================================================
