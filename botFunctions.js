@@ -191,7 +191,7 @@ board.on("ready", function () {
     // Initialize components connected to the arduino board
     createComponents();
 
-    proximitySensor.on("change", () => {
+    proximitySensor1.on("change", () => {
         const { centimeters, inches } = proximity;
         console.log("Proximity: ");
         console.log("  cm  : ", centimeters);
@@ -209,14 +209,16 @@ function createComponents() {
     //motor2 = new five.Motor(motorConfig.M2);
 
     // Initialize the proximity sensor
-    const proximitySensor = new five.Proximity({
+    proximitySensor1 = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY1_PIN
     });
-    const proximitySensor2 = new five.Proximity({
+    /*
+    proximitySensor2 = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
+    */
 
     //piezo = new five.Piezo(3);
     // Plays a song
