@@ -192,13 +192,19 @@ board.on("ready", function () {
     createComponents();
 
     proximitySensor1.on("change", () => {
-        const { centimeters, inches } = proximity;
+        const { centimeters, inches } = proximitySensor1;
         console.log("Proximity: ");
         console.log("  cm  : ", centimeters);
         console.log("  in  : ", inches);
         console.log("-----------------");
     });
 
+    /*
+    proximity.within([ 100, 200 ], "cm", function() {
+      // This is called when the proximity sensor's cm value falls within 100-200
+
+    });
+    */
 
 }); // board.on("ready", function() {
 
