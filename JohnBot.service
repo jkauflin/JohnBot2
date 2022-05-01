@@ -19,7 +19,7 @@ After=network-online.target
 [Service]
 Type=simple
 # Set the user, directory, and node start command
-User=pi
+User=johnk
 WorkingDirectory=/home/johnk/JohnBot2
 ExecStart=/usr/bin/npm start
 Restart=always
