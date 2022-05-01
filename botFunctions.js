@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017,2018,2019,2020 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019,2020,2022 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS module to handle robot functions.  Communicates with
              the Arduino Mega, and accepts commands from connected web
@@ -66,22 +66,19 @@ Modification History
 2020-05-30 JJK  Working on distance sensor accuracy by adding smoothing
 2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
                 chatbot and reworking the loops for sensors
+2022-05-01 JJK  Ok, back to JohnBot - newest OS (Buster) and starting to 
+                re-check functions
 =============================================================================*/
-var dateTime = require('node-datetime');
+//const fetch = require('node-fetch');
 
-const EventEmitter = require('events');
-// EventEmitter object (to send events outside of this module)
-var botEvent = new EventEmitter();
-
-// When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
-// be sure to shut the REPL off!
+// Library to control the Arduino board
 var five = require("johnny-five");
-var board = new five.Board({
-    repl: true,
-    debug: true
-});
-//var dt = dateTime.create();
-//var formatted = dt.format('Y-m-d H:M:S');
+//var Raspi = require("raspi-io").RaspiIO;
+
+//const EventEmitter = require('events');
+// EventEmitter object (to send events outside of this module)
+//var botEvent = new EventEmitter();
+
 
 // Constants for pin numbers and commands
 const LEFT_EYE = 45;
@@ -162,44 +159,76 @@ var walkMode = false;
 var walkAboutMode = false;
 
 
-board.on("error", function (err) {
-    log("*** Error in Board, err = "+err);
-    boardReady = false;
-    //botEvent.emit("error", "*** Error in Board, err = "+err);
-    // Exit the process (so that Forever will re-start and reset the board)
-    process.exit(1);
-}); // board.on("error", function() {
+// Create Johnny-Five board object
+// When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
+// be sure to shut the REPL off!
+var board = new five.Board({
+    repl: false,
+    debug: false
+    //    timeout: 12000
+});
 
-// When the board is ready, create and intialize global component objects (to be used by functions)
-board.on("ready", function () {
-    log("*** Johnny-Five to PingFirmata on arduino mega board READY ***");
-    boardReady = true;
+try {
+    board.on("error", function () {
+        log("*** Error in Board ***");
+        boardReady = false;
+        //botEvent.emit("error", "*** Error in Board, err = "+err);
+        // Exit the process (so that Forever will re-start and reset the board)
+        //process.exit(1);
+    }); // board.on("error", function() {
+    
+    log("===== Starting board initialization =====");
+    //-------------------------------------------------------------------------------------------------------
+    // When the board is ready, create and intialize global component objects (to be used by functions)
+    //-------------------------------------------------------------------------------------------------------
+    // When the board is ready, create and intialize global component objects (to be used by functions)
+    board.on("ready", function () {
+        log("*** board ready ***");
+        boardReady = true;
+    
+        // If the board is exiting, execute cleanup actions
+        this.on("exit", function () {
+            log("on EXIT");
+            //cleanup actions
+            _allStop();
+            //process.exit(1);
+        });
+        // Handle a termination signal
+        process.on('SIGTERM', function () {
+            log('on SIGTERM');
+            //cleanup actions
+            _allStop();
+            //process.exit(1);
+        });
 
-    // If the board is exiting, turn everything off
-    this.on("exit", function () {
-        log("EXIT - All Stop");
-        _allStop();
-        process.exit(1);
-    });
-    // Handle a termination signal
-    process.on('SIGTERM', function () {
-        log('on SIGTERM');
-        _allStop();
-        process.exit(1);
-    });
+        
+        // Define the analog voltage sensors (after waiting a few seconds for things to calm down)
+        this.wait(5*secondsToMilliseconds, function () {
+            //log("$$$$$ Starting sensors");
+            //startSensors();
+        });
+    
+        // Initialize components connected to the arduino board
+        //createComponents();
 
-    // Initialize components connected to the arduino board
-    createComponents();
+        /*
+        proximitySensor1.within([ 1, 9 ], "in", function() {
+        // This is called when the proximity sensor's cm value falls within 100-200
+            const { centimeters, inches } = proximitySensor1;
+            console.log("proximitySensor1  in  : ", inches);
+        });
+        */
 
+        log("End of board.on (initialize) event");
+    
+    }); // board.on("ready", function() {
 
-    proximitySensor1.within([ 1, 9 ], "in", function() {
-      // This is called when the proximity sensor's cm value falls within 100-200
-        const { centimeters, inches } = proximitySensor1;
-        console.log("proximitySensor1  in  : ", inches);
-    });
-
-}); // board.on("ready", function() {
-
+} catch (err) {
+    log('Error in main initialization, err = '+err);
+    console.error(err.stack);
+} finally {
+    // turn things off?
+}
 
 function createComponents() {
     // Initialize the legs (do this first)
@@ -299,6 +328,7 @@ function createComponents() {
     // Set up a handler for the proximity sensor data
     //_proximitySensors();
 }
+
 
     // Create a animation for the head and arm
     /*
@@ -826,10 +856,11 @@ function command(botMessage) {
 
 function _allStop() {
     log("ALL STOP");
+
     // Stop all motion
-    _stopWalking();
+    //_stopWalking();
     // Stop all components
-    _doneSpeaking();
+    //_doneSpeaking();
 
 
 
@@ -846,17 +877,32 @@ function _allStop() {
     */
 }
 
-function log(outStr) {
-    console.log(dateTime.create().format('H:M:S.N') + " " + outStr);
-}
-
 
 function _getRandomInt(min, max) {
     // Floor - rounded down to the nearest integer
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
+function log(inStr) {
+    //var logStr = dateTime.create().format('Y-m-d H:M:S') + " " + inStr;
+    var td = new Date();
+
+    var tempMonth = td.getMonth() + 1;
+    if (td.getMonth() < 9) {
+        tempMonth = '0' + (td.getMonth() + 1);
+    }
+    var tempDay = td.getDate();
+    if (td.getDate() < 10) {
+        tempDay = '0' + td.getDate();
+    }
+    var formattedDate = td.getFullYear() + '-' + tempMonth + '-' + tempDay;
+
+    //var dateStr = `${td.toDateString()} ${td.getHours()}:${td.getMinutes()}:${td.getSeconds()}.${td.getMilliseconds()}`;
+    var dateStr = `${formattedDate} ${td.getHours()}:${td.getMinutes()}:${td.getSeconds()}.${td.getMilliseconds()}`;
+    console.log(dateStr + " " + inStr);
+}
+
 module.exports = {
-    botEvent,
-    command
+    //botEvent,
+    //command
 };

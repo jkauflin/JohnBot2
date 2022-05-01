@@ -1,5 +1,5 @@
 /*==============================================================================
-(C) Copyright 2017,2018,2019,2021 John J Kauflin, All rights reserved. 
+(C) Copyright 2017,2018,2019,2022 John J Kauflin, All rights reserved. 
 -----------------------------------------------------------------------------
 DESCRIPTION: NodeJS server for JohnBot2 to run a web app and the
              communications to the Arduino Mega robot
@@ -55,6 +55,8 @@ Modification History
 2019-09-22 JJK  Checking functions
 2021-10-09 JJK  Re-looking at the JohnBot - turning off the connection to
                 chatbot and reworking the loops for sensors
+2022-05-01 JJK  Ok, back to JohnBot - newest OS (Buster) and starting to 
+                re-check functions
 =============================================================================*/
 
 // General handler for any uncaught exceptions
@@ -114,9 +116,7 @@ if (process.env.HOST == "localhost") {
 //var dataLoaded = false;
 //var audioFunctions = require('./audioFunctions.js');
 
-console.log("BEFORE botFunctions");
-var botFunctions = require('./botFunctions.js');
-console.log("AFTER botFunctions");
+var botFunctions = require('./botFunctions.js');
 
 
 //=================================================================================================

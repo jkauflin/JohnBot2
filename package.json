@@ -21,6 +21,6 @@
     "dotenv": "latest",
     "serialport": "latest",
     "johnny-five": "latest",
-    "node-datetime": "latest"
+    "node-fetch": "^2.6.7"
   }
 }
