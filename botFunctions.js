@@ -215,13 +215,13 @@ try {
             proximitySensor1.within([ 1, 9 ], "in", function() {
                 // This is called when the proximity sensor's cm value falls within 100-200
                 const { centimeters, inches } = proximitySensor1;
-                log("proximitySensor1  in  : ", inches);
+                log(`proximitySensor1  in  : ${inches}`);
             });
 
             proximitySensor2.within([ 1, 9 ], "in", function() {
                 // This is called when the proximity sensor's cm value falls within 100-200
                 const { centimeters, inches } = proximitySensor2;
-                log("proximitySensor2  in  : ", inches);
+                log(`proximitySensor2  in  : ${inches}`);
             });
         });
 
