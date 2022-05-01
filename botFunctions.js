@@ -157,6 +157,8 @@ var rotateDirection = RIGHT;
 // Mode variables
 var walkMode = false;
 var walkAboutMode = false;
+const minutesToMilliseconds = 60 * 1000;
+const secondsToMilliseconds = 1000;
 
 
 // Create Johnny-Five board object
