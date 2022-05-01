@@ -214,8 +214,14 @@ try {
         this.wait(10*secondsToMilliseconds, function () {
             proximitySensor1.within([ 1, 9 ], "in", function() {
                 // This is called when the proximity sensor's cm value falls within 100-200
-                    const { centimeters, inches } = proximitySensor1;
-                    console.log("proximitySensor1  in  : ", inches);
+                const { centimeters, inches } = proximitySensor1;
+                log("proximitySensor1  in  : ", inches);
+            });
+
+            proximitySensor2.within([ 1, 9 ], "in", function() {
+                // This is called when the proximity sensor's cm value falls within 100-200
+                const { centimeters, inches } = proximitySensor2;
+                log("proximitySensor2  in  : ", inches);
             });
         });
 
@@ -240,12 +246,11 @@ function createComponents() {
         controller: "HCSR04",
         pin: PROXIMITY1_PIN
     });
-    /*
+
     proximitySensor2 = new five.Proximity({
         controller: "HCSR04",
         pin: PROXIMITY2_PIN
     });
-    */
 
     //piezo = new five.Piezo(3);
     // Plays a song
