@@ -204,20 +204,16 @@ try {
         
         // Define the analog voltage sensors (after waiting a few seconds for things to calm down)
         this.wait(5*secondsToMilliseconds, function () {
-            //log("$$$$$ Starting sensors");
-            //startSensors();
+            log("$$$$$ Creating components");
+            // Initialize components connected to the arduino board
+            createComponents();
         });
-    
-        // Initialize components connected to the arduino board
-        //createComponents();
 
-        /*
         proximitySensor1.within([ 1, 9 ], "in", function() {
         // This is called when the proximity sensor's cm value falls within 100-200
             const { centimeters, inches } = proximitySensor1;
             console.log("proximitySensor1  in  : ", inches);
         });
-        */
 
         log("End of board.on (initialize) event");
     
