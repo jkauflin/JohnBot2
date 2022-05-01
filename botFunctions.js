@@ -211,10 +211,12 @@ try {
             createComponents();
         });
 
-        proximitySensor1.within([ 1, 9 ], "in", function() {
-        // This is called when the proximity sensor's cm value falls within 100-200
-            const { centimeters, inches } = proximitySensor1;
-            console.log("proximitySensor1  in  : ", inches);
+        this.wait(10*secondsToMilliseconds, function () {
+            proximitySensor1.within([ 1, 9 ], "in", function() {
+                // This is called when the proximity sensor's cm value falls within 100-200
+                    const { centimeters, inches } = proximitySensor1;
+                    console.log("proximitySensor1  in  : ", inches);
+            });
         });
 
         log("End of board.on (initialize) event");
