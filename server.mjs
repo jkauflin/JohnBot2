@@ -100,30 +100,11 @@ var relays = null
 
 log(">>> Starting server.mjs...")
 
-/*
-const fs = require('node:fs')
-const path = require('node:path')
-const fastify = require('fastify')({
-  http2: true,
-  https: {
-    allowHTTP1: true, // fallback support for HTTP1
-    key: fs.readFileSync(path.join(__dirname, '..', 'https', 'fastify.key')),
-    cert: fs.readFileSync(path.join(__dirname, '..', 'https', 'fastify.cert'))
-  }
-})
-
-// this route can be accessed through both protocols
-fastify.get('/', function (request, reply) {
-  reply.code(200).send({ hello: 'world' })
-})
-
-fastify.listen({ port: 3000 })
-*/
-
-
 // Declare a route
-fastify.get('/', async function handler (request, reply) {
-    return { hello: 'world' }
+fastify.post('/test', async function handler (req, reply) {
+    log("req.body = "+req.body)
+
+    return "return string JJK"
 })
 
 /*
@@ -167,53 +148,6 @@ try {
     process.exit(1)
 }
 
-// Read environment variables from the .env file
-//HOST=
-//WEB_PORT=
-//BOT_WEB_URL=
-//UID=
-//SSL_PRIVATE_KEY_FILE_LOC=
-//SSL_PUBLIC_CERT_FILE_LOC=
-
-
-/*
-var http = require('http');
-//import * as http from 'http';
-const express = require('express')
-//import express from 'express'
-
-var WEB_PORT = 3035;
-
-// Create a web server
-var app = express();
-var httpServer = http.createServer(app);
-
-app.use('/',express.static('public'));
-app.use(express.json());
-
-// jjk new
-app.use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-})
-
-// Have the web server listen for requests
-httpServer.listen(WEB_PORT,function() {
-    log("Live at Port " + WEB_PORT + " - Let's rock!");
-});
-
-
-app.get('/GetValues', function (req, res, next) {
-    //res.send(JSON.stringify(boardFunctions.getStoreRec()));
-});
-
-app.post('/Water', function (req, res, next) {
-    //boardFunctions.water(req.body);
-    //res.send('ok');
-});
-*/
-
-
 
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
@@ -256,3 +190,4 @@ board.on("ready", () => {
     log("End of board.on (initialize) event")
 })
 */
+
