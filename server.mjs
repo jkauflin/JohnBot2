@@ -101,7 +101,7 @@ var relays = null
 log(">>> Starting server.mjs...")
 
 // Declare a route
-fastify.post('/test', (req, res) => {
+fastify.post('test', (req, res) => {
     log("req.body = "+req.body)
 
     return "return string JJK"
