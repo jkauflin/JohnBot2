@@ -66,6 +66,7 @@ Modification History
 import 'dotenv/config'
 import Fastify from 'fastify'
 import fs, { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { syncBuiltinESMExports } from 'node:module'
 import { Buffer } from 'node:buffer'
 import fetch from 'node-fetch'              // Fetch to make HTTPS calls
@@ -74,7 +75,10 @@ import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
 
 const fastify = Fastify({
-    logger: true
+    logger: true,
+    // Key and certificate that have been signed by a CA root authority installed on server
+    key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
+    cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
 })
 
 const {Board,Led,Relays} = johnnyFivePkg
@@ -154,7 +158,7 @@ fastify.route({
 
 // Run the server!
 try {
-    await fastify.listen({ port: 3035, host: '0.0.0.0'  })
+    await fastify.listen({ port: process.env.WEB_PORT, host: '0.0.0.0'  })
 } catch (err) {
     fastify.log.error(err)
     process.exit(1)
