@@ -74,17 +74,32 @@ import johnnyFivePkg from 'johnny-five'     // Library to control the Arduino bo
 import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
 
+import {exec} from 'child_process'
+
+// Constants for pin numbers and commands
+const LEFT_EYE = 45;
+const RIGHT_EYE = 44;
+
+var eyes;
+var leftEyeLed;
+var rightEyeLed;
+
+var eyesOn = false;
+
 const fastify = Fastify({
-    logger: true,
-    http2: true,
-    https: {
-      // Key and certificate that have been signed by a CA root authority installed on server
-      key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
-      cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
-    }
+    logger: true
 })
 
-const {Board,Led,Relays} = johnnyFivePkg
+/*
+http2: true,
+https: {
+  // Key and certificate that have been signed by a CA root authority installed on server
+  key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
+  cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
+}
+*/
+
+const {Board,Led,Leds,Relays,Proximity} = johnnyFivePkg
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -101,44 +116,47 @@ var relays = null
 log(">>> Starting server.mjs...")
 
 // Declare a route
-fastify.post('/test', (req, res) => {
-    log("req.body = "+req.body)
-
-    return "return string JJK"
-})
-
-/*
-fastify.route({
-    method: 'GET',
-    url: '/',
-    schema: {
-      // request needs to have a querystring with a `name` parameter
-      querystring: {
-        type: 'object',
-        properties: {
-            name: { type: 'string'}
-        },
-        required: ['name'],
-      },
-      // the response needs to be an object with an `hello` property of type 'string'
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            hello: { type: 'string' }
-          }
-        }
-      }
-    },
-    // this function is executed for every request before the handler is executed
-    preHandler: async (request, reply) => {
-      // E.g. check authentication
-    },
-    handler: async (request, reply) => {
-      return { hello: 'world' }
+fastify.post('/botCommands', (req, res) => {
+    let botCommands = JSON.parse(req.body)
+    if (botCommand.say != undefined) {
+        speakText(botCommand.say)
     }
 })
+
+function speakText(textStr) {
+    console.log("in speakText, text = "+textStr)
+    //player.stop();
+    //player.pause();
+    //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
+    //picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
+    //picoSpeaker.speak("<volume level='20'><pitch level='70'>" + textStr).then(function () {
+    /*
+    picoSpeaker.speak("<volume level='10'><pitch level='60'>" + textStr).then(function () {
+        //console.log("done speaking");
+        //player.resume();
+    }.bind(this));
+    */
+/*
+error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav 
+" <volume level='15'><pitch level='60'>I am the John Bot. Pleased to meet you." && aplay /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav
 */
+
+    // *** need to sanitize textStr and make sure it does not have a single quote
+    let linuxCmd = `pico2wave -w botSpeak.wav "${textStr}" && aplay botSpeak.wav`
+    //exec('dir', (err, stdout, stderr) => {
+    exec(linuxCmd, (err, stdout, stderr) => {
+        if (err) {
+            //some err occurred
+            console.error(err)
+        } else {
+            // the *entire* stdout and stderr (buffered)
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+        }
+    })
+
+}
+
 
 // Run the server!
 try {
@@ -152,7 +170,6 @@ try {
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
 // be sure to shut the REPL off!
-/*
 try {
     log("===== Starting board initialization =====")
     board = new Board({
@@ -181,13 +198,27 @@ board.on("ready", () => {
         //turnRelaysOFF()
     })
 
+    leftEyeLed = new Led(LEFT_EYE);
+    rightEyeLed = new Led(RIGHT_EYE);
+    eyes = new Leds([leftEyeLed, rightEyeLed]);
+    //eyes.on();
+    //eyes.off();
+    //eyes.strobe(150);
+
+    /*
+    new five.Proximity({
+      controller: "GP2Y0A21YK",
+      pin: "A8"
+    });
+    */
+    
     // Start the function to toggle air ventilation ON and OFF
+    /*
     log("Starting Air toggle interval")
     setTimeout(toggleAir, 5000)
     // Start sending metrics 10 seconds after starting (so things are calm)
     setTimeout(logMetric, 10000)
+    */
 
     log("End of board.on (initialize) event")
 })
-*/
-
