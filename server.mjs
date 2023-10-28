@@ -118,8 +118,8 @@ log(">>> Starting server.mjs...")
 // Declare a route
 fastify.post('/botCommands', (req, res) => {
     let botCommands = JSON.parse(req.body)
-    if (botCommand.say != undefined) {
-        speakText(botCommand.say)
+    if (botCommands.say != undefined) {
+        speakText(botCommands.say)
     }
 })
 
