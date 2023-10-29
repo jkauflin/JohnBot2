@@ -115,6 +115,7 @@ var relays = null
 
 log(">>> Starting server.mjs...")
 
+
 // Declare a route
 fastify.post('/botCommands', (req, res) => {
     let botCommands = JSON.parse(req.body)
