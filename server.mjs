@@ -90,9 +90,10 @@ const fastify = Fastify({
     logger: true,
     http2: true,
     https: {
-      // Key and certificate that have been signed by a CA root authority installed on server
-      key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
-      cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
+        allowHTTP1: true, // fallback support for HTTP1
+        // Key and certificate that have been signed by a CA root authority installed on server
+        key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
+        cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
     }
 })
 
