@@ -121,14 +121,26 @@ var relays = null
 
 log(">>> Starting server.mjs...")
 
-
-// Declare a route
-fastify.post('/botCommands', (req, res) => {
-    let botCommands = JSON.parse(req.body)
+fastify.post('/botcmd', async function handler (req, res) {
+    let botCommands = req.body
     if (botCommands.say != undefined) {
         speakText(botCommands.say)
     }
+    //return { hello: 'world' }
+    return
 })
+
+// Declare a route
+/*
+fastify.get('/botcmd', (req, res) => {
+    console.log("in /botcmd")
+    console.log("in /botcmd, body = "+req.body)
+    let botCommands = JSON.parse(req.body)
+    if (botCommands.say != undefined) {
+    }
+   return
+})
+*/
 
 function speakText(textStr) {
     console.log("in speakText, text = "+textStr)
@@ -161,7 +173,6 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
             console.log(`stderr: ${stderr}`);
         }
     })
-
 }
 
 
