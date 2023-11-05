@@ -87,9 +87,11 @@ const endpointDurationSec = 0.2;
 log(">>> Starting server.mjs...")
 
 const mic = new NodeMic({
+    debug: true,
     rate: 16000,
     channels: 1,
-    threshold: 6
+    threshold: 6,
+    device: "plughw:1,0"
 });
 
 const micInputStream = mic.getAudioStream();
