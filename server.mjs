@@ -87,7 +87,7 @@ const endpointDurationSec = 0.2;
 log(">>> Starting server.mjs...")
 
 const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
-log("Cheetah version = "+handle.version())
+log("Cheetah version = "+handle.version)
 
 const mic = new NodeMic({
     debug: true,
