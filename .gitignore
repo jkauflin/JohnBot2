@@ -19,3 +19,4 @@ ssl/
 public/js/artyom.ts
 public/dotenv.php
 media/
+*.raw
