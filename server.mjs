@@ -144,8 +144,9 @@ async function micDemo() {
     });
 
     log("after cheetah init, before recorder")
-  const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex);
-  recorder.start();
+    //const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex);
+    const recorder = new PvRecorder(512, audioDeviceIndex);
+    recorder.start();
 
   console.log(`Using device: ${recorder.getSelectedDevice()}`);
 
