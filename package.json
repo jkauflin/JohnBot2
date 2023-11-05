@@ -25,6 +25,7 @@
     "johnny-five": "^2.1.0",
     "node-fetch": "^3.3.2",
     "node-mic": "^1.0.1",
-    "serialport": "latest"
+    "serialport": "latest",
+    "wavefile": "^11.0.0"
   }
 }
