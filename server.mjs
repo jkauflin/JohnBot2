@@ -87,25 +87,25 @@ const endpointDurationSec = 0.2;
 log(">>> Starting server.mjs...")
 
 const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
+log("Cheetah version = "+handle.version())
 
 const mic = new NodeMic({
     debug: true,
     rate: 16000,
     channels: 1,
     threshold: 6,
-    fileType: "wav",
     device: "plughw:1,0"
 });
 
 const micInputStream = mic.getAudioStream();
 
-//const outputFileStream = fs.createWriteStream('output.raw');
-//micInputStream.pipe(outputFileStream);
+const outputFileStream = fs.createWriteStream('output.raw');
+micInputStream.pipe(outputFileStream);
 
 micInputStream.on('data', (audioFrame) => {
     // Do something with the data.
     // data is an audio waveform
-    console.log('>>> in data, sending to cheetah')
+    log('>>> in data, sending to cheetah')
     const [partialTranscript, isEndpoint] = handle.process(audioFrame);
     if (isEndpoint) {
         finalTranscript = handle.flush()
