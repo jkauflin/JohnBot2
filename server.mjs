@@ -66,7 +66,7 @@ Modification History
 =============================================================================*/
 
 import 'dotenv/config'
-import Fastify from 'fastify'
+//import Fastify from 'fastify'
 import fs, { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { syncBuiltinESMExports } from 'node:module'
@@ -77,8 +77,8 @@ import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
 
 //import {WaveFile} from 'wavefile'
-import pkg from 'wavefile';
-const {WaveFile} = pkg;
+//import pkg from 'wavefile';
+//const {WaveFile} = pkg;
 
 import {exec} from 'child_process'
 
