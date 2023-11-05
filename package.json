@@ -20,12 +20,18 @@
   "dependencies": {
     "@picovoice/cheetah-node": "^1.1.1",
     "@picovoice/porcupine-node": "^3.0.0",
+    "@picovoice/pvrecorder-node": "^1.2.1",
     "dotenv": "^16.3.1",
-    "fastify": "^4.24.3",
     "johnny-five": "^2.1.0",
-    "node-fetch": "^3.3.2",
-    "node-mic": "^1.0.1",
-    "serialport": "latest",
-    "wavefile": "^11.0.0"
-  }
+    "serialport": "latest"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "cpu": [
+    "!ia32",
+    "!mips",
+    "!ppc",
+    "!ppc64"
+  ]
 }

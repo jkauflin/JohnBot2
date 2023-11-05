@@ -81,128 +81,105 @@ import pkg from 'wavefile';
 const {WaveFile} = pkg;
 
 import {exec} from 'child_process'
-import {Cheetah} from '@picovoice/cheetah-node'
+
+import {checkWaveFile,getInt16Frames} from './wave_util.mjs'
+import {PvRecorder} from '@picovoice/pvrecorder-node'
+import {Cheetah,CheetahActivationLimitReachedError} from '@picovoice/cheetah-node'
 import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
 
-import NodeMic from 'node-mic';
-
-const endpointDurationSec = 0.2;
 
 log(">>> Starting server.mjs...")
+
+const recorder = new PvRecorder(/*frameLength*/ 512);
+//const recorder = new PvRecorder(512, /*device index*/0);
+//const devices = PvRecorder.getAvailableDevices()
+recorder.start()
 
 //const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
 //log("Cheetah version = "+handle.version)
 
-//let audioPath = "output.raw"
-let audioPath = "test.wav"
+let isInterrupted = false;
 
-fileDemo()
-function fileDemo() {
+async function micDemo() {
+  let accessKey = process.env.PICOVOICE_ACCESS_KEY
+  //let libraryFilePath = program["library_file_path"];
+  //let modelFilePath = program["model_file_path"];
+  //let audioDeviceIndex = program["audio_device_index"];
+  //let endpointDurationSec = program["endpoint_duration_sec"];
+  const endpointDurationSec = 0.4;
+  //let showAudioDevices = program["show_audio_devices"];
+  //let disableAutomaticPunctuation = program["disable_automatic_punctuation"];
+  let disableAutomaticPunctuation = false
+
+  //let showAudioDevicesDefined = showAudioDevices !== undefined;
+  let showAudioDevicesDefined = true
+
+  if (showAudioDevicesDefined) {
+    const devices = PvRecorder.getAvailableDevices();
+    for (let i = 0; i < devices.length; i++) {
+      console.log(`index: ${i}, device name: ${devices[i]}`);
+    }
+    process.exit();
+  }
+
+  if (accessKey === undefined) {
+    console.log("No AccessKey provided");
+    process.exit();
+  }
+
+  //modelPath: modelFilePath,
+  //libraryPath: libraryFilePath,
   let engineInstance = new Cheetah(
-    process.env.PICOVOICE_ACCESS_KEY,
+    accessKey,
     {
-      endpointDurationSec: 0.4
+      endpointDurationSec: endpointDurationSec,
+      enableAutomaticPunctuation: !disableAutomaticPunctuation
     });
 
-  if (!fs.existsSync(audioPath)) {
-    console.error(`--input_audio_file_path file not found: ${audioPath}`);
-    return;
+  const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex);
+  recorder.start();
+
+  console.log(`Using device: ${recorder.getSelectedDevice()}`);
+
+  console.log(
+    "Listening... Press `ENTER` to stop:"
+  );
+
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+
+  process.stdin.on("keypress", (key, str) => {
+    if (str.sequence === '\r' || str.sequence === '\n') {
+      isInterrupted = true;
+    }
+  });
+
+  while (!isInterrupted) {
+    const pcm = await recorder.read();
+    try {
+      const [partialTranscript, isEndpoint] = engineInstance.process(pcm);
+      process.stdout.write(partialTranscript);
+      if (isEndpoint === true) {
+        const finalTranscript = engineInstance.flush();
+        process.stdout.write(`${finalTranscript}\n`);
+      }
+    } catch (err) {
+      if (err instanceof CheetahActivationLimitReachedError) {
+        console.error(`AccessKey '${accessKey}' has reached it's processing limit.`);
+      } else {
+        console.error(err);
+      }
+      isInterrupted = true;
+    }
   }
 
-  let waveBuffer = fs.readFileSync(audioPath);
-  let inputWaveFile;
-  try {
-    inputWaveFile = new WaveFile(waveBuffer);
-  } catch (error) {
-    console.error(`Exception trying to read file as wave format: ${audioPath}`);
-    console.error(error);
-    return;
-  }
-
-  if (!checkWaveFile(inputWaveFile, engineInstance.sampleRate)) {
-    console.error(
-      "Audio file did not meet requirements. Wave file must be 16KHz, 16-bit, linear PCM (mono)."
-    );
-  }
-
-  let frames = getInt16Frames(inputWaveFile, engineInstance.frameLength);
-
-  let transcript = '';
-  for (let frame of frames) {
-    const [partialTranscript, _] = engineInstance.process(frame);
-    transcript += partialTranscript
-  }
-
-  transcript += engineInstance.flush();
-  console.log("*** transcript = "+transcript);
+  recorder.stop();
+  recorder.release();
   engineInstance.release();
-
+  process.exit();
 }
 
-const mic = new NodeMic({
-    debug: true,
-    rate: 16000,
-    channels: 1,
-    threshold: 6,
-    device: "plughw:1,0"
-});
-
-const micInputStream = mic.getAudioStream();
-
-const outputFileStream = fs.createWriteStream('output.raw');
-micInputStream.pipe(outputFileStream);
-
-micInputStream.on('data', (audioFrame) => {
-    // Do something with the data.
-    // data is an audio waveform
-    log('>>> in data, sending to cheetah')
-    /*
-    const [partialTranscript, isEndpoint] = handle.process(audioFrame);
-    if (isEndpoint) {
-        finalTranscript = handle.flush()
-        console.log("Cheetah finalTranscript = "+finalTranscript)
-    }
-    */
-});
-
-micInputStream.on('error', (err) => {
-    console.log(`Error: ${err.message}`);
-});
-
-micInputStream.on('started', () => {
-    console.log('Started');
-    setTimeout(() => {
-        mic.pause();
-    }, 5000);
-});
-
-micInputStream.on('stopped', () => {
-    console.log('Stopped');
-});
-
-micInputStream.on('paused', () => {
-    console.log('Paused');
-    setTimeout(() => {
-        mic.resume();
-    }, 5000);
-});
-
-micInputStream.on('unpaused', () => {
-    console.log('Unpaused');
-    setTimeout(() => {
-        mic.stop();
-    }, 5000);
-});
-
-micInputStream.on('silence', () => {
-    console.log('Silence');
-});
-
-micInputStream.on('exit', (code) => {
-    console.log(`Exited with code: ${code}`);
-});
-
-//mic.start();
+micDemo();
 
 /*
 const handle = new Porcupine(
