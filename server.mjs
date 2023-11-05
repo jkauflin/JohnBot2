@@ -93,10 +93,11 @@ const {Cheetah,CheetahActivationLimitReachedError} = cpkg;
 
 log(">>> Starting server.mjs...")
 
+
 //const recorder = new PvRecorder(/*frameLength*/ 512);
-const recorder = new PvRecorder(512, /*device index*/1);
+//const recorder = new PvRecorder(512, /*device index*/1);
 //const devices = PvRecorder.getAvailableDevices()
-recorder.start()
+//recorder.start()
 
 //const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
 //log("Cheetah version = "+handle.version)
@@ -110,7 +111,7 @@ async function micDemo() {
   let accessKey = process.env.PICOVOICE_ACCESS_KEY
   //let libraryFilePath = program["library_file_path"];
   //let modelFilePath = program["model_file_path"];
-  //let audioDeviceIndex = program["audio_device_index"];
+  let audioDeviceIndex = 1
   //let endpointDurationSec = program["endpoint_duration_sec"];
   const endpointDurationSec = 0.4;
   //let showAudioDevices = program["show_audio_devices"];
