@@ -71,7 +71,7 @@ import fs, { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { syncBuiltinESMExports } from 'node:module'
 import { Buffer } from 'node:buffer'
-import fetch from 'node-fetch'              // Fetch to make HTTPS calls
+//import fetch from 'node-fetch'              // Fetch to make HTTPS calls
 import johnnyFivePkg from 'johnny-five'     // Library to control the Arduino board
 import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
