@@ -89,7 +89,8 @@ log(">>> Starting server.mjs...")
 //const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
 //log("Cheetah version = "+handle.version)
 
-let audioPath = "output.raw"
+//let audioPath = "output.raw"
+let audioPath = "test.wav"
 
 fileDemo()
 function fileDemo() {
