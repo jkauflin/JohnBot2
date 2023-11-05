@@ -61,6 +61,8 @@ Modification History
                 Implementing newest bootstrap 5 ideas
 2023-10-22 JJK  Re-do with newest OS (Bookworm) and ES6 modules
                 Try Fastify for https web server to handle RESTful API requests
+2023-11-05 JJK  Working on audio capture from a USB microphone, and then
+                using picovoice for STT
 =============================================================================*/
 
 import 'dotenv/config'
@@ -75,6 +77,97 @@ import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
 
 import {exec} from 'child_process'
+import {Cheetah} from '@picovoice/cheetah-node'
+import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
+
+import NodeMic from 'node-mic';
+
+const endpointDurationSec = 0.2;
+
+log(">>> Starting server.mjs...")
+
+const mic = new NodeMic({
+    rate: 16000,
+    channels: 1,
+    threshold: 6
+});
+
+const micInputStream = mic.getAudioStream();
+const outputFileStream = fs.createWriteStream('output.raw');
+
+micInputStream.pipe(outputFileStream);
+
+micInputStream.on('data', (data) => {
+    // Do something with the data.
+});
+
+micInputStream.on('error', (err) => {
+    console.log(`Error: ${err.message}`);
+});
+
+micInputStream.on('started', () => {
+    console.log('Started');
+    setTimeout(() => {
+        mic.pause();
+    }, 5000);
+});
+
+micInputStream.on('stopped', () => {
+    console.log('Stopped');
+});
+
+micInputStream.on('paused', () => {
+    console.log('Paused');
+    setTimeout(() => {
+        mic.resume();
+    }, 5000);
+});
+
+micInputStream.on('unpaused', () => {
+    console.log('Unpaused');
+    setTimeout(() => {
+        mic.stop();
+    }, 5000);
+});
+
+micInputStream.on('silence', () => {
+    console.log('Silence');
+});
+
+micInputStream.on('exit', (code) => {
+    console.log(`Exited with code: ${code}`);
+});
+
+mic.start();
+
+/*
+const handle = new Porcupine(
+    accessKey,
+    [BuiltinKeyword.GRASSHOPPER, BuiltinKeyword.BUMBLEBEE],
+    [0.5, 0.65]);
+
+// process a single frame of audio
+// the keywordIndex provides the index of the keyword detected, or -1 if no keyword was detected
+const keywordIndex = handle.process(frame);
+*/
+
+/*
+const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
+
+function getNextAudioFrame() {
+  // ...
+  return audioFrame;
+}
+
+while (true) {
+    const audioFrame = getNextAudioFrame();
+    const [partialTranscript, isEndpoint] = handle.process(audioFrame);
+    if (isEndpoint) {
+        finalTranscript = handle.flush()
+        console.log("finalTranscript = "+finalTranscript)
+    }
+}
+*/
 
 // Constants for pin numbers and commands
 const LEFT_EYE = 45;
@@ -86,6 +179,7 @@ var rightEyeLed;
 
 var eyesOn = false;
 
+/*
 const fastify = Fastify({
     logger: true,
     http2: true,
@@ -96,6 +190,7 @@ const fastify = Fastify({
         cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
     }
 })
+*/
 
 /*
 http2: true,
@@ -120,8 +215,8 @@ process.on('uncaughtException', function (e) {
 var board = null
 var relays = null
 
-log(">>> Starting server.mjs...")
 
+/*
 fastify.post('/botcmd', async function handler (req, res) {
     let botCommands = req.body
     if (botCommands.say != undefined) {
@@ -130,6 +225,7 @@ fastify.post('/botcmd', async function handler (req, res) {
     //return { hello: 'world' }
     return
 })
+*/
 
 // Declare a route
 /*
@@ -178,12 +274,14 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
 
 
 // Run the server!
+/*
 try {
     await fastify.listen({ port: process.env.WEB_PORT, host: '0.0.0.0'  })
 } catch (err) {
     fastify.log.error(err)
     process.exit(1)
 }
+*/
 
 
 // Create Johnny-Five board object
