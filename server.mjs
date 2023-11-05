@@ -104,6 +104,7 @@ recorder.start()
 let isInterrupted = false;
 
 async function micDemo() {
+    log("in mic demo")
   let accessKey = process.env.PICOVOICE_ACCESS_KEY
   //let libraryFilePath = program["library_file_path"];
   //let modelFilePath = program["model_file_path"];
