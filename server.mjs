@@ -106,12 +106,13 @@ micInputStream.on('data', (audioFrame) => {
     // Do something with the data.
     // data is an audio waveform
     log('>>> in data, sending to cheetah')
+    /*
     const [partialTranscript, isEndpoint] = handle.process(audioFrame);
     if (isEndpoint) {
         finalTranscript = handle.flush()
         console.log("Cheetah finalTranscript = "+finalTranscript)
     }
-
+    */
 });
 
 micInputStream.on('error', (err) => {
