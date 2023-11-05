@@ -15,8 +15,8 @@ yarn-error.log*
 *-search.json
 *.wav
 *.mp3
+*.raw
 ssl/
 public/js/artyom.ts
 public/dotenv.php
 media/
-*.raw

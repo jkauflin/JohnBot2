@@ -80,11 +80,13 @@ import {exec} from 'child_process'
 import {Cheetah} from '@picovoice/cheetah-node'
 import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
 
-import NodeMic from 'mic';
+import NodeMic from 'node-mic';
 
 const endpointDurationSec = 0.2;
 
 log(">>> Starting server.mjs...")
+
+const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
 
 const mic = new NodeMic({
     debug: true,
@@ -95,13 +97,20 @@ const mic = new NodeMic({
 });
 
 const micInputStream = mic.getAudioStream();
-const outputFileStream = fs.createWriteStream('output.raw');
 
-micInputStream.pipe(outputFileStream);
+//const outputFileStream = fs.createWriteStream('output.raw');
+//micInputStream.pipe(outputFileStream);
 
-micInputStream.on('data', (data) => {
+micInputStream.on('data', (audioFrame) => {
     // Do something with the data.
     // data is an audio waveform
+    console.log('>>> in data, sending to cheetah')
+    const [partialTranscript, isEndpoint] = handle.process(audioFrame);
+    if (isEndpoint) {
+        finalTranscript = handle.flush()
+        console.log("Cheetah finalTranscript = "+finalTranscript)
+    }
+
 });
 
 micInputStream.on('error', (err) => {
