@@ -86,8 +86,53 @@ const endpointDurationSec = 0.2;
 
 log(">>> Starting server.mjs...")
 
-const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
-log("Cheetah version = "+handle.version)
+//const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
+//log("Cheetah version = "+handle.version)
+
+let audioPath = "output.raw"
+
+fileDemo()
+function fileDemo() {
+  let engineInstance = new Cheetah(
+    process.env.PICOVOICE_ACCESS_KEY,
+    {
+      endpointDurationSec: 0.4
+    });
+
+  if (!fs.existsSync(audioPath)) {
+    console.error(`--input_audio_file_path file not found: ${audioPath}`);
+    return;
+  }
+
+  let waveBuffer = fs.readFileSync(audioPath);
+  let inputWaveFile;
+  try {
+    inputWaveFile = new WaveFile(waveBuffer);
+  } catch (error) {
+    console.error(`Exception trying to read file as wave format: ${audioPath}`);
+    console.error(error);
+    return;
+  }
+
+  if (!checkWaveFile(inputWaveFile, engineInstance.sampleRate)) {
+    console.error(
+      "Audio file did not meet requirements. Wave file must be 16KHz, 16-bit, linear PCM (mono)."
+    );
+  }
+
+  let frames = getInt16Frames(inputWaveFile, engineInstance.frameLength);
+
+  let transcript = '';
+  for (let frame of frames) {
+    const [partialTranscript, _] = engineInstance.process(frame);
+    transcript += partialTranscript
+  }
+
+  transcript += engineInstance.flush();
+  console.log("*** transcript = "+transcript);
+  engineInstance.release();
+
+}
 
 const mic = new NodeMic({
     debug: true,
@@ -152,7 +197,7 @@ micInputStream.on('exit', (code) => {
     console.log(`Exited with code: ${code}`);
 });
 
-mic.start();
+//mic.start();
 
 /*
 const handle = new Porcupine(
