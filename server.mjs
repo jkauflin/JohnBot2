@@ -84,8 +84,11 @@ import {exec} from 'child_process'
 
 import {checkWaveFile,getInt16Frames} from './wave_util.mjs'
 import {PvRecorder} from '@picovoice/pvrecorder-node'
-import {Cheetah,CheetahActivationLimitReachedError} from '@picovoice/cheetah-node'
+//import {Cheetah,CheetahActivationLimitReachedError} from '@picovoice/cheetah-node'
 import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
+
+import cpkg from '@picovoice/cheetah-node';
+const {Cheetah,CheetahActivationLimitReachedError} = cpkg;
 
 
 log(">>> Starting server.mjs...")
