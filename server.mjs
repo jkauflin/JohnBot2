@@ -93,8 +93,8 @@ const {Cheetah,CheetahActivationLimitReachedError} = cpkg;
 
 log(">>> Starting server.mjs...")
 
-const recorder = new PvRecorder(/*frameLength*/ 512);
-//const recorder = new PvRecorder(512, /*device index*/0);
+//const recorder = new PvRecorder(/*frameLength*/ 512);
+const recorder = new PvRecorder(512, /*device index*/1);
 //const devices = PvRecorder.getAvailableDevices()
 recorder.start()
 
