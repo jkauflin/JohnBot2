@@ -80,7 +80,7 @@ import {exec} from 'child_process'
 import {Cheetah} from '@picovoice/cheetah-node'
 import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
 
-import NodeMic from 'node-mic';
+import NodeMic from 'mic';
 
 const endpointDurationSec = 0.2;
 
@@ -101,6 +101,7 @@ micInputStream.pipe(outputFileStream);
 
 micInputStream.on('data', (data) => {
     // Do something with the data.
+    // data is an audio waveform
 });
 
 micInputStream.on('error', (err) => {
