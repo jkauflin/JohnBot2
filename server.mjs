@@ -91,6 +91,7 @@ const mic = new NodeMic({
     rate: 16000,
     channels: 1,
     threshold: 6,
+    fileType: wav,
     device: "plughw:1,0"
 });
 
