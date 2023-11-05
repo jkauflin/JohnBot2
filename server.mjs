@@ -76,7 +76,9 @@ import johnnyFivePkg from 'johnny-five'     // Library to control the Arduino bo
 import {log} from './util.mjs'
 //import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
 
-import {WaveFile} from 'wavefile'
+//import {WaveFile} from 'wavefile'
+import pkg from 'wavefile';
+const {WaveFile} = pkg;
 
 import {exec} from 'child_process'
 import {Cheetah} from '@picovoice/cheetah-node'
