@@ -133,23 +133,23 @@ async function startListening() {
             isInterrupted = true
         }
     })
-
+    /*
     process.on('SIGTERM', function () {
         log('on SIGTERM')
         recorder.stop()
         recorder.release()
         engineInstance.release()
     })
-
+    */
     while (!isInterrupted) {
         const pcm = await recorder.read()
         try {
             const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
-            process.stdout.write(partialTranscript)
+            //process.stdout.write(partialTranscript)
             if (isEndpoint === true) {
                 const finalTranscript = engineInstance.flush()
-                process.stdout.write(`${finalTranscript}\n`)
-                speakText(finalTranscript)
+                console.log(`finalTranscrip = ${finalTranscript}`)
+                //speakText(finalTranscript)
             }
         } catch (err) {
             if (err instanceof CheetahActivationLimitReachedError) {
