@@ -136,13 +136,14 @@ async function micDemo() {
 
   //modelPath: modelFilePath,
   //libraryPath: libraryFilePath,
+  /*
   let engineInstance = new Cheetah(
     accessKey,
     {
       endpointDurationSec: endpointDurationSec,
       enableAutomaticPunctuation: !disableAutomaticPunctuation
     });
-
+    */
     log("after cheetah init, before recorder")
     //const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex);
     const recorder = new PvRecorder(512, audioDeviceIndex);
@@ -166,25 +167,29 @@ async function micDemo() {
   while (!isInterrupted) {
     const pcm = await recorder.read();
     try {
+      /*
       const [partialTranscript, isEndpoint] = engineInstance.process(pcm);
       process.stdout.write(partialTranscript);
       if (isEndpoint === true) {
         const finalTranscript = engineInstance.flush();
         process.stdout.write(`${finalTranscript}\n`);
       }
+      */
     } catch (err) {
+      /*
       if (err instanceof CheetahActivationLimitReachedError) {
         console.error(`AccessKey '${accessKey}' has reached it's processing limit.`);
       } else {
         console.error(err);
       }
+      */
       isInterrupted = true;
     }
   }
 
   recorder.stop();
   recorder.release();
-  engineInstance.release();
+  //engineInstance.release();
   process.exit();
 }
 
