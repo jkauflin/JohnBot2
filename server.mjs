@@ -71,6 +71,7 @@ Modification History
 import 'dotenv/config'                            // Class to get parameters from .env file
 import {log} from './util.mjs'                    // My utility functions
 import {speakText,speakTextEmitter} from './audioFunctions.mjs'    // My audio (TTS) functions
+import {getChatBotReply} from './chatBot.mjs'    // My audio (TTS) functions
 //import fs, { readFileSync } from 'node:fs'
 //import path from 'node:path'
 //import { syncBuiltinESMExports } from 'node:module'
@@ -101,14 +102,15 @@ speakTextEmitter.on('doneSpeaking', () => {
 })
 
 
-var tempText = ""
+var speechText = ""
 
 async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
     const frameLength = 512
     const endpointDurationSec = 1
-    let isInterrupted = false;
+    let isInterrupted = false
+    let reply = ""
 
     /*
     if (showAudioDevicesDefined) {
@@ -161,16 +163,17 @@ async function startListening() {
                 const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
                 //console.log("partial = "+partialTranscript)
                 //process.stdout.write(partialTranscript)
-                tempText += partialTranscript
+                speechText += partialTranscript
                 if (isEndpoint === true) {
                     const finalTranscript = engineInstance.flush()
                     //process.stdout.write(`${finalTranscript}\n`);
-                    tempText += finalTranscript
-                    log(`tempText = ${tempText}`)
+                    speechText += finalTranscript
+                    log(`speechText = ${speechText}`)
+                    reply = getChatBotReply(speechText)
                     speaking = true
                     log('>>>>> speaking set to true')
-                    speakText(tempText)
-                    tempText = ""
+                    speakText(reply)
+                    speechText = ""
                 }
             } catch (err) {
                 /*

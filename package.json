@@ -21,7 +21,8 @@
     "@picovoice/cheetah-node": "^1.1.1",
     "@picovoice/pvrecorder-node": "^1.2.1",
     "dotenv": "^16.3.1",
-    "johnny-five": "^2.1.0"
+    "johnny-five": "^2.1.0",
+    "rivescript": "^1.19.0"
   },
   "engines": {
     "node": ">=14.0.0"

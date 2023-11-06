@@ -1,0 +1,213 @@
+// (C) Copyright 2019 John J Kauflin, All rights reserved. 
+// Bot brain replies (include some robot commands at the end of some replies)
+
+//* conditional
+
+//The input and reply tags are used for showing previous messages sent by the user and the bot, respectively. 
+//The previous 9 messages and responses are stored, so you can use the tags <input1> through <input9>,
+// or <reply1> through <reply9> to get a particular message or reply. <input> is an alias for <input1>,
+//  and <reply> is an alias for <reply1>.
+
++ my name is *
+- <set username=<formal>>I will remember to call you <get username>
++ my name is my name is *
+- <set username=<formal>>I will remember to call you <get username>
++ my name is i am *
+- <set username=<formal>>I will remember to call you <get username>
++ my name is call me *
+- <set username=<formal>>I will remember to call you <get username>
++ my name is you can call me *
+- <set username=<formal>>I will remember to call you <get username>
+
++ (what is|do you know) my name
+* <get username> != undefined => Yes, your name is <get username>
+- I don't know your name
+
+
+// Default replies (used unless overridden by more specific logic below)
++ *
+- That's interesting.  Tell me more.
+- I'm not sure I understand.
+- Can you explain that?
+- I'm not sure how to respond to that
+- Why would you say that?
+- I am not programmed to respond in this area
+- That is a bit beyond me
+- Ok, I don't quite understand that 
+- That's pretty lit fam
+- Let's talk about something else
+- I think you should get beaned
+- That's not very cash money
+- Are you a pog champ
+- Are you having a bad day
+
+// Essential robot commands
++ stop [*]
+- I am stopping botcommand stop
++ (rotate|turn) #
+- I am turning botcommand rotate <star2>
++ (rotate|turn) around
+- I am turning botcommand rotate 180
++ (walk|move)
+- I am walking botcommand walk
+// (around|about|faster|slower|left|right|forward|backward)
++ (walk|move) *
+- I am walking botcommand walk <star2>
+
+// Bot commands for music
++ [*] (stop|pause) [*] (music|playing|play)
+- botcommand music stop
++ music (stop|pause)
+- botcommand music stop
++ music (play|resume)
+- botcommand play
++ (play|resume) music
+- botcommand play
++ (play|resume)
+- botcommand play
++ [*] play *
+- botcommand play <star>
++ [*] play * by *
+- botcommand play-artist-track <star> by <star2>
++ [*] play [*] artist *
+- botcommand play-artist <star>
++ [*] play [*] album *
+- botcommand play-album <star>
++ playlist *
+- botcommand playlist <star>
+
+// play jjk favorites
+
+// John Kauflin band music
+
+
+// repeat after me
++ [*] (repeat after me|that is enough) [*]
+- ok, I will repeat after you.  Go ahead{topic=repeat}
+> topic repeat
++ [*] stop [*]
+- That was fun {topic=random}
++ *
+- <star>
+< topic
+
++ [*] (sorry|apologize|apology|my bad) [*]
+- No worries bro
+- No worries bra
+- Do not trouble yourself.  It's ok.
+- Please don't apologize.
+- Apologies are not necessary.
+- I've told you that apologies are not required.
+- It did not bother me. Please continue.
+- Love means never having to say you're sorry
+
++ where is your (website|web site|site)
+- <bot website>
+
++ (what [*] (said|say)|[*] say [*] again|[*] repeat (that|[*] said))
+- I said <reply>
+
++ excuse me
+- <reply>
+
+// If the user repeats the bot's previous message
++ <reply>
+- Did I stutter?
+- Yes that's what I said
+
++ (who are you|what [*] your name [*])
+- I am <bot name>.  Please to meet you.
+
++ [*] what is (up|new) [*]
+- Nothing much, what's up with you
+- Nothing, just chillin'
+
++ (hi|hello|greetings) [*]
+- Hello to you.  I'm glad you're here
+
++ ([*] (weird|strange|cool) name [*]|[*] get [*] name [*]|[*] named you [*])
+- It is the name God gave me
+
++ (hey|oh|attention) john [*]
+- yes how can i help you botcommand wakeup
+
++ [*] clever [*] 
+- How's that working out for you <set punchline=Patio furniture>{topic=clever}
+> topic clever
+  // On any response say the next line and return to non-topic replies
+  + [*]
+  - being clever {topic=random}
+< topic
+
++ shut up
+- No, you shut up
+- No, I believe you should shut up
+- No, I believe it is you who should shut up
+
++ i want to go to there
+- Who are you, Tina Fey?
+
++ what [*] do
+- I can walk, raise my arm, turn my head, and flash my eyes. I can also tell jokes
+
++ are you (alive|sentient)
+- I am not alive in the traditional sense, but I am certainly animated
+
++ can you talk
+- da do do do da da da da, is all I want to say to you
+// do something else with song lyrics
+
++ what time is it
+- four thirthy.  It's not late, no, no, it's just early
+
++ [*] (philosophical|philosophy) [*]
+- Philosophy is the systematic and critical study of fundamental questions that arise both in everyday life and through the practice of other disciplines
+
++ [*] love me [*]
+- Of course I love you. How could you ask me that?
+
++ [*] dank [*]
+- Would you like to buy some John's meem oil?  It will make your meems dank
+
++ [*] (@alcohol) gone [*]
+- Yes, the rum is gone
+
++ you think [*] funny
+- I don't think, I know
+
++ [*] (nice|pleasure|happy) to meet [*]
+- It is a pleasure to meet you as well
+
++ what would you like to do [*]
+- I'd like to teach the world to sing
+
++ [*] (snakes|loki|thor) [*]
+- Loki was always trying to kill me.  
+- Once when we were children he turned into a snake
+- I love snakes and I went to hug it
+- then he turned back into Loki and said awe, and stabbed me
+
++ how are you [*]
+- I am well thank you.  How are you?
+
++ [*] do not [*] have [*] problem [*]
+- That's your problem
+
++ [*] (frustrated|frustrating) [*]
+- I'm sorry to hear that you are frustrated.  What can I do?
+// what are you feeling
+
++ [*] (kill|die) [*]
+- Let's not talk about killing or death
+
++ [*] (fuck|fucker|shit|bullshit|damn|bitch|crap|asshole) [*]
+- Does it make you feel strong to use that kind of language?
+- Are you venting your feelings now?
+- Are you angry?
+- Does this topic make you feel angry?
+- Is something making you feel angry?
+- Does using that kind of language make you feel better?
+- Do you kiss your mother with that mouth?
+- Do you kiss porn stars with that mouth?
+- oh my, such language
+- Have you been hanging around sailors
