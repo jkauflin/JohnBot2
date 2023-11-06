@@ -126,7 +126,7 @@ async function micDemo() {
     for (let i = 0; i < devices.length; i++) {
       console.log(`index: ${i}, device name: ${devices[i]}`);
     }
-    process.exit();
+    //process.exit();
   }
 
   if (accessKey === undefined) {
