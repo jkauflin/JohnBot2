@@ -59,8 +59,8 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
             // the *entire* stdout and stderr (buffered)
             //console.log(`stdout: ${stdout}`);
             //console.log(`stderr: ${stderr}`);
+            log("AFTER exec")
         }
-        console.log("AFTER exec?")
     })
 }
 
