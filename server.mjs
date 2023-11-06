@@ -98,7 +98,7 @@ async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
     const frameLength = 512
-    const endpointDurationSec = 0.2;
+    const endpointDurationSec = 1
     let isInterrupted = false;
 
     /*
@@ -143,13 +143,19 @@ async function startListening() {
     */
     while (!isInterrupted) {
         const pcm = await recorder.read()
+        let tempText = ""
         try {
             const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
-            console.log("partial = "+partialTranscript)
+            //console.log("partial = "+partialTranscript)
+            if (partialTranscript.length > 0) {
+                tempText = tempText + " " + partialTranscript
+            }
             if (isEndpoint === true) {
                 const finalTranscript = engineInstance.flush()
-                console.log(`finalTranscript = ${finalTranscript}`)
+                tempText = tempText + " " + finalTranscript
+                console.log(`tempText = ${tempText}`)
                 //speakText(finalTranscript)
+                tempText = ""
             }
         } catch (err) {
             /*
