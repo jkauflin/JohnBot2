@@ -155,7 +155,7 @@ async function startListening() {
                 //process.stdout.write(`${finalTranscript}\n`);
                 tempText += finalTranscript
                 console.log(`tempText = ${tempText}`)
-                //speakText(tempText)
+                speakText(tempText)
                 tempText = ""
             }
         } catch (err) {
