@@ -145,7 +145,7 @@ async function startListening() {
         const pcm = await recorder.read()
         try {
             const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
-            //process.stdout.write(partialTranscript)
+            console.log("partial = "+partialTranscript)
             if (isEndpoint === true) {
                 const finalTranscript = engineInstance.flush()
                 console.log(`finalTranscript = ${finalTranscript}`)
