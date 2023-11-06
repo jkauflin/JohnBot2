@@ -98,8 +98,7 @@ async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
     const frameLength = 512
-    //const endpointDurationSec = 0.5;
-    const endpointDurationSec = 1
+    const endpointDurationSec = 0.2;
     let isInterrupted = false;
 
     /*
@@ -123,7 +122,7 @@ async function startListening() {
           enableAutomaticPunctuation: true
         })
 
-    const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex)
+    const recorder = new PvRecorder(frameLength, audioDeviceIndex)
     recorder.start()
     //console.log(`Using device: ${recorder.getSelectedDevice()}`);
     console.log("Listening... Press `ENTER` to stop:")
