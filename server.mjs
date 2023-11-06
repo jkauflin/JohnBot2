@@ -70,7 +70,7 @@ Modification History
 
 import 'dotenv/config'                            // Class to get parameters from .env file
 import {log} from './util.mjs'                    // My utility functions
-import {speakText} from './audioFunctions.mjs'    // My audio (TTS) functions
+import {speakText,speakTextEmitter} from './audioFunctions.mjs'    // My audio (TTS) functions
 //import fs, { readFileSync } from 'node:fs'
 //import path from 'node:path'
 //import { syncBuiltinESMExports } from 'node:module'
@@ -93,6 +93,13 @@ process.on('uncaughtException', function (e) {
 });
 
 log(">>> Starting JohnBot...")
+
+var speaking = false
+speakTextEmitter.on('doneSpeaking', () => {
+    log("in Server, doneSpeaking set to false")
+    speaking = false
+})
+
 
 var tempText = ""
 
@@ -148,31 +155,34 @@ async function startListening() {
     // you have to "stop listening" while it's speaking
 
     while (!isInterrupted) {
-        const pcm = await recorder.read()
-        try {
-            const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
-            //console.log("partial = "+partialTranscript)
-            //process.stdout.write(partialTranscript)
-            tempText += partialTranscript
-            if (isEndpoint === true) {
-                const finalTranscript = engineInstance.flush()
-                //process.stdout.write(`${finalTranscript}\n`);
-                tempText += finalTranscript
-                log(`tempText = ${tempText}`)
-                speakText(tempText)
-                tempText = ""
+        if (!speaking) {
+            const pcm = await recorder.read()
+            try {
+                const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
+                //console.log("partial = "+partialTranscript)
+                //process.stdout.write(partialTranscript)
+                tempText += partialTranscript
+                if (isEndpoint === true) {
+                    const finalTranscript = engineInstance.flush()
+                    //process.stdout.write(`${finalTranscript}\n`);
+                    tempText += finalTranscript
+                    log(`tempText = ${tempText}`)
+                    speaking = true
+                    speakText(tempText)
+                    tempText = ""
+                    isInterrupted = true;
+                }
+            } catch (err) {
+                /*
+                if (err instanceof CheetahActivationLimitReachedError) {
+                    console.error(`AccessKey '${accessKey}' has reached it's processing limit.`)
+                } else {
+                    console.error(err)
+                }
+                */
+                console.error(err)
                 isInterrupted = true;
             }
-        } catch (err) {
-            /*
-            if (err instanceof CheetahActivationLimitReachedError) {
-                console.error(`AccessKey '${accessKey}' has reached it's processing limit.`)
-            } else {
-                console.error(err)
-            }
-            */
-            console.error(err)
-            isInterrupted = true;
         }
     }
     
