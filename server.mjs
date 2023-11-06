@@ -97,7 +97,7 @@ log(">>> Starting JohnBot...")
 async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
-    //const frameLength = 
+    const frameLength = 512
     //const endpointDurationSec = 0.5;
     const endpointDurationSec = 1
     let isInterrupted = false;
@@ -123,7 +123,7 @@ async function startListening() {
           enableAutomaticPunctuation: true
         })
 
-    const recorder = new PvRecorder(Cheetah.frameLength, audioDeviceIndex)
+    const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex)
     recorder.start()
     //console.log(`Using device: ${recorder.getSelectedDevice()}`);
     console.log("Listening... Press `ENTER` to stop:")
