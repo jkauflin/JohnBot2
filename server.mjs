@@ -180,7 +180,7 @@ async function startListening() {
     recorder.release()
     engineInstance.release()
     log("STOPPED")
-    process.exit()
+    //process.exit()
 }
 
 startListening()
