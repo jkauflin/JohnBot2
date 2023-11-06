@@ -168,7 +168,7 @@ async function startListening() {
                     tempText += finalTranscript
                     log(`tempText = ${tempText}`)
                     speaking = true
-                    log('>>>>> speaking ste to true')
+                    log('>>>>> speaking set to true')
                     speakText(tempText)
                     tempText = ""
                 }
