@@ -147,7 +147,8 @@ async function startListening() {
         try {
             const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
             //console.log("partial = "+partialTranscript)
-            process.stdout.write(partialTranscript);
+            process.stdout.write(partialTranscript)
+            tempText = tempText.trim() + " " + partialTranscript.trim()
             /*
             if (partialTranscript.length > 0) {
                 tempText = tempText + " " + partialTranscript
@@ -156,10 +157,11 @@ async function startListening() {
             if (isEndpoint === true) {
                 const finalTranscript = engineInstance.flush()
                 process.stdout.write(`${finalTranscript}\n`);
+                tempText = tempText.trim() + " " + finalTranscript.trim()
                 //tempText = tempText + " " + finalTranscript
-                //console.log(`tempText = ${tempText}`)
+                console.log(`tempText = ${tempText}`)
                 //speakText(finalTranscript)
-                //tempText = ""
+                tempText = ""
             }
         } catch (err) {
             /*
