@@ -168,9 +168,9 @@ async function startListening() {
                     tempText += finalTranscript
                     log(`tempText = ${tempText}`)
                     speaking = true
+                    log('>>>>> speaking ste to true')
                     speakText(tempText)
                     tempText = ""
-                    isInterrupted = true;
                 }
             } catch (err) {
                 /*
@@ -189,8 +189,7 @@ async function startListening() {
     recorder.stop()
     recorder.release()
     engineInstance.release()
-    log("STOPPED")
-    //process.exit()
+    process.exit()
 }
 
 startListening()
