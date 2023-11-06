@@ -94,6 +94,13 @@ process.on('uncaughtException', function (e) {
 
 log(">>> Starting JohnBot...")
 
+var tempText = ""
+var tempText2 = ""
+
+process.stdout.on('data', (chunk) => {
+    tempText2 += chunk.toString()
+});
+
 async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
@@ -143,7 +150,6 @@ async function startListening() {
     */
     while (!isInterrupted) {
         const pcm = await recorder.read()
-        let tempText = ""
         try {
             const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
             //console.log("partial = "+partialTranscript)
@@ -160,8 +166,10 @@ async function startListening() {
                 tempText += finalTranscript
                 //tempText = tempText + " " + finalTranscript
                 console.log(`tempText = ${tempText}`)
+                console.log(`tempText2 = ${tempText2}`)
                 //speakText(finalTranscript)
                 tempText = ""
+                tempText2 = ""
             }
         } catch (err) {
             /*
