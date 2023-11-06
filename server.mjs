@@ -155,7 +155,7 @@ async function startListening() {
     // you have to "stop listening" while it's speaking
 
     while (!isInterrupted) {
-        if (!speaking) {
+        //if (!speaking) {
             const pcm = await recorder.read()
             try {
                 const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
@@ -183,7 +183,7 @@ async function startListening() {
                 console.error(err)
                 isInterrupted = true;
             }
-        }
+        //}
     }
     
     recorder.stop()
