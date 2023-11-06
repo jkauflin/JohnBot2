@@ -143,6 +143,10 @@ async function startListening() {
         engineInstance.release()
     })
     */
+
+    // *** PROBLEM - it hears what is being spoken.
+    // you have to "stop listening" while it's speaking
+
     while (!isInterrupted) {
         const pcm = await recorder.read()
         try {
@@ -154,9 +158,10 @@ async function startListening() {
                 const finalTranscript = engineInstance.flush()
                 //process.stdout.write(`${finalTranscript}\n`);
                 tempText += finalTranscript
-                console.log(`tempText = ${tempText}`)
+                log(`tempText = ${tempText}`)
                 speakText(tempText)
                 tempText = ""
+                isInterrupted = true;
             }
         } catch (err) {
             /*
@@ -174,6 +179,7 @@ async function startListening() {
     recorder.stop()
     recorder.release()
     engineInstance.release()
+    log("STOPPED")
     process.exit()
 }
 

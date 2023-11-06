@@ -60,6 +60,7 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
             //console.log(`stdout: ${stdout}`);
             //console.log(`stderr: ${stderr}`);
         }
+        console.log("AFTER exec?")
     })
 }
 
