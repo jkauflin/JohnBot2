@@ -55,9 +55,10 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
 */
 
     // *** need to sanitize textStr and make sure it does not have a single quote
-    /*
     let linuxCmd = `pico2wave -l en-US -w /tmp/botSpeak.wav "<volume level='15'><pitch level='60'>${textStr}" && aplay /tmp/botSpeak.wav`
     exec(linuxCmd, (err, stdout, stderr) => {
+        log("AFTER exec - emitting doneSpeaking")
+        speakTextEmitter.emit('doneSpeaking')
         if (err) {
             //some err occurred
             console.error(err)
@@ -65,12 +66,8 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
             // the *entire* stdout and stderr (buffered)
             //console.log(`stdout: ${stdout}`);
             //console.log(`stderr: ${stderr}`);
-            log("AFTER exec - emitting doneSpeaking")
-            speakTextEmitter.emit('doneSpeaking')
         }
     })
-    */
-    speakTextEmitter.emit('doneSpeaking')
 }
 
 // With full options
