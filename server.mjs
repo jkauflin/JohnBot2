@@ -97,8 +97,8 @@ log(">>> Starting JohnBot...")
 async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
     const audioDeviceIndex = 1
-    const frameLength = 512
-    const endpointDurationSec = 0.4;
+    const frameLength = 1024
+    const endpointDurationSec = 0.5;
     let isInterrupted = false;
 
     /*
@@ -148,7 +148,7 @@ async function startListening() {
             //process.stdout.write(partialTranscript)
             if (isEndpoint === true) {
                 const finalTranscript = engineInstance.flush()
-                console.log(`finalTranscrip = ${finalTranscript}`)
+                console.log(`finalTranscript = ${finalTranscript}`)
                 //speakText(finalTranscript)
             }
         } catch (err) {
