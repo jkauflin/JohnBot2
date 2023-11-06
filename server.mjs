@@ -61,331 +61,111 @@ Modification History
                 Implementing newest bootstrap 5 ideas
 2023-10-22 JJK  Re-do with newest OS (Bookworm) and ES6 modules
                 Try Fastify for https web server to handle RESTful API requests
+                *** Giving up on web servers - trying to get working on device
 2023-11-05 JJK  Working on audio capture from a USB microphone, and then
                 using picovoice for STT
+2023-11-06 JJK  Got Cheetah STT working from the mic demo and using the
+                pv recorder to record audio from the usb mic in device 1
 =============================================================================*/
 
-import 'dotenv/config'
-//import Fastify from 'fastify'
-import fs, { readFileSync } from 'node:fs'
+import 'dotenv/config'                            // Class to get parameters from .env file
+import {log} from './util.mjs'                    // My utility functions
+import {speakText} from './audioFunctions.mjs'    // My audio (TTS) functions
+//import fs, { readFileSync } from 'node:fs'
+//import path from 'node:path'
+//import { syncBuiltinESMExports } from 'node:module'
+//import { Buffer } from 'node:buffer'
+
 import readline from 'node:readline'
-import path from 'node:path'
-import { syncBuiltinESMExports } from 'node:module'
-import { Buffer } from 'node:buffer'
-//import fetch from 'node-fetch'              // Fetch to make HTTPS calls
-import johnnyFivePkg from 'johnny-five'     // Library to control the Arduino board
-import {log} from './util.mjs'
-//import {getConfig,completeRequest,updImgData} from './dataRepository.mjs'
-
-//import {WaveFile} from 'wavefile'
-//import pkg from 'wavefile';
-//const {WaveFile} = pkg;
-
-import {exec} from 'child_process'
-
-import {checkWaveFile,getInt16Frames} from './wave_util.mjs'
+//import {checkWaveFile,getInt16Frames} from './wave_util.mjs'
 import {PvRecorder} from '@picovoice/pvrecorder-node'
-//import {Cheetah,CheetahActivationLimitReachedError} from '@picovoice/cheetah-node'
-import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
-
-import cpkg from '@picovoice/cheetah-node';
-const {Cheetah,CheetahActivationLimitReachedError} = cpkg;
-
-
-log(">>> Starting server.mjs...")
-
-
-//const recorder = new PvRecorder(/*frameLength*/ 512);
-//const recorder = new PvRecorder(512, /*device index*/1);
-//const devices = PvRecorder.getAvailableDevices()
-//recorder.start()
-
-//const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
-//log("Cheetah version = "+handle.version)
-
-let isInterrupted = false;
-
-async function micDemo() {
-    
-    log("in mic demo")
-
-  let accessKey = process.env.PICOVOICE_ACCESS_KEY
-  //let libraryFilePath = program["library_file_path"];
-  //let modelFilePath = program["model_file_path"];
-  let audioDeviceIndex = 1
-  //let endpointDurationSec = program["endpoint_duration_sec"];
-  const endpointDurationSec = 0.4;
-  //let showAudioDevices = program["show_audio_devices"];
-  //let disableAutomaticPunctuation = program["disable_automatic_punctuation"];
-  let disableAutomaticPunctuation = false
-
-  //let showAudioDevicesDefined = showAudioDevices !== undefined;
-  let showAudioDevicesDefined = true
-
-  if (showAudioDevicesDefined) {
-    const devices = PvRecorder.getAvailableDevices();
-    for (let i = 0; i < devices.length; i++) {
-      console.log(`index: ${i}, device name: ${devices[i]}`);
-    }
-    //process.exit();
-  }
-
-  if (accessKey === undefined) {
-    console.log("No AccessKey provided");
-    process.exit();
-  }
-
-  //modelPath: modelFilePath,
-  //libraryPath: libraryFilePath,
-  let engineInstance = new Cheetah(
-    accessKey,
-    {
-      endpointDurationSec: endpointDurationSec,
-      enableAutomaticPunctuation: !disableAutomaticPunctuation
-    });
-    log("after cheetah init, before recorder")
-    //const recorder = new PvRecorder(engineInstance.frameLength, audioDeviceIndex);
-    const recorder = new PvRecorder(512, audioDeviceIndex);
-    recorder.start();
-
-  console.log(`Using device: ${recorder.getSelectedDevice()}`);
-
-  console.log(
-    "Listening... Press `ENTER` to stop:"
-  );
-
-  readline.emitKeypressEvents(process.stdin);
-  process.stdin.setRawMode(true);
-
-  process.stdin.on("keypress", (key, str) => {
-    if (str.sequence === '\r' || str.sequence === '\n') {
-      isInterrupted = true;
-    }
-  });
-
-  while (!isInterrupted) {
-    const pcm = await recorder.read();
-    try {
-      const [partialTranscript, isEndpoint] = engineInstance.process(pcm);
-      process.stdout.write(partialTranscript);
-      if (isEndpoint === true) {
-        const finalTranscript = engineInstance.flush();
-        process.stdout.write(`${finalTranscript}\n`);
-      }
-    } catch (err) {
-      if (err instanceof CheetahActivationLimitReachedError) {
-        console.error(`AccessKey '${accessKey}' has reached it's processing limit.`);
-      } else {
-        console.error(err);
-      }
-      isInterrupted = true;
-    }
-  }
-
-  recorder.stop();
-  recorder.release();
-  engineInstance.release();
-  process.exit();
-}
-
-micDemo();
-
-/*
-const handle = new Porcupine(
-    accessKey,
-    [BuiltinKeyword.GRASSHOPPER, BuiltinKeyword.BUMBLEBEE],
-    [0.5, 0.65]);
-
-// process a single frame of audio
-// the keywordIndex provides the index of the keyword detected, or -1 if no keyword was detected
-const keywordIndex = handle.process(frame);
-*/
-
-/*
-const handle = new Cheetah(process.env.PICOVOICE_ACCESS_KEY);
-
-function getNextAudioFrame() {
-  // ...
-  return audioFrame;
-}
-
-while (true) {
-    const audioFrame = getNextAudioFrame();
-    const [partialTranscript, isEndpoint] = handle.process(audioFrame);
-    if (isEndpoint) {
-        finalTranscript = handle.flush()
-        console.log("finalTranscript = "+finalTranscript)
-    }
-}
-*/
-
-// Constants for pin numbers and commands
-const LEFT_EYE = 45;
-const RIGHT_EYE = 44;
-
-var eyes;
-var leftEyeLed;
-var rightEyeLed;
-
-var eyesOn = false;
-
-/*
-const fastify = Fastify({
-    logger: true,
-    http2: true,
-    https: {
-        allowHTTP1: true, // fallback support for HTTP1
-        // Key and certificate that have been signed by a CA root authority installed on server
-        key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
-        cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
-    }
-})
-*/
-
-/*
-http2: true,
-https: {
-  // Key and certificate that have been signed by a CA root authority installed on server
-  key: fs.readFileSync(process.env.SSL_PRIVATE_KEY_FILE_LOC),
-  cert: fs.readFileSync(process.env.SSL_PUBLIC_CERT_FILE_LOC)
-}
-*/
-
-const {Board,Led,Leds,Relays,Proximity} = johnnyFivePkg
+//import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
+import CheetahPkg from '@picovoice/cheetah-node'
+const {Cheetah,CheetahActivationLimitReachedError} = CheetahPkg
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
-  log("UncaughtException, error = " + e);
-  console.error(e.stack);
-  // Stop the process
-  // 2017-12-29 JJK - Don't stop for now, just log the error
-  //process.exit(1);
+    log("UncaughtException, error = " + e);
+    console.error(e.stack);
+    // Stop the process
+    // 2017-12-29 JJK - Don't stop for now, just log the error
+    //process.exit(1);
 });
 
-var board = null
-var relays = null
+log(">>> Starting JohnBot...")
 
+async function startListening() {
+    const accessKey = process.env.PICOVOICE_ACCESS_KEY
+    const audioDeviceIndex = 1
+    const frameLength = 512
+    const endpointDurationSec = 0.4;
+    let isInterrupted = false;
 
-/*
-fastify.post('/botcmd', async function handler (req, res) {
-    let botCommands = req.body
-    if (botCommands.say != undefined) {
-        speakText(botCommands.say)
-    }
-    //return { hello: 'world' }
-    return
-})
-*/
-
-// Declare a route
-/*
-fastify.get('/botcmd', (req, res) => {
-    console.log("in /botcmd")
-    console.log("in /botcmd, body = "+req.body)
-    let botCommands = JSON.parse(req.body)
-    if (botCommands.say != undefined) {
-    }
-   return
-})
-*/
-
-function speakText(textStr) {
-    console.log("in speakText, text = "+textStr)
-    //player.stop();
-    //player.pause();
-    //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
-    //picoSpeaker.speak("<volume level='15'><pitch level='60'>"+textStr).then(function() {
-    //picoSpeaker.speak("<volume level='20'><pitch level='70'>" + textStr).then(function () {
     /*
-    picoSpeaker.speak("<volume level='10'><pitch level='60'>" + textStr).then(function () {
-        //console.log("done speaking");
-        //player.resume();
-    }.bind(this));
+    if (showAudioDevicesDefined) {
+        const devices = PvRecorder.getAvailableDevices();
+        for (let i = 0; i < devices.length; i++) {
+        console.log(`index: ${i}, device name: ${devices[i]}`);
+      }
+      process.exit();
+    }
     */
-/*
-error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav 
-" <volume level='15'><pitch level='60'>I am the John Bot. Pleased to meet you." && aplay /tmp/5a9ea3bbf7dc38e1636adc1470a49843.wav
-*/
+  
+    if (accessKey === undefined) {
+      console.log("No AccessKey provided");
+      process.exit();
+    }
+  
+    let engineInstance = new Cheetah(accessKey,
+        {
+          endpointDurationSec: endpointDurationSec,
+          enableAutomaticPunctuation: true
+        })
 
-    // *** need to sanitize textStr and make sure it does not have a single quote
-    let linuxCmd = `pico2wave -w botSpeak.wav "${textStr}" && aplay botSpeak.wav`
-    //exec('dir', (err, stdout, stderr) => {
-    exec(linuxCmd, (err, stdout, stderr) => {
-        if (err) {
-            //some err occurred
-            console.error(err)
-        } else {
-            // the *entire* stdout and stderr (buffered)
-            console.log(`stdout: ${stdout}`);
-            console.log(`stderr: ${stderr}`);
+    const recorder = new PvRecorder(frameLength, audioDeviceIndex)
+    recorder.start()
+    //console.log(`Using device: ${recorder.getSelectedDevice()}`);
+    console.log("Listening... Press `ENTER` to stop:")
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.on("keypress", (key, str) => {
+        if (str.sequence === '\r' || str.sequence === '\n') {
+            isInterrupted = true
         }
     })
-}
-
-
-// Run the server!
-/*
-try {
-    await fastify.listen({ port: process.env.WEB_PORT, host: '0.0.0.0'  })
-} catch (err) {
-    fastify.log.error(err)
-    process.exit(1)
-}
-*/
-
-
-// Create Johnny-Five board object
-// When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
-// be sure to shut the REPL off!
-try {
-    log("===== Starting board initialization =====")
-    board = new Board({
-        repl: false,
-        debug: false
-        //    timeout: 12000
-    })
-} catch (err) {
-    log('Error in main initialization, err = ' + err)
-    console.error(err.stack)
-}
-
-board.on("error", function (err) {
-    log("*** Error in Board ***")
-    console.error(err.stack)
-})
-
-//-------------------------------------------------------------------------------------------------------
-// When the board is ready, create and intialize global component objects (to be used by functions)
-//-------------------------------------------------------------------------------------------------------
-board.on("ready", () => {
-    log("*** board ready ***")
 
     process.on('SIGTERM', function () {
         log('on SIGTERM')
-        //turnRelaysOFF()
+        recorder.stop()
+        recorder.release()
+        engineInstance.release()
     })
 
-    leftEyeLed = new Led(LEFT_EYE);
-    rightEyeLed = new Led(RIGHT_EYE);
-    eyes = new Leds([leftEyeLed, rightEyeLed]);
-    //eyes.on();
-    //eyes.off();
-    //eyes.strobe(150);
-
-    /*
-    new five.Proximity({
-      controller: "GP2Y0A21YK",
-      pin: "A8"
-    });
-    */
+    while (!isInterrupted) {
+        const pcm = await recorder.read()
+        try {
+            const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
+            process.stdout.write(partialTranscript)
+            if (isEndpoint === true) {
+                const finalTranscript = engineInstance.flush()
+                process.stdout.write(`${finalTranscript}\n`)
+                speakText(finalTranscript)
+            }
+        } catch (err) {
+            if (err instanceof CheetahActivationLimitReachedError) {
+                console.error(`AccessKey '${accessKey}' has reached it's processing limit.`)
+            } else {
+                console.error(err)
+            }
+            isInterrupted = true;
+        }
+    }
     
-    // Start the function to toggle air ventilation ON and OFF
-    /*
-    log("Starting Air toggle interval")
-    setTimeout(toggleAir, 5000)
-    // Start sending metrics 10 seconds after starting (so things are calm)
-    setTimeout(logMetric, 10000)
-    */
+    recorder.stop()
+    recorder.release()
+    engineInstance.release()
+    process.exit()
+}
 
-    log("End of board.on (initialize) event")
-})
+startListening()
+

@@ -19,11 +19,9 @@
   "homepage": "https://github.com/jkauflin/JohnBot2#readme",
   "dependencies": {
     "@picovoice/cheetah-node": "^1.1.1",
-    "@picovoice/porcupine-node": "^3.0.0",
     "@picovoice/pvrecorder-node": "^1.2.1",
     "dotenv": "^16.3.1",
-    "johnny-five": "^2.1.0",
-    "serialport": "latest"
+    "johnny-five": "^2.1.0"
   },
   "engines": {
     "node": ">=14.0.0"
