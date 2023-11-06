@@ -152,11 +152,14 @@ async function startListening() {
                 //speakText(finalTranscript)
             }
         } catch (err) {
+            /*
             if (err instanceof CheetahActivationLimitReachedError) {
                 console.error(`AccessKey '${accessKey}' has reached it's processing limit.`)
             } else {
                 console.error(err)
             }
+            */
+            console.error(err)
             isInterrupted = true;
         }
     }
