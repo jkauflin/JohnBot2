@@ -34,8 +34,8 @@
 //import {speakText,stopSpeaking,stopAll,startRecognizing} from './speech.js'
 import {log} from './util.mjs'                    // My utility functions
 
-import RiveScriptPkg from 'rivescript'
-const {RiveScript} = RiveScriptPkg
+import RiveScript from 'rivescript'
+//const {RiveScript} = RiveScriptPkg
 var userName = "local-user"
 
 // Create our RiveScript interpreter.
