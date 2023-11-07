@@ -66,24 +66,21 @@ Modification History
                 using picovoice for STT
 2023-11-06 JJK  Got Cheetah STT working from the mic demo and using the
                 pv recorder to record audio from the usb mic in device 1.
-                Implementing RiveScript brain for replies and bot commands
+                Implementing RiveScript brain for replies and bot commands,
+                and pico on Linux for TTS
 =============================================================================*/
 
-import 'dotenv/config'                            // Class to get parameters from .env file
-import {log} from './util.mjs'                    // My utility functions
-import {speakText,speaking} from './audioFunctions.mjs'    // My audio (TTS) functions
-import {getChatBotReply} from './chatBot.mjs'    // My audio (TTS) functions
-//import fs, { readFileSync } from 'node:fs'
-//import path from 'node:path'
-//import { syncBuiltinESMExports } from 'node:module'
-//import { Buffer } from 'node:buffer'
+import 'dotenv/config'                                      // Class to get parameters from .env file
+import {log} from './util.mjs'                              // My utility functions
+import {speakText,speaking} from './audioFunctions.mjs'     // My audio (TTS) functions
+import {} from './botFunctions.mjs'                         // My audio (TTS) functions
+import {getChatBotReply} from './chatBot.mjs'               // My audio (TTS) functions
 
 import readline from 'node:readline'
-//import {checkWaveFile,getInt16Frames} from './wave_util.mjs'
-import {PvRecorder} from '@picovoice/pvrecorder-node'
-//import {Porcupine,BuiltinKeyword} from '@picovoice/porcupine-node'
-import CheetahPkg from '@picovoice/cheetah-node'
+import {PvRecorder} from '@picovoice/pvrecorder-node'       // Audio recorder using USB Mic
+import CheetahPkg from '@picovoice/cheetah-node'            // Speech-to-Text engine
 const {Cheetah,CheetahActivationLimitReachedError} = CheetahPkg
+var speechText = ""
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
@@ -95,16 +92,6 @@ process.on('uncaughtException', function (e) {
 });
 
 log(">>> Starting JohnBot...")
-
-/*
-var speaking = false
-speakTextEmitter.on('doneSpeaking', () => {
-    log("in Server, doneSpeaking set to false")
-    speaking = false
-})
-*/
-
-var speechText = ""
 
 async function startListening() {
     const accessKey = process.env.PICOVOICE_ACCESS_KEY
@@ -128,11 +115,11 @@ async function startListening() {
       process.exit();
     }
   
-    let engineInstance = new Cheetah(accessKey,
-        {
-          endpointDurationSec: endpointDurationSec,
-          enableAutomaticPunctuation: true
-        })
+    let cheetahSTTengine = new Cheetah(accessKey,
+    {
+        endpointDurationSec: endpointDurationSec,
+        enableAutomaticPunctuation: true
+    })
 
     const recorder = new PvRecorder(frameLength, audioDeviceIndex)
     recorder.start()
@@ -150,21 +137,20 @@ async function startListening() {
         log('on SIGTERM')
         recorder.stop()
         recorder.release()
-        engineInstance.release()
+        cheetahSTTengine.release()
     })
     */
 
     while (!isInterrupted) {
         const pcm = await recorder.read()
-        // Stop translating speech audio when actively speaking (because it translates that)
+        // Only translate speech audio when NOT actively speaking (because it translates that as well)
         if (!speaking) {
             try {
-                const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
-                //console.log("partial = "+partialTranscript)
+                const [partialTranscript, isEndpoint] = cheetahSTTengine.process(pcm)
                 //process.stdout.write(partialTranscript)
                 speechText += partialTranscript
                 if (isEndpoint === true) {
-                    const finalTranscript = engineInstance.flush()
+                    const finalTranscript = cheetahSTTengine.flush()
                     //process.stdout.write(`${finalTranscript}\n`);
                     speechText += finalTranscript
                     log(`speechText = ${speechText}`)
@@ -176,13 +162,6 @@ async function startListening() {
                     speechText = ""
                 }
             } catch (err) {
-                /*
-                if (err instanceof CheetahActivationLimitReachedError) {
-                    console.error(`AccessKey '${accessKey}' has reached it's processing limit.`)
-                } else {
-                    console.error(err)
-                }
-                */
                 console.error(err)
                 isInterrupted = true;
             }
@@ -191,19 +170,8 @@ async function startListening() {
     
     recorder.stop()
     recorder.release()
-    engineInstance.release()
+    cheetahSTTengine.release()
     process.exit()
 }
 
 startListening()
-
-/*
-setTimeout(testReply,5000)
-
-function testReply() {
-    getChatBotReply("hello johnbot")
-    .then(reply => {
-        log("after call, reply = "+reply)
-    })
-}
-*/

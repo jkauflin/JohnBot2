@@ -29,6 +29,7 @@
  * --------------------------------------------------------------------------
  * 2023-10-28 JJK   Re-starting JohnBot development.
  * 2023-11-06 JJK   Moved back to JohnBot project for the brain responses
+ * 2023-11-07 JJK   Got RiveScript and promise reply working
  *============================================================================*/
 
 //import {speakText,stopSpeaking,stopAll,startRecognizing} from './speech.js'
@@ -42,18 +43,6 @@ var userName = "local-user"
 const brain = new RiveScript();
 // Load our RiveScript files from the brain folder.
 brain.loadDirectory("./brain").then(brainReady).catch(brainError);
-/*
-brain.loadFile([
-    "./brain/begin.rive",
-    //        "js/brain/eliza.rive",
-    //        "js/brain/admin.rive",
-    "./brain/main.rive",
-    "./brain/jokes.rive",
-    //        "js/brain/clients.rive",
-    //        "js/brain/myself.rive",
-    "./brain/javascript.rive"
-]).then(brainReady).catch(brainError);
-*/
 //    brain.parse()   // dynamically parse and load script?
 // https://github.com/aichaos/rivescript-js/blob/master/docs/rivescript.md\
 function brainReady() {

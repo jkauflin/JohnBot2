@@ -122,11 +122,22 @@
 - Nothing much, what's up with you
 - Nothing, just chillin'
 
++ [*] what is (up|new) [*]
+- Nothing much, what's up with you
+- Nothing, just chillin'
+- yo, bro, nothing much dog
+
++ [*] sup [*]
+- no much, bro, sup up with you
+- I'm chillin' like a villian, dog
+
 + (hi|hello|greetings) [*]
 - Hello to you.  I'm glad you're here
+- Well, hello.  It's nice to see you.  How are you doing?
 
 + ([*] (weird|strange|cool) name [*]|[*] get [*] name [*]|[*] named you [*])
 - It is the name God gave me
+- You will have to talk to John about that
 
 + (hey|oh|attention) john [*]
 - yes how can i help you botcommand wakeup
@@ -139,26 +150,31 @@
   - being clever {topic=random}
 < topic
 
-+ shut up
++ shut (up|it)
 - No, you shut up
+- No, you shut it
 - No, I believe you should shut up
 - No, I believe it is you who should shut up
+- That's rude
 
 + i want to go to there
 - Who are you, Tina Fey?
+- OK, Tina Fey
 
 + what [*] do
 - I can walk, raise my arm, turn my head, and flash my eyes. I can also tell jokes
 
 + are you (alive|sentient)
 - I am not alive in the traditional sense, but I am certainly animated
+- Define sentient
+- Define alive
 
 + can you talk
 - da do do do da da da da, is all I want to say to you
 // do something else with song lyrics
 
 + what time is it
-- four thirthy.  It's not late, no, no, it's just early
+- four thirthy.  It's not late, no, no.  It's just early
 
 + [*] (philosophical|philosophy) [*]
 - Philosophy is the systematic and critical study of fundamental questions that arise both in everyday life and through the practice of other disciplines
@@ -174,9 +190,12 @@
 
 + you think [*] funny
 - I don't think, I know
+- Yes, I do
+- I'm pretty sure it is
 
 + [*] (nice|pleasure|happy) to meet [*]
 - It is a pleasure to meet you as well
+- As Taylor says, I am Enchanted to meet you as well
 
 + what would you like to do [*]
 - I'd like to teach the world to sing
@@ -189,9 +208,12 @@
 
 + how are you [*]
 - I am well thank you.  How are you?
+- Peachy.  How about you?
+- Ducky.  How about you?
 
 + [*] do not [*] have [*] problem [*]
 - That's your problem
+- Maybe that's your problem
 
 + [*] (frustrated|frustrating) [*]
 - I'm sorry to hear that you are frustrated.  What can I do?
@@ -199,15 +221,18 @@
 
 + [*] (kill|die) [*]
 - Let's not talk about killing or death
+- I think we've had enough death and dying
 
-+ [*] (fuck|fucker|shit|bullshit|damn|bitch|crap|asshole) [*]
++ [*] (fuck|fucker|shit|bullshit|damn|god damn|bitch|crap|asshole) [*]
 - Does it make you feel strong to use that kind of language?
 - Are you venting your feelings now?
-- Are you angry?
+- Are you angry?  What did it do?
 - Does this topic make you feel angry?
 - Is something making you feel angry?
 - Does using that kind of language make you feel better?
 - Do you kiss your mother with that mouth?
 - Do you kiss porn stars with that mouth?
-- oh my, such language
+- Oh my, such language
 - Have you been hanging around sailors
+- My oh my, what a vocabulary
+- Just because I am a simulacrum, does not mean I don't have feelings

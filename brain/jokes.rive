@@ -40,7 +40,7 @@
 
 
 + [*] tell [*] [joke|one] [*] wine [joke]
-- What is a horse's favorite wine <set punchline=Chardonnay>{topic=joke}
+- What is a horse's favorite wine <set punchline=Chardonnaay>{topic=joke}
 + [*] tell [*] [joke|one] [*] irish [joke]
 - What's Irish and stays out all night <set punchline=Patio furniture>{topic=joke}
 + [*] tell [*] [joke|one] [*] moon [joke]

@@ -13,10 +13,6 @@ Modification History
 import {log} from './util.mjs'              // My utility functions
 import {exec} from 'child_process'          // Class to execute Linux commands
 
-//import { EventEmitter } from 'node:events'
-//class SpeakTextEmitter extends EventEmitter {}
-//export const speakTextEmitter = new SpeakTextEmitter()
-
 export var speaking = false
 
 /*
@@ -61,7 +57,6 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
     exec(linuxCmd, (err, stdout, stderr) => {
         log("AFTER exec - emitting doneSpeaking")
         speaking = false
-        //speakTextEmitter.emit('doneSpeaking')
         if (err) {
             //some err occurred
             console.error(err)
