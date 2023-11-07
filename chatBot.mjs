@@ -41,7 +41,7 @@ var userName = "local-user"
 // Create our RiveScript interpreter.
 var brain = new RiveScript();
 // Load our RiveScript files from the brain folder.
-brain.loadDirectory("brain").then(brainReady).catch(brainError);
+brain.loadDirectory("./brain").then(brainReady).catch(brainError);
 /*
 brain.loadFile([
     "js/brain/begin.rive",
