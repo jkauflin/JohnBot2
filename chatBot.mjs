@@ -39,19 +39,19 @@ import RiveScript from 'rivescript'
 var userName = "local-user"
 
 // Create our RiveScript interpreter.
-var brain = new RiveScript();
+const brain = new RiveScript();
 // Load our RiveScript files from the brain folder.
 brain.loadDirectory("./brain").then(brainReady).catch(brainError);
 /*
 brain.loadFile([
-    "js/brain/begin.rive",
+    "./brain/begin.rive",
     //        "js/brain/eliza.rive",
     //        "js/brain/admin.rive",
-    "js/brain/main.rive",
-    "js/brain/jokes.rive",
+    "./brain/main.rive",
+    "./brain/jokes.rive",
     //        "js/brain/clients.rive",
     //        "js/brain/myself.rive",
-    "js/brain/javascript.rive"
+    "./brain/javascript.rive"
 ]).then(brainReady).catch(brainError);
 */
 //    brain.parse()   // dynamically parse and load script?
@@ -59,7 +59,7 @@ brain.loadFile([
 function brainReady() {
     // Now to sort the replies!
     brain.sortReplies()
-    //console.log("Brain loaded and sorted")
+    log("Brain loaded and sorted")
 }
 function brainError(err, filename, lineno) {
     log("Error in chatBot loading brain, err = " + err)
@@ -91,11 +91,10 @@ export function getChatBotReply(speechText) {
     }
     */
 
-    let replyResponse = "No reply."
     // Call the RiveScript interpreter to get a reply
-    brain.reply(userName, speechText).then(function (reply) {
-        //console.log("brain reply = " + reply);
-        replyResponse = reply
+    return brain.reply(userName, speechText).then(function (reply) {
+        log("chatBot brain reply = " + reply);
+        return reply
         
         /*
         if (reply.search("I will remember to call you ")) {
@@ -132,7 +131,7 @@ export function getChatBotReply(speechText) {
         log(e)
     })
 
-    return replyResponse
+    //return replyResponse
 
 } // function handleTextFromSpeech(speechText) {
 

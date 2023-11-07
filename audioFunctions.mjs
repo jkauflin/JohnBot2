@@ -13,10 +13,11 @@ Modification History
 import {log} from './util.mjs'              // My utility functions
 import {exec} from 'child_process'          // Class to execute Linux commands
 
-import { EventEmitter } from 'node:events'
-class SpeakTextEmitter extends EventEmitter {}
-export const speakTextEmitter = new SpeakTextEmitter()
+//import { EventEmitter } from 'node:events'
+//class SpeakTextEmitter extends EventEmitter {}
+//export const speakTextEmitter = new SpeakTextEmitter()
 
+export var speaking = false
 
 /*
 var picoConfig = {
@@ -37,7 +38,8 @@ var picoConfig = {
 */
 
 export function speakText(textStr) {
-    log("in speakText, text = "+textStr)
+    speaking = true
+    log("in speakText (Speaking = true), text = "+textStr)
     //player.stop();
     //player.pause();
     //words = '<volume level=\'60\'><pitch level=\'133\'>' + words + '</pitch></volume>'
@@ -58,7 +60,8 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
     let linuxCmd = `pico2wave -l en-US -w /tmp/botSpeak.wav "<volume level='15'><pitch level='60'>${textStr}" && aplay /tmp/botSpeak.wav`
     exec(linuxCmd, (err, stdout, stderr) => {
         log("AFTER exec - emitting doneSpeaking")
-        speakTextEmitter.emit('doneSpeaking')
+        speaking = false
+        //speakTextEmitter.emit('doneSpeaking')
         if (err) {
             //some err occurred
             console.error(err)

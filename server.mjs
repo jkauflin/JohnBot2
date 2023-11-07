@@ -65,12 +65,13 @@ Modification History
 2023-11-05 JJK  Working on audio capture from a USB microphone, and then
                 using picovoice for STT
 2023-11-06 JJK  Got Cheetah STT working from the mic demo and using the
-                pv recorder to record audio from the usb mic in device 1
+                pv recorder to record audio from the usb mic in device 1.
+                Implementing RiveScript brain for replies and bot commands
 =============================================================================*/
 
 import 'dotenv/config'                            // Class to get parameters from .env file
 import {log} from './util.mjs'                    // My utility functions
-import {speakText,speakTextEmitter} from './audioFunctions.mjs'    // My audio (TTS) functions
+import {speakText,speaking} from './audioFunctions.mjs'    // My audio (TTS) functions
 import {getChatBotReply} from './chatBot.mjs'    // My audio (TTS) functions
 //import fs, { readFileSync } from 'node:fs'
 //import path from 'node:path'
@@ -95,12 +96,13 @@ process.on('uncaughtException', function (e) {
 
 log(">>> Starting JohnBot...")
 
+/*
 var speaking = false
 speakTextEmitter.on('doneSpeaking', () => {
     log("in Server, doneSpeaking set to false")
     speaking = false
 })
-
+*/
 
 var speechText = ""
 
@@ -110,7 +112,6 @@ async function startListening() {
     const frameLength = 512
     const endpointDurationSec = 1
     let isInterrupted = false
-    let reply = ""
 
     /*
     if (showAudioDevicesDefined) {
@@ -153,11 +154,9 @@ async function startListening() {
     })
     */
 
-    // *** PROBLEM - it hears what is being spoken.
-    // you have to "stop listening" while it's speaking
-
     while (!isInterrupted) {
         const pcm = await recorder.read()
+        // Stop translating speech audio when actively speaking (because it translates that)
         if (!speaking) {
             try {
                 const [partialTranscript, isEndpoint] = engineInstance.process(pcm)
@@ -169,10 +168,11 @@ async function startListening() {
                     //process.stdout.write(`${finalTranscript}\n`);
                     speechText += finalTranscript
                     log(`speechText = ${speechText}`)
-                    reply = getChatBotReply(speechText)
-                    speaking = true
-                    log('>>>>> speaking set to true')
-                    speakText(reply)
+                    getChatBotReply(speechText)
+                    .then(reply => {
+                        //log("after call, reply = "+reply)
+                        speakText(reply)
+                    })
                     speechText = ""
                 }
             } catch (err) {
@@ -197,3 +197,13 @@ async function startListening() {
 
 startListening()
 
+/*
+setTimeout(testReply,5000)
+
+function testReply() {
+    getChatBotReply("hello johnbot")
+    .then(reply => {
+        log("after call, reply = "+reply)
+    })
+}
+*/
