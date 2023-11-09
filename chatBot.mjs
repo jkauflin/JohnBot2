@@ -120,8 +120,6 @@ export function getChatBotReply(speechText) {
         log(e)
     })
 
-    //return replyResponse
-
 } // function handleTextFromSpeech(speechText) {
 
 /*
