@@ -90,10 +90,12 @@ var eyesOn = false;
 var speaking = false;
 
 // Handle a termination signal
+/*
 process.on('SIGTERM', function () {
     log('>>> in bot - on SIGTERM - allStop')
     allStop()
 })
+*/
 
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 

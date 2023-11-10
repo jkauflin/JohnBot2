@@ -131,6 +131,7 @@ async function startListening() {
         }
     })
 
+    /*
     process.on('SIGTERM', function () {
         log('Server on SIGTERM')
         recorder.stop()
@@ -138,6 +139,7 @@ async function startListening() {
         cheetahSTTengine.release()
         process.exit()
     })
+    */
 
     while (!isInterrupted) {
         const pcm = await recorder.read()
@@ -155,6 +157,9 @@ async function startListening() {
                     // Check for override stop command
                     if (speechText.toUpperCase().includes("STOP")) {
                         allStop();
+                    }
+                    else if (speechText.toUpperCase() == "EXIT") {
+                        isInterrupted = true
                     } else {
                         getChatBotReply(speechText) // ChatBot function
                         .then(reply => {
