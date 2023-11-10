@@ -89,6 +89,12 @@ var eyesOn = false;
 
 var speaking = false;
 
+// Handle a termination signal
+process.on('SIGTERM', function () {
+    log('>>> in bot - on SIGTERM - allStop')
+    allStop()
+})
+
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
 // be sure to shut the REPL off!
@@ -115,16 +121,6 @@ board.on("error", function (err) {
 board.on("ready", () => {
     log("*** board ready ***")
 
-    // If the board is exiting, execute cleanup actions
-    process.on("exit", function () {
-        log("on EXIT")
-        allStop()
-    })
-    // Handle a termination signal
-    process.on('SIGTERM', function () {
-        log('on SIGTERM')
-        allStop()
-    })
 
     leftEyeLed = new Led(LEFT_EYE);
     rightEyeLed = new Led(RIGHT_EYE);

@@ -84,11 +84,9 @@ var speechText = ""
 
 // General handler for any uncaught exceptions
 process.on('uncaughtException', function (e) {
-    log("UncaughtException, error = " + e);
-    console.error(e.stack);
-    // Stop the process
-    // 2017-12-29 JJK - Don't stop for now, just log the error
-    //process.exit(1);
+    log("UncaughtException, error = " + e)
+    console.error(e.stack)
+    process.exit()
 });
 
 log(">>> Starting JohnBot...")
@@ -111,8 +109,8 @@ async function startListening() {
     */
   
     if (accessKey === undefined) {
-      console.log("No AccessKey provided");
-      process.exit();
+      console.log("No AccessKey provided")
+      process.exit()
     }
   
     let cheetahSTTengine = new Cheetah(accessKey,
@@ -133,17 +131,12 @@ async function startListening() {
         }
     })
 
-    process.on("exit", function () {
-        log("Server on EXIT");
-        recorder.stop()
-        recorder.release()
-        cheetahSTTengine.release()
-    });
     process.on('SIGTERM', function () {
         log('Server on SIGTERM')
         recorder.stop()
         recorder.release()
         cheetahSTTengine.release()
+        process.exit()
     })
 
     while (!isInterrupted) {
