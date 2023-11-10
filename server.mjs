@@ -72,7 +72,7 @@ Modification History
 
 import 'dotenv/config'                                      // Class to get parameters from .env file
 import {log} from './util.mjs'                              // My utility functions
-import {speakText,speaking} from './audioFunctions.mjs'     // My audio (TTS) functions
+import {speakText,speaking,testPlay,playerStop} from './audioFunctions.mjs'     // My audio (TTS) functions
 import {allStop,animateSpeech} from './botFunctions.mjs'            // My audio (TTS) functions
 import {getChatBotReply} from './chatBot.mjs'               // My audio (TTS) functions
 
@@ -97,6 +97,8 @@ async function startListening() {
     const frameLength = 512
     const endpointDurationSec = 1
     let isInterrupted = false
+    var textToSpeak = ""
+    var commandPos = ""
 
     /*
     if (showAudioDevicesDefined) {
@@ -162,8 +164,19 @@ async function startListening() {
                         getChatBotReply(speechText) // ChatBot function
                         .then(reply => {
                             log("reply = "+reply)
-                            speakText(reply)        // Audio function (TTS)
-                            animateSpeech(reply)    // Bot function (physical robot actions)
+                            var commandPos = reply.search("botcommand");
+                            if (commandPos >= 0) {
+                                _executeBotCommands(reply.substr(commandPos + 11));
+                                // Get the text before the bot command
+                                textToSpeak = reply.substr(0,commandPos-1)
+                            } else {
+                                textToSpeak = reply
+                            }                   
+                            // If there is something for the bot to say, speak it and animate it
+                            if (textToSpeak.length > 0) {
+                                speakText(textToSpeak)        // Audio function (TTS)
+                                animateSpeech(textToSpeak)    // Bot function (physical robot actions)
+                            }
                         })
                     }
                     speechText = ""
@@ -183,3 +196,48 @@ async function startListening() {
 
 // wait for an amount of time till you know the botFunctions are ready - maybe a botReady variable?
 startListening()
+
+function _executeBotCommands(cmdStr) {
+    if (cmdStr == "stop") {
+        //sendCommand('{"stop":1}');
+        //music.stop();
+    } else if (cmdStr.substr(0, 4) == "walk") {
+        //sendCommand('{"walk":1, "walkCommand":"' + cmdStr.substr(5) + '"}');
+    } else if (cmdStr.search("rotate") >= 0) {
+        /*
+        var tempDegrees = cmdStr.substr(7);
+        if (tempDegrees == null || tempDegrees == '') {
+            tempDegrees = "180";
+        } else if (tempDegrees == 'around') {
+            tempDegrees = "180";
+        }
+        sendCommand('{"rotate":1,"rotateDirection":"R","rotateDegrees":' + tempDegrees + '}');
+        */
+    } else if (cmdStr.search("play") >= 0) {
+        if (cmdStr.search("play-artist-track") >= 0) {
+            // play-artist-track <star> by <star2>
+            // 18, then by and end
+        }
+        else if (cmdStr.search("play-artist") >= 0) {
+            // play-artist <star>
+            //music.searchAndPlay(cmdStr.substr(12), "artist");
+        }
+        else if (cmdStr.search("play-album") >= 0) {
+            //music.searchAndPlay(cmdStr.substr(11), "album");
+        }
+        else if (cmdStr.search("playlist") >= 0) {
+            // playlist <star>
+            //music.searchAndPlay(cmdStr.substr(9), "playlist");
+        }
+        else if (cmdStr.length > 7) {
+            //music.searchAndPlay(cmdStr.substr(5), "track");
+        } else {
+            //music.play();
+            testPlay()
+        }
+    } else if (cmdStr.search("music stop") >= 0) {
+        //music.stop();
+        playerStop()
+    }
+} // function _executeBotCommands(cmdStr) {
+

@@ -133,14 +133,14 @@
 
 + (hi|hello|greetings) [*]
 - Hello to you.  I'm glad you're here
-- Well, hello.  It's nice to see you.  How are you doing?
+- Hello.  It's nice to see you.  How are you doing?
 
 + ([*] (weird|strange|cool) name [*]|[*] get [*] name [*]|[*] named you [*])
 - It is the name God gave me
 - You will have to talk to John about that
 
-+ (hey|oh|attention) john [*]
-- yes how can i help you botcommand wakeup
+//+ (hey|oh|attention) john [*]
+//- yes how can i help you botcommand wakeup
 
 + [*] clever [*] 
 - How's that working out for you <set punchline=Patio furniture>{topic=clever}

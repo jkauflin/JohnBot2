@@ -13,6 +13,81 @@ Modification History
 import {log} from './util.mjs'              // My utility functions
 import {exec} from 'child_process'          // Class to execute Linux commands
 
+//import {PvRecorder} from '@picovoice/pvrecorder-node'       // Audio recorder using USB Mic
+//import CheetahPkg from '@picovoice/cheetah-node'            // Speech-to-Text engine
+//const {Cheetah,CheetahActivationLimitReachedError} = CheetahPkg
+
+/*
+import MPlayerPkg from 'mplayer'
+const {MPlayer} = MPlayerPkg
+
+var player = new MPlayer();
+*/
+/*
+player.on('start', console.log.bind(this, 'playback started'));
+player.on('status', console.log);
+*/
+/*
+player.openPlaylist('http://www.miastomuzyki.pl/n/rmfclassic.pls', {
+    cache: 128,
+    cacheMin: 1
+});
+*/
+/*
+setTimeout(player.volume.bind(player, 50), 1000);
+
+export function testPlay() {
+    player.openFile('media/rockandroll.mp3')
+    player.play()
+}
+
+export function playerStop() {
+    player.stop()
+}
+*/
+
+import pkg from 'sound-player';
+//const {SoundPlayer} = pkg;
+const {player} = pkg;
+
+
+var soundPlayerOptions = {
+    //filename: "dreams.mp3",
+    //filename: "lookdave.wav",
+    gain: 5,
+    debug: true,
+    player: "mpg123", // "afplay" "aplay" "mpg123" "mpg321"
+//    player: "aplay", // "afplay" "aplay" "mpg123" "mpg321"
+    device: "sysdefault:CARD=Device"   // sysdefault:CARD=Device   or default
+}
+
+//var player = new SoundPlayer(soundPlayerOptions)
+
+export function testPlay() {
+    soundPlayerOptions.filename = 'media/rockandroll.mp3'
+    player.play(soundPlayerOptions)
+}
+
+export function playerStop() {
+    player.stop
+}
+
+//player.pause
+//player.resume
+
+/*
+player.on('complete', function() {
+    console.log('Done with playback!')
+})
+player.on('error', function(err) {
+    console.log('Error occurred:', err)
+})
+*/
+
+
+
+
+
 export var speaking = false
 
 /*
@@ -68,33 +143,3 @@ error while executing command  pico2wave -l en-US -w /tmp/5a9ea3bbf7dc38e1636adc
     })
 }
 
-// With full options
-/*
-var SoundPlayer = require("sound-player");
-var options = {
-    //filename: "dreams.mp3",
-    filename: "lookdave.wav",
-    gain: 5,
-    debug: true,
-    player: "mpg321", // "afplay" "aplay" "mpg123" "mpg321"
-//    player: "aplay", // "afplay" "aplay" "mpg123" "mpg321"
-    device: "sysdefault:CARD=Device"   // sysdefault:CARD=Device   or default
-}
- 
-// 5/20/2018 - this works
-var player = new SoundPlayer(options)
-// 12/2/2018 - still works
-player.play();
- 
-//player.stop
-//player.pause
-//player.resume
-
-player.on('complete', function() {
-    console.log('Done with playback!');
-});
- 
-player.on('error', function(err) {
-    console.log('Error occurred:', err);
-});
-*/
