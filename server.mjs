@@ -133,7 +133,7 @@ async function startListening() {
         }
     })
 
-    this.on("exit", function () {
+    process.on("exit", function () {
         log("Server on EXIT");
         recorder.stop()
         recorder.release()

@@ -116,14 +116,14 @@ board.on("ready", () => {
     log("*** board ready ***")
 
     // If the board is exiting, execute cleanup actions
-    this.on("exit", function () {
+    process.on("exit", function () {
         log("on EXIT")
-        _allStop()
+        allStop()
     })
     // Handle a termination signal
     process.on('SIGTERM', function () {
         log('on SIGTERM')
-        _allStop()
+        allStop()
     })
 
     leftEyeLed = new Led(LEFT_EYE);
