@@ -161,7 +161,7 @@ async function startListening() {
                     } else {
                         getChatBotReply(speechText) // ChatBot function
                         .then(reply => {
-                            //log("after call, reply = "+reply)
+                            log("reply = "+reply)
                             speakText(reply)        // Audio function (TTS)
                             animateSpeech(reply)    // Bot function (physical robot actions)
                         })

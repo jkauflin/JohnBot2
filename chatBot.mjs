@@ -70,7 +70,7 @@ bot.reply(username, "Hello, bot!").then(function(reply) {
 
 // Respond to string recognized by speech to text (or from search input text box)
 export function getChatBotReply(speechText) {
-    log("in ChatBot, speechText = "+speechText)
+    //log("in ChatBot, speechText = "+speechText)
     /*
     if (getUserName) {
         getUserName = false;
@@ -82,7 +82,7 @@ export function getChatBotReply(speechText) {
 
     // Call the RiveScript interpreter to get a reply
     return brain.reply(userName, speechText).then(function (reply) {
-        log("chatBot brain reply = " + reply);
+        //log("chatBot brain reply = " + reply);
         return reply
         
         /*
