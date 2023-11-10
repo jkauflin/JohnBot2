@@ -87,6 +87,8 @@ var leftEyeLed;
 var rightEyeLed;
 var eyesOn = false;
 
+var speaking = false;
+
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
 // be sure to shut the REPL off!
@@ -113,9 +115,15 @@ board.on("error", function (err) {
 board.on("ready", () => {
     log("*** board ready ***")
 
+    // If the board is exiting, execute cleanup actions
+    this.on("exit", function () {
+        log("on EXIT")
+        _allStop()
+    })
+    // Handle a termination signal
     process.on('SIGTERM', function () {
         log('on SIGTERM')
-        //turnRelaysOFF()
+        _allStop()
     })
 
     leftEyeLed = new Led(LEFT_EYE);
@@ -142,3 +150,88 @@ board.on("ready", () => {
 
     log("End of board.on (initialize) event")
 })
+
+
+export function allStop() {
+    log(">>>>> bot - ALL STOP");
+
+    // Stop all motion
+    //_stopWalking();
+    // Stop all components
+    _doneSpeaking();
+
+    //walkAboutMode = false;
+    //walkMode = false;
+    // Clear the function calls
+    /*
+    clearTimeout(_executeCommands);
+    clearTimeout(_stopWalking);
+    clearTimeout(_startWalking);
+    clearTimeout(_rotate);
+    clearTimeout(_walk);
+    clearTimeout(_walkAbout);
+    */
+}
+
+function _getRandomInt(min, max) {
+    // Floor - rounded down to the nearest integer
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+
+export function animateSpeech(textToSpeak) {
+    // Cancel any running animations before starting a new one
+    _doneSpeaking();
+
+    // Calculate a milliseconds time from the textToSpeak and set a _doneSpeaking function call
+    // (just calculate using the word count for now)
+    var wordList = textToSpeak.split(" ");
+    //for (var i = 0; i < wordList.length; i++) {
+    //wordList[i]
+    //}
+    var speakingDuration = wordList.length * 309;
+    setTimeout(_doneSpeaking, speakingDuration);
+    speaking = true;
+    // Start strobing the eye leds
+    eyes.strobe(150);
+
+    try {
+        /*
+        speechAnimation.enqueue({
+            duration: 2000,
+            cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
+            keyFrames:
+                [
+                    [null, { degrees: 50 }, { degrees: 120 }, { degrees: 55 }, { degrees: 90 }],
+                    [null, { degrees: 60 }, { degrees: 105 }, { degrees: 75 }, { degrees: 90 }]
+                ],
+            loop: true,
+            onstop: function () {
+                //console.log("Animation stopped");
+                //Use onstop functions when your looping animation is halted to return a bot's animated limbs to their home positions.
+                //Nearly always use null as the first value in an animation segment. It allows the segment to be started from a variety of positions.
+              
+                // Center?  seems to mess things up
+                //headAndArm.home();
+            },
+            oncomplete: function () {
+                //console.log("Animation complete");
+            }
+        });
+        */
+    }
+    catch (error) {
+        console.error(">>> speechAnimation error = " + error);
+    }
+}
+
+function _doneSpeaking() {
+    //log("doneSpeaking");
+    if (speaking) {
+        //log("clearTimeout for _doneSpeaking");
+        clearTimeout(_doneSpeaking);
+        //speechAnimation.stop();
+        eyes.stop().off();
+        speaking = false;
+    }
+}

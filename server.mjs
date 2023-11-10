@@ -73,7 +73,7 @@ Modification History
 import 'dotenv/config'                                      // Class to get parameters from .env file
 import {log} from './util.mjs'                              // My utility functions
 import {speakText,speaking} from './audioFunctions.mjs'     // My audio (TTS) functions
-import {} from './botFunctions.mjs'                         // My audio (TTS) functions
+import {allStop,animateSpeech} from './botFunctions.mjs'            // My audio (TTS) functions
 import {getChatBotReply} from './chatBot.mjs'               // My audio (TTS) functions
 
 import readline from 'node:readline'
@@ -132,21 +132,26 @@ async function startListening() {
             isInterrupted = true
         }
     })
-    /*
+
+    this.on("exit", function () {
+        log("Server on EXIT");
+        recorder.stop()
+        recorder.release()
+        cheetahSTTengine.release()
+    });
     process.on('SIGTERM', function () {
-        log('on SIGTERM')
+        log('Server on SIGTERM')
         recorder.stop()
         recorder.release()
         cheetahSTTengine.release()
     })
-    */
 
     while (!isInterrupted) {
         const pcm = await recorder.read()
         // Only translate speech audio when NOT actively speaking (because it translates that as well)
         if (!speaking) {
             try {
-                const [partialTranscript, isEndpoint] = cheetahSTTengine.process(pcm)
+                const [partialTranscript, isEndpoint] = cheetahSTTengine.process(pcm)   // STT function
                 //process.stdout.write(partialTranscript)
                 speechText += partialTranscript
                 if (isEndpoint === true) {
@@ -154,11 +159,17 @@ async function startListening() {
                     //process.stdout.write(`${finalTranscript}\n`);
                     speechText += finalTranscript
                     log(`speechText = ${speechText}`)
-                    getChatBotReply(speechText)
-                    .then(reply => {
-                        //log("after call, reply = "+reply)
-                        speakText(reply)
-                    })
+                    // Check for override stop command
+                    if (speechText.toUpperCase().includes("STOP")) {
+                        allStop();
+                    } else {
+                        getChatBotReply(speechText) // ChatBot function
+                        .then(reply => {
+                            //log("after call, reply = "+reply)
+                            speakText(reply)        // Audio function (TTS)
+                            animateSpeech(reply)    // Bot function (physical robot actions)
+                        })
+                    }
                     speechText = ""
                 }
             } catch (err) {
@@ -174,4 +185,5 @@ async function startListening() {
     process.exit()
 }
 
+// wait for an amount of time till you know the botFunctions are ready - maybe a botReady variable?
 startListening()
