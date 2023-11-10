@@ -131,15 +131,13 @@ async function startListening() {
         }
     })
 
-    /*
-    process.on('SIGTERM', function () {
-        log('Server on SIGTERM')
+    process.on('SIGINT', function () {
+        log('Server on SIGINT - Cleanup and Exit process')
         recorder.stop()
         recorder.release()
         cheetahSTTengine.release()
         process.exit()
     })
-    */
 
     while (!isInterrupted) {
         const pcm = await recorder.read()
@@ -158,7 +156,7 @@ async function startListening() {
                     if (speechText.toUpperCase().includes("STOP")) {
                         allStop();
                     }
-                    else if (speechText.toUpperCase() == "EXIT") {
+                    else if (speechText.toUpperCase().includes("EXIT")) {
                         isInterrupted = true
                     } else {
                         getChatBotReply(speechText) // ChatBot function

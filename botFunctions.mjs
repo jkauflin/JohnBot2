@@ -89,14 +89,6 @@ var eyesOn = false;
 
 var speaking = false;
 
-// Handle a termination signal
-/*
-process.on('SIGTERM', function () {
-    log('>>> in bot - on SIGTERM - allStop')
-    allStop()
-})
-*/
-
 // Create Johnny-Five board object
 // When running Johnny-Five programs as a sub-process (eg. init.d, or npm scripts), 
 // be sure to shut the REPL off!
@@ -145,6 +137,12 @@ board.on("ready", () => {
     // Start sending metrics 10 seconds after starting (so things are calm)
     setTimeout(logMetric, 10000)
     */
+
+    // Handle a termination signal
+    process.on('SIGINT', function () {
+        log('>>> in bot - on SIGINT - allStop')
+        allStop()
+    })
 
     log("End of board.on (initialize) event")
 })
